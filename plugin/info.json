@@ -1,6 +1,6 @@
 {
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "category": "translate",
   "name": "AI-VIP-0-token-plan—GravityPoet开发",
   "summary": "支持 OpenAI/Gemini/AWS Bedrock 的 Bob 文本翻译插件",
@@ -156,8 +156,12 @@
       "identifier": "reasoningEffort",
       "type": "menu",
       "title": "思考强度",
-      "defaultValue": "medium",
+      "defaultValue": "none",
       "menuValues": [
+        {
+          "title": "无(不设置)",
+          "value": "none"
+        },
         {
           "title": "低",
           "value": "low"
@@ -171,7 +175,7 @@
           "value": "high"
         }
       ],
-      "desc": "仅 OpenAI 通道生效（映射到 reasoning.effort）。Gemini 通道会忽略该参数。"
+      "desc": "默认“无”表示不传思考参数。当前仅 OpenAI 通道生效（映射到 reasoning.effort）。"
     },
     {
       "identifier": "streamOutput",

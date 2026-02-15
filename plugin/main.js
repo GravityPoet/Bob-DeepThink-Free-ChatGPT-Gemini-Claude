@@ -119,12 +119,13 @@ var LANGUAGE_NAMES = {
 var DEFAULT_BASE_URL = 'http://127.0.0.1:18080/v1';
 var DEFAULT_TIMEOUT_SEC = 90;
 var DEFAULT_MAX_OUTPUT_TOKENS = 1024;
-var DEFAULT_REASONING_EFFORT = 'medium';
+var DEFAULT_REASONING_EFFORT = 'none';
 var DEFAULT_STREAM_OUTPUT = true;
 var DEFAULT_API_MODE = 'responses';
 var DEFAULT_BEDROCK_REGION = 'us-east-1';
 
 var REASONING_EFFORT_VALUES = {
+    none: true,
     low: true,
     medium: true,
     high: true,
@@ -337,7 +338,7 @@ function buildTranslateRequestBody(params) {
         max_output_tokens: params.maxOutputTokens,
     };
 
-    if (params.provider === 'openai') {
+    if (params.provider === 'openai' && params.reasoningEffort !== 'none') {
         body.reasoning = {
             effort: params.reasoningEffort,
         };

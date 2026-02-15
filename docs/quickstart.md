@@ -20,6 +20,9 @@
   - `Gemini`：模型建议 `gemini-3-flash-preview`
   - `AWS Bedrock (Mantle)`：模型填你在 Bedrock 可用的模型 ID（例如 `us.meta.llama4-maverick-17b-instruct-v1:0`）
   - 若 Base URL 用 `bedrock-runtime.../openai/v1`，建议 `接口协议` 选择 `Chat Completions`
+- **思考强度**：
+  - `无(不设置)`：默认，完全不发送思考参数（兼容性最好）
+  - `低/中/高`：当前仅 OpenAI 通道生效
 
 ## 3) 常见问题
 

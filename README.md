@@ -15,7 +15,7 @@
 - 单模型入口：同一处选择模型，调用逻辑更清晰
 - 兼容 Sub2API：自动把 Base URL 标准化到 `/v1`
 - 支持 Bob 流式输出：接入 `query.onStream` + `$http.streamRequest`
-- 支持思考强度：`low / medium / high`（OpenAI 通道映射 `reasoning.effort`）
+- 支持思考强度：`none / low / medium / high`（默认 `none` 不传该参数；OpenAI 通道映射 `reasoning.effort`）
 - 错误可读：401/502/上游异常会返回明确提示
 - 兼容性策略：默认不发送 `temperature` 参数，避免部分 OpenAI 上游返回 400
 
