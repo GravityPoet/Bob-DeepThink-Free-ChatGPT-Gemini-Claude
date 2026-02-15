@@ -106,17 +106,6 @@
       }
     },
     {
-      "identifier": "temperature",
-      "type": "text",
-      "title": "温度",
-      "defaultValue": "0.2",
-      "desc": "范围 0-1，翻译建议 0-0.3。",
-      "textConfig": {
-        "placeholderText": "0.2",
-        "type": "visible"
-      }
-    },
-    {
       "identifier": "maxOutputTokens",
       "type": "text",
       "title": "最大输出 Token",

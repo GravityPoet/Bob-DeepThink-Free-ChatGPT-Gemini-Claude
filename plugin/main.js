@@ -118,7 +118,6 @@ var LANGUAGE_NAMES = {
 
 var DEFAULT_BASE_URL = 'http://127.0.0.1:18080/v1';
 var DEFAULT_TIMEOUT_SEC = 90;
-var DEFAULT_TEMPERATURE = 0.2;
 var DEFAULT_MAX_OUTPUT_TOKENS = 1024;
 
 function supportLanguages() {
@@ -235,7 +234,6 @@ function translate(query, completion) {
                 ],
             },
         ],
-        temperature: config.temperature,
         max_output_tokens: config.maxOutputTokens,
     };
 
@@ -495,13 +493,6 @@ function buildRuntimeConfig() {
         300
     );
 
-    var temperature = parseFloatInRange(
-        getOptionString('temperature', String(DEFAULT_TEMPERATURE)),
-        DEFAULT_TEMPERATURE,
-        0,
-        1
-    );
-
     var maxOutputTokens = parseIntegerInRange(
         getOptionString('maxOutputTokens', String(DEFAULT_MAX_OUTPUT_TOKENS)),
         DEFAULT_MAX_OUTPUT_TOKENS,
@@ -515,7 +506,6 @@ function buildRuntimeConfig() {
         apiKey: apiKey,
         provider: provider,
         timeoutSec: timeoutSec,
-        temperature: temperature,
         maxOutputTokens: maxOutputTokens,
     };
 }
