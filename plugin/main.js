@@ -602,6 +602,28 @@ function parseValidateResponse(resp, config) {
         };
     }
 
+    if (config && config.provider === 'bedrock') {
+        if (statusCode === 404) {
+            if (isBedrockRuntimeOpenAiBaseUrl(config.baseUrl) && config.apiMode === 'responses') {
+                return {
+                    ok: false,
+                    error: makeServiceError(
+                        'param',
+                        '当前 Bedrock Runtime OpenAI 端点在该配置下返回 404。请将“接口协议”改为 Chat Completions，或改用 bedrock-mantle.<region>.api.aws/v1。',
+                        {
+                            baseUrl: config.baseUrl,
+                            apiMode: config.apiMode,
+                        }
+                    ),
+                };
+            }
+            return { ok: true };
+        }
+        if (statusCode === 405 || statusCode === 501) {
+            return { ok: true };
+        }
+    }
+
     if (
         config &&
         config.provider === 'custom' &&
@@ -980,6 +1002,13 @@ function normalizeBaseUrl(raw) {
     }
 
     return value + '/v1';
+}
+
+function isBedrockRuntimeOpenAiBaseUrl(baseUrl) {
+    if (typeof baseUrl !== 'string') {
+        return false;
+    }
+    return /^https?:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/openai\/v1$/.test(baseUrl);
 }
 
 function normalizeRegion(raw) {

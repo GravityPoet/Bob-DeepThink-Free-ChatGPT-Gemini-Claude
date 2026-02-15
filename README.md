@@ -43,8 +43,8 @@
 1. `翻译通道` 选择 `AWS Bedrock (Mantle)`  
 2. `Bedrock Region` 填你的区域（默认 `us-east-1`）  
 3. `API Key` 填 Amazon Bedrock API key（Bearer）  
-4. `Base URL / Endpoint` 可留默认（插件会按 region 自动生成为 `https://bedrock-mantle.<region>.api.aws/v1`），也可手填  
-5. `接口协议` 可选 `Responses API` 或 `Chat Completions`  
+4. `Base URL / Endpoint` 可留默认（插件会按 region 自动生成为 `https://bedrock-mantle.<region>.api.aws/v1`），也可手填 `https://bedrock-runtime.<region>.amazonaws.com/openai/v1`  
+5. `接口协议`：若用 `bedrock-runtime.../openai/v1`，优先选 `Chat Completions`；若用 `bedrock-mantle.../v1` 可选 `Responses API` 或 `Chat Completions`  
 
 ## 版本更新
 

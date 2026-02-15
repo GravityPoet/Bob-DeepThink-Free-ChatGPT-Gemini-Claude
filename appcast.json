@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
+      "version": "0.1.4",
+      "desc": "修复 Bedrock Runtime(OpenAI) 校验 404：增加端点识别与明确引导（Runtime 建议 Chat Completions，Mantle 可用 Responses/Chat）。",
+      "sha256": "e97e69e88544d206d24ed9c37421652da7e9cb8772e58baeb51df3a58380bf1f",
+      "url": "https://github.com/GravityPoet/AI-VIP-0-token-plan/releases/download/v0.1.4/AI-VIP-0-token-plan.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1771183665130
+    },
+    {
       "version": "0.1.3",
       "desc": "新增 AWS Bedrock(Mantle) 驱动入口：支持 Bedrock 区域自动端点、OpenAI 兼容协议调用（Responses/Chat Completions）。",
       "sha256": "59fdbeb47a3fa7e773caf0ff4e457e7da3401ad514acca0e5f3a9dc1c27b64b8",

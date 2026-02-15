@@ -11,6 +11,7 @@
   - Sub2API 本机直连：`http://127.0.0.1:18080`
   - Sub2API SSH 隧道：`http://127.0.0.1:18081`
   - AWS Bedrock Mantle：`https://bedrock-mantle.<region>.api.aws/v1`
+  - AWS Bedrock Runtime(OpenAI)：`https://bedrock-runtime.<region>.amazonaws.com/openai/v1`
 - **API Key**：
   - Sub2API：填 Sub2API 的 key
   - Bedrock：填 Amazon Bedrock API key（Bearer）
@@ -18,6 +19,7 @@
   - `OpenAI`：模型建议 `gpt-5.2`
   - `Gemini`：模型建议 `gemini-3-flash-preview`
   - `AWS Bedrock (Mantle)`：模型填你在 Bedrock 可用的模型 ID（例如 `us.meta.llama4-maverick-17b-instruct-v1:0`）
+  - 若 Base URL 用 `bedrock-runtime.../openai/v1`，建议 `接口协议` 选择 `Chat Completions`
 
 ## 3) 常见问题
 
