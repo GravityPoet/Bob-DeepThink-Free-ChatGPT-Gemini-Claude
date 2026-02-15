@@ -1,6 +1,6 @@
 {
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "category": "translate",
   "name": "AI-VIP-0-token-plan—GravityPoet开发",
   "summary": "支持 OpenAI/Gemini/AWS Bedrock 的 Bob 文本翻译插件",
@@ -175,7 +175,7 @@
           "value": "high"
         }
       ],
-      "desc": "默认“无”表示不传思考参数。当前仅 OpenAI 通道生效（映射到 reasoning.effort）。"
+      "desc": "默认“无”表示不传思考参数。Responses 协议映射 reasoning.effort（OpenAI/自定义）；Chat Completions 协议映射 reasoning_effort（OpenAI/Gemini/AWS/自定义）。部分模型不支持时请选“无”。"
     },
     {
       "identifier": "streamOutput",

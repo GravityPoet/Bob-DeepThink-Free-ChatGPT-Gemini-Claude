@@ -295,9 +295,33 @@ function buildApiEndpoint(baseUrl, apiMode) {
     return baseUrl + '/responses';
 }
 
+function applyReasoningParam(body, params) {
+    if (params.reasoningEffort === 'none') {
+        return;
+    }
+
+    if (params.apiMode === 'responses') {
+        if (params.provider === 'openai' || params.provider === 'custom') {
+            body.reasoning = {
+                effort: params.reasoningEffort,
+            };
+        }
+        return;
+    }
+
+    if (
+        params.provider === 'openai' ||
+        params.provider === 'gemini' ||
+        params.provider === 'bedrock' ||
+        params.provider === 'custom'
+    ) {
+        body.reasoning_effort = params.reasoningEffort;
+    }
+}
+
 function buildTranslateRequestBody(params) {
     if (params.apiMode === 'chat_completions') {
-        return {
+        var chatBody = {
             model: params.modelName,
             messages: [
                 {
@@ -311,6 +335,9 @@ function buildTranslateRequestBody(params) {
             ],
             max_tokens: params.maxOutputTokens,
         };
+
+        applyReasoningParam(chatBody, params);
+        return chatBody;
     }
 
     var body = {
@@ -338,11 +365,7 @@ function buildTranslateRequestBody(params) {
         max_output_tokens: params.maxOutputTokens,
     };
 
-    if (params.provider === 'openai' && params.reasoningEffort !== 'none') {
-        body.reasoning = {
-            effort: params.reasoningEffort,
-        };
-    }
+    applyReasoningParam(body, params);
 
     return body;
 }

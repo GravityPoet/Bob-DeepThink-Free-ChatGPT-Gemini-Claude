@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
+      "version": "0.1.6",
+      "desc": "思考强度参数扩展到 Gemini/AWS 等 Chat Completions 协议（reasoning_effort）；Responses 协议继续使用 reasoning.effort；默认“无”仍不传参。",
+      "sha256": "6fd1aa858ac5827584cff515c78191fecc11247c4b8379849a4f0777660d86b7",
+      "url": "https://github.com/GravityPoet/AI-VIP-0-token-plan/releases/download/v0.1.6/AI-VIP-0-token-plan.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1771184631962
+    },
+    {
       "version": "0.1.5",
       "desc": "思考强度新增“无(不设置)”并设为默认，避免不支持 reasoning 参数的模型报错；仅在 OpenAI 通道且非“无”时发送 reasoning.effort。",
       "sha256": "c3c9d6608f202a9fe3ba28f10b0fa4b2af4ad239f060f24679a820b56165b8e5",

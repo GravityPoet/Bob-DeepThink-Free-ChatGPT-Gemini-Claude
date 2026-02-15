@@ -22,7 +22,8 @@
   - 若 Base URL 用 `bedrock-runtime.../openai/v1`，建议 `接口协议` 选择 `Chat Completions`
 - **思考强度**：
   - `无(不设置)`：默认，完全不发送思考参数（兼容性最好）
-  - `低/中/高`：当前仅 OpenAI 通道生效
+  - `低/中/高`：`Responses` 协议会发送 `reasoning.effort`（OpenAI/自定义）；`Chat Completions` 协议会发送 `reasoning_effort`（OpenAI/Gemini/AWS/自定义）
+  - 若模型不支持推理参数，改回 `无(不设置)`
 
 ## 3) 常见问题
 
