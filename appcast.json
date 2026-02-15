@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
+      "version": "0.1.8",
+      "desc": "增强思考链折叠识别：覆盖 reasoning_content/thinking/Gemini thought parts/OpenAI 兼容 reasoning 增量；并新增插件图标。",
+      "sha256": "bed5eecd29f042856cf2f8871762d604d2df72dcc1d3391b98e478e0f28d36dd",
+      "url": "https://github.com/GravityPoet/AI-VIP-0-token-plan/releases/download/v0.1.8/AI-VIP-0-token-plan.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1771188829764
+    },
+    {
       "version": "0.1.7",
       "desc": "新增思考链折叠：自动将 <reasoning>/<think> 从译文中拆分到 Bob thinkInfo 折叠区，避免长思考文本污染翻译结果。",
       "sha256": "d9b3815e22642b0678b1ca1241524f24650352a4f601db8b7072c76fa96f8480",

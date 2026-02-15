@@ -20,11 +20,12 @@
   - `Gemini`：模型建议 `gemini-3-flash-preview`
   - `AWS Bedrock (Mantle)`：模型填你在 Bedrock 可用的模型 ID（例如 `us.meta.llama4-maverick-17b-instruct-v1:0`）
   - 若 Base URL 用 `bedrock-runtime.../openai/v1`，建议 `接口协议` 选择 `Chat Completions`
+  - `Bedrock Region` 仅 AWS 通道生效；其他通道会自动忽略
 - **思考强度**：
   - `无(不设置)`：默认，完全不发送思考参数（兼容性最好）
   - `低/中/高`：`Responses` 协议会发送 `reasoning.effort`（OpenAI/自定义）；`Chat Completions` 协议会发送 `reasoning_effort`（OpenAI/Gemini/AWS/自定义）
   - 若模型不支持推理参数，改回 `无(不设置)`
-  - 若返回内容含 `<reasoning>` 或 `<think>` 标签，插件会自动拆到 Bob 可折叠思考区
+  - 插件会自动识别并折叠常见思考字段到 Bob 可折叠思考区：`<reasoning>/<think>`、`reasoning_content`、`thinking`、Gemini thought parts、OpenAI 兼容 `reasoning_*`
 
 ## 3) 常见问题
 

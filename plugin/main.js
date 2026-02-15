@@ -371,8 +371,10 @@ function buildTranslateRequestBody(params) {
 function requestWithStream(params) {
     var state = {
         text: '',
+        thinkText: '',
         sseBuffer: '',
         finalSnapshot: '',
+        finalThinkSnapshot: '',
         streamApiError: null,
     };
 
@@ -420,12 +422,17 @@ function requestWithStream(params) {
                 return;
             }
 
+            var finalThinkText = mergeThinkText(
+                mergeThinkText(state.thinkText, state.finalThinkSnapshot),
+                parsedFinal.thinkText
+            );
+
             params.done({
                 result: buildTranslateResult(
                     params.sourceLang,
                     params.targetLang,
                     parsedFinal.answerText,
-                    parsedFinal.thinkText,
+                    finalThinkText,
                     false
                 ),
             });
@@ -467,6 +474,11 @@ function handleStreamChunk(stream, state, query, sourceLang, targetLang) {
         var delta = extractStreamDeltaText(eventData);
         var changed = mergeStreamText(state, delta);
 
+        var thinkDelta = extractStreamDeltaThink(eventData);
+        if (mergeStreamThink(state, thinkDelta)) {
+            changed = true;
+        }
+
         var snapshot = extractStreamSnapshotText(eventData);
         if (snapshot) {
             state.finalSnapshot = snapshot;
@@ -475,8 +487,16 @@ function handleStreamChunk(stream, state, query, sourceLang, targetLang) {
             }
         }
 
+        var thinkSnapshot = extractStreamSnapshotThink(eventData);
+        if (thinkSnapshot) {
+            state.finalThinkSnapshot = thinkSnapshot;
+            if (mergeStreamThink(state, thinkSnapshot)) {
+                changed = true;
+            }
+        }
+
         if (changed) {
-            emitStreamResult(query, sourceLang, targetLang, state.text);
+            emitStreamResult(query, sourceLang, targetLang, state.text, state.thinkText);
         }
     }
 }
@@ -508,21 +528,35 @@ function mergeStreamText(state, incomingText) {
     return true;
 }
 
-function emitStreamResult(query, sourceLang, targetLang, text) {
+function mergeStreamThink(state, incomingText) {
+    var merged = mergeThinkText(state.thinkText, incomingText);
+    if (merged === state.thinkText) {
+        return false;
+    }
+    state.thinkText = merged;
+    return true;
+}
+
+function emitStreamResult(query, sourceLang, targetLang, text, thinkText) {
     if (!isPlainObject(query) || typeof query.onStream !== 'function') {
         return;
     }
 
     var parsed = splitThoughtAndAnswer(text);
-    if (!parsed.answerText && !parsed.thinkText) {
+    var mergedThink = mergeThinkText(thinkText, parsed.thinkText);
+    if (!parsed.answerText && !mergedThink) {
         return;
     }
 
-    query.onStream(buildTranslateResult(sourceLang, targetLang, parsed.answerText, parsed.thinkText, true));
+    query.onStream(buildTranslateResult(sourceLang, targetLang, parsed.answerText, mergedThink, true));
 }
 
 function extractStreamDeltaText(eventData) {
     if (!isPlainObject(eventData)) {
+        return '';
+    }
+
+    if (isReasoningEventType(eventData.type)) {
         return '';
     }
 
@@ -540,12 +574,15 @@ function extractStreamDeltaText(eventData) {
             if (deltaContent) {
                 return deltaContent;
             }
+            if (typeof choice.delta.text === 'string' && choice.delta.text) {
+                return choice.delta.text;
+            }
         }
     }
 
     if (Array.isArray(eventData.candidates) && eventData.candidates.length > 0) {
         var candidate = eventData.candidates[0];
-        var candidateText = extractGeminiCandidateText(candidate);
+        var candidateText = extractGeminiCandidateAnswerText(candidate);
         if (candidateText) {
             return candidateText;
         }
@@ -571,10 +608,65 @@ function extractStreamSnapshotText(eventData) {
         return extractFromOutputArray(eventData.output);
     }
 
+    if (isPlainObject(eventData.response)) {
+        return extractTranslatedText(eventData.response);
+    }
+
     return '';
 }
 
-function extractGeminiCandidateText(candidate) {
+function extractStreamDeltaThink(eventData) {
+    if (!isPlainObject(eventData)) {
+        return '';
+    }
+
+    var chunks = [];
+    if (isReasoningEventType(eventData.type)) {
+        pushUniqueChunk(chunks, extractAnyText(eventData.delta));
+        pushUniqueChunk(chunks, extractAnyText(eventData.text));
+        pushUniqueChunk(chunks, extractAnyText(eventData.reasoning));
+        pushUniqueChunk(chunks, extractAnyText(eventData.reasoning_content));
+        pushUniqueChunk(chunks, extractAnyText(eventData.summary));
+    }
+
+    pushUniqueChunk(chunks, extractAnyText(eventData.reasoning_content));
+    pushUniqueChunk(chunks, extractAnyText(eventData.reasoning));
+    pushUniqueChunk(chunks, extractAnyText(eventData.thinking));
+    pushUniqueChunk(chunks, extractAnyText(eventData.thoughts));
+
+    if (Array.isArray(eventData.choices) && eventData.choices.length > 0) {
+        var choice = eventData.choices[0];
+        if (isPlainObject(choice) && isPlainObject(choice.delta)) {
+            pushUniqueChunk(chunks, extractAnyText(choice.delta.reasoning_content));
+            pushUniqueChunk(chunks, extractAnyText(choice.delta.reasoning));
+            pushUniqueChunk(chunks, extractAnyText(choice.delta.thinking));
+            pushUniqueChunk(chunks, extractAnyText(choice.delta.thinking_delta));
+            pushUniqueChunk(chunks, extractThinkingFromMessageContent(choice.delta.content));
+        }
+    }
+
+    if (Array.isArray(eventData.candidates) && eventData.candidates.length > 0) {
+        var candidate = eventData.candidates[0];
+        pushUniqueChunk(chunks, extractGeminiCandidateThinkText(candidate));
+    }
+
+    return cleanInlineText(chunks.join('\n\n'));
+}
+
+function extractStreamSnapshotThink(eventData) {
+    if (!isPlainObject(eventData)) {
+        return '';
+    }
+
+    var chunks = [];
+    pushUniqueChunk(chunks, extractStructuredThinkText(eventData));
+    if (isPlainObject(eventData.response)) {
+        pushUniqueChunk(chunks, extractStructuredThinkText(eventData.response));
+    }
+    return cleanInlineText(chunks.join('\n\n'));
+}
+
+function extractGeminiCandidateAnswerText(candidate) {
     if (
         !isPlainObject(candidate) ||
         !isPlainObject(candidate.content) ||
@@ -587,11 +679,31 @@ function extractGeminiCandidateText(candidate) {
     var i;
     for (i = 0; i < candidate.content.parts.length; i += 1) {
         var part = candidate.content.parts[i];
-        if (isPlainObject(part) && typeof part.text === 'string' && part.text) {
+        if (isPlainObject(part) && !isThinkingPart(part) && typeof part.text === 'string' && part.text) {
             chunks.push(part.text);
         }
     }
     return chunks.join('');
+}
+
+function extractGeminiCandidateThinkText(candidate) {
+    if (
+        !isPlainObject(candidate) ||
+        !isPlainObject(candidate.content) ||
+        !Array.isArray(candidate.content.parts)
+    ) {
+        return '';
+    }
+
+    var chunks = [];
+    var i;
+    for (i = 0; i < candidate.content.parts.length; i += 1) {
+        var part = candidate.content.parts[i];
+        if (isPlainObject(part) && isThinkingPart(part) && typeof part.text === 'string' && part.text) {
+            chunks.push(part.text);
+        }
+    }
+    return cleanInlineText(chunks.join(''));
 }
 
 function parseValidateResponse(resp, config) {
@@ -695,6 +807,8 @@ function parseTranslateResponse(resp) {
     }
 
     var parsed = splitThoughtAndAnswer(text);
+    var structuredThinkText = extractStructuredThinkText(resp.data);
+    var mergedThinkText = mergeThinkText(structuredThinkText, parsed.thinkText);
     if (!parsed.answerText) {
         return {
             ok: false,
@@ -705,7 +819,7 @@ function parseTranslateResponse(resp) {
     return {
         ok: true,
         text: parsed.answerText,
-        thinkText: parsed.thinkText,
+        thinkText: mergedThinkText,
     };
 }
 
@@ -780,6 +894,29 @@ function buildTranslateResult(sourceLang, targetLang, answerText, thinkText, all
     return result;
 }
 
+function mergeThinkText(baseText, incomingText) {
+    var base = cleanInlineText(baseText);
+    var incoming = cleanInlineText(incomingText);
+
+    if (!base) {
+        return incoming;
+    }
+    if (!incoming) {
+        return base;
+    }
+    if (base === incoming) {
+        return base;
+    }
+    if (base.indexOf(incoming) >= 0) {
+        return base;
+    }
+    if (incoming.indexOf(base) >= 0) {
+        return incoming;
+    }
+
+    return base + '\n\n' + incoming;
+}
+
 function cleanInlineText(text) {
     if (typeof text !== 'string') {
         return '';
@@ -825,11 +962,57 @@ function extractTranslatedText(data) {
             isPlainObject(candidate.content.parts[0]) &&
             typeof candidate.content.parts[0].text === 'string'
         ) {
-            return candidate.content.parts[0].text.trim();
+            return extractGeminiCandidateAnswerText(candidate).trim();
         }
     }
 
     return '';
+}
+
+function extractStructuredThinkText(data) {
+    if (!isPlainObject(data)) {
+        return '';
+    }
+
+    var chunks = [];
+    pushUniqueChunk(chunks, extractAnyText(data.reasoning_content));
+    pushUniqueChunk(chunks, extractAnyText(data.reasoning));
+    pushUniqueChunk(chunks, extractAnyText(data.thinking));
+    pushUniqueChunk(chunks, extractAnyText(data.thoughts));
+    pushUniqueChunk(chunks, extractAnyText(data.think));
+
+    if (Array.isArray(data.output)) {
+        var outputThink = extractThinkFromOutputArray(data.output);
+        pushUniqueChunk(chunks, outputThink);
+    }
+
+    if (Array.isArray(data.choices) && data.choices.length > 0) {
+        var choice = data.choices[0];
+        if (isPlainObject(choice)) {
+            if (isPlainObject(choice.message)) {
+                pushUniqueChunk(chunks, extractAnyText(choice.message.reasoning_content));
+                pushUniqueChunk(chunks, extractAnyText(choice.message.reasoning));
+                pushUniqueChunk(chunks, extractAnyText(choice.message.thinking));
+                pushUniqueChunk(chunks, extractThinkingFromMessageContent(choice.message.content));
+            }
+            if (isPlainObject(choice.delta)) {
+                pushUniqueChunk(chunks, extractAnyText(choice.delta.reasoning_content));
+                pushUniqueChunk(chunks, extractAnyText(choice.delta.reasoning));
+                pushUniqueChunk(chunks, extractAnyText(choice.delta.thinking));
+                pushUniqueChunk(chunks, extractThinkingFromMessageContent(choice.delta.content));
+            }
+        }
+    }
+
+    if (Array.isArray(data.candidates) && data.candidates.length > 0) {
+        pushUniqueChunk(chunks, extractGeminiCandidateThinkText(data.candidates[0]));
+    }
+
+    if (isPlainObject(data.response)) {
+        pushUniqueChunk(chunks, extractStructuredThinkText(data.response));
+    }
+
+    return cleanInlineText(chunks.join('\n\n'));
 }
 
 function extractFromOutputArray(output) {
@@ -858,6 +1041,31 @@ function extractFromOutputArray(output) {
     return merged;
 }
 
+function extractThinkFromOutputArray(output) {
+    var chunks = [];
+    var i;
+    for (i = 0; i < output.length; i += 1) {
+        var item = output[i];
+        if (!isPlainObject(item)) {
+            continue;
+        }
+
+        if (isReasoningEventType(item.type)) {
+            pushUniqueChunk(chunks, extractAnyText(item.summary));
+            pushUniqueChunk(chunks, extractAnyText(item.reasoning));
+            pushUniqueChunk(chunks, extractAnyText(item.reasoning_content));
+            pushUniqueChunk(chunks, extractAnyText(item.content));
+            pushUniqueChunk(chunks, extractAnyText(item.text));
+            continue;
+        }
+
+        if (item.type === 'message' && Array.isArray(item.content)) {
+            pushUniqueChunk(chunks, extractThinkingFromMessageContent(item.content));
+        }
+    }
+    return cleanInlineText(chunks.join('\n\n'));
+}
+
 function normalizeMessageContent(content) {
     if (typeof content === 'string') {
         return content.trim();
@@ -875,12 +1083,133 @@ function normalizeMessageContent(content) {
             chunks.push(item);
             continue;
         }
-        if (isPlainObject(item) && typeof item.text === 'string' && item.text) {
+        if (isPlainObject(item) && !isThinkingPart(item) && typeof item.text === 'string' && item.text) {
             chunks.push(item.text);
         }
     }
 
     return chunks.join('').trim();
+}
+
+function extractThinkingFromMessageContent(content) {
+    if (typeof content === 'string' || !Array.isArray(content)) {
+        return '';
+    }
+
+    var chunks = [];
+    var i;
+    for (i = 0; i < content.length; i += 1) {
+        var item = content[i];
+        if (isPlainObject(item) && isThinkingPart(item) && typeof item.text === 'string' && item.text) {
+            chunks.push(item.text);
+        }
+    }
+
+    return cleanInlineText(chunks.join(''));
+}
+
+function isThinkingPart(part) {
+    if (!isPlainObject(part)) {
+        return false;
+    }
+
+    if (part.thought === true || part.thinking === true) {
+        return true;
+    }
+
+    return isReasoningEventType(part.type);
+}
+
+function isReasoningEventType(typeValue) {
+    if (typeof typeValue !== 'string') {
+        return false;
+    }
+
+    var lower = typeValue.toLowerCase();
+    if (!lower) {
+        return false;
+    }
+
+    return (
+        lower.indexOf('reasoning') >= 0 ||
+        lower.indexOf('thinking') >= 0 ||
+        lower.indexOf('thought') >= 0 ||
+        lower === 'summary_text'
+    );
+}
+
+function extractAnyText(value) {
+    if (typeof value === 'string') {
+        return cleanInlineText(value);
+    }
+
+    if (Array.isArray(value)) {
+        var arrayChunks = [];
+        var i;
+        for (i = 0; i < value.length; i += 1) {
+            pushUniqueChunk(arrayChunks, extractAnyText(value[i]));
+        }
+        return cleanInlineText(arrayChunks.join('\n\n'));
+    }
+
+    if (!isPlainObject(value)) {
+        return '';
+    }
+
+    var chunks = [];
+    if (typeof value.text === 'string') {
+        pushUniqueChunk(chunks, value.text);
+    }
+    if (typeof value.output_text === 'string') {
+        pushUniqueChunk(chunks, value.output_text);
+    }
+    if (typeof value.reasoning_content === 'string') {
+        pushUniqueChunk(chunks, value.reasoning_content);
+    }
+    if (typeof value.content === 'string') {
+        pushUniqueChunk(chunks, value.content);
+    }
+    if (typeof value.summary_text === 'string') {
+        pushUniqueChunk(chunks, value.summary_text);
+    }
+    if (Array.isArray(value.content)) {
+        pushUniqueChunk(chunks, extractThinkingFromMessageContent(value.content));
+    }
+    if (Array.isArray(value.parts)) {
+        var j;
+        for (j = 0; j < value.parts.length; j += 1) {
+            var part = value.parts[j];
+            if (isPlainObject(part) && typeof part.text === 'string' && part.text) {
+                pushUniqueChunk(chunks, part.text);
+            }
+        }
+    }
+    if (Array.isArray(value.summary)) {
+        pushUniqueChunk(chunks, extractAnyText(value.summary));
+    } else if (isPlainObject(value.summary)) {
+        pushUniqueChunk(chunks, extractAnyText(value.summary));
+    }
+    if (isPlainObject(value.reasoning)) {
+        pushUniqueChunk(chunks, extractAnyText(value.reasoning));
+    }
+    if (isPlainObject(value.thinking)) {
+        pushUniqueChunk(chunks, extractAnyText(value.thinking));
+    }
+    if (isPlainObject(value.delta)) {
+        pushUniqueChunk(chunks, extractAnyText(value.delta));
+    }
+
+    return cleanInlineText(chunks.join('\n\n'));
+}
+
+function pushUniqueChunk(chunks, value) {
+    var cleanValue = cleanInlineText(value);
+    if (!cleanValue) {
+        return;
+    }
+    if (chunks.indexOf(cleanValue) < 0) {
+        chunks.push(cleanValue);
+    }
 }
 
 function parseApiError(data, statusCode) {

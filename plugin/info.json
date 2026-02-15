@@ -1,10 +1,17 @@
 {
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "category": "translate",
   "name": "AI-VIP-0-token-plan—GravityPoet开发",
-  "summary": "支持 OpenAI/Gemini/AWS Bedrock 的 Bob 文本翻译插件",
-  "icon": "",
+  "summary": "全通道翻译插件：OpenAI/Gemini/AWS/自定义 + 流式 + 思考链折叠",
+  "icon": "favicon1",
+  "icons": [
+    {
+      "identifier": "favicon1",
+      "type": "file",
+      "filePath": "favicon1.ico"
+    }
+  ],
   "author": "GravityPoet",
   "homepage": "https://github.com/GravityPoet/AI-VIP-0-token-plan",
   "appcast": "https://github.com/GravityPoet/AI-VIP-0-token-plan/raw/main/appcast.json",
@@ -60,7 +67,7 @@
       "type": "text",
       "title": "Bedrock Region",
       "defaultValue": "us-east-1",
-      "desc": "仅 AWS Bedrock 通道使用。若 Base URL 仍为默认值，将自动生成为 bedrock-mantle.<region>.api.aws/v1。",
+      "desc": "仅 AWS Bedrock 通道使用。若 Base URL 仍为默认值，将自动生成为 bedrock-mantle.<region>.api.aws/v1。非 AWS 通道会忽略该项（Bob 配置项当前不支持按通道动态隐藏）。",
       "textConfig": {
         "placeholderText": "us-east-1",
         "type": "visible"
@@ -175,7 +182,7 @@
           "value": "high"
         }
       ],
-      "desc": "默认“无”表示不传思考参数。Responses 协议映射 reasoning.effort（OpenAI/自定义）；Chat Completions 协议映射 reasoning_effort（OpenAI/Gemini/AWS/自定义）。若上游返回 <reasoning>/<think>，插件会自动折叠到 Bob 思考区。"
+      "desc": "默认“无”表示不传思考参数。Responses 协议映射 reasoning.effort（OpenAI/自定义）；Chat Completions 协议映射 reasoning_effort（OpenAI/Gemini/AWS/自定义）。插件会识别常见 reasoning/thinking 字段并自动折叠到 Bob 思考区。"
     },
     {
       "identifier": "streamOutput",
