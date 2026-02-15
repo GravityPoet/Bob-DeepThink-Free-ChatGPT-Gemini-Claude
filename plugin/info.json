@@ -1,0 +1,131 @@
+{
+  "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
+  "version": "0.1.0",
+  "category": "translate",
+  "name": "AI-VIP-0-token-plan",
+  "summary": "通过 Sub2API 调用 OpenAI/Gemini 的 Bob 文本翻译插件",
+  "icon": "",
+  "author": "GravityPoet",
+  "homepage": "https://github.com/GravityPoet/AI-VIP-0-token-plan",
+  "appcast": "https://github.com/GravityPoet/AI-VIP-0-token-plan/raw/main/appcast.json",
+  "minBobVersion": "1.8.0",
+  "options": [
+    {
+      "identifier": "provider",
+      "type": "menu",
+      "title": "翻译通道",
+      "defaultValue": "openai",
+      "menuValues": [
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        }
+      ]
+    },
+    {
+      "identifier": "baseUrl",
+      "type": "text",
+      "title": "Sub2API Base URL",
+      "desc": "可填 http://127.0.0.1:18080 或 http://127.0.0.1:18080/v1，插件会自动标准化到 /v1。",
+      "defaultValue": "http://127.0.0.1:18080/v1",
+      "textConfig": {
+        "placeholderText": "http://127.0.0.1:18080/v1",
+        "type": "visible"
+      }
+    },
+    {
+      "identifier": "apiKey",
+      "type": "text",
+      "title": "Sub2API Key",
+      "desc": "填 Sub2API 的 sk-...（不是 OpenAI 官方 key）",
+      "textConfig": {
+        "placeholderText": "sk-xxxxxxxx",
+        "type": "secure"
+      }
+    },
+    {
+      "identifier": "model",
+      "type": "menu",
+      "title": "模型",
+      "defaultValue": "gpt-5.2",
+      "menuValues": [
+        {
+          "title": "gpt-5.2",
+          "value": "gpt-5.2"
+        },
+        {
+          "title": "gpt-5.1",
+          "value": "gpt-5.1"
+        },
+        {
+          "title": "gpt-5-mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "gemini-3-flash-preview",
+          "value": "gemini-3-flash-preview"
+        },
+        {
+          "title": "gemini-2.5-flash",
+          "value": "gemini-2.5-flash"
+        },
+        {
+          "title": "gemini-2.5-pro",
+          "value": "gemini-2.5-pro"
+        },
+        {
+          "title": "自定义模型",
+          "value": "custom"
+        }
+      ],
+      "desc": "先用“翻译通道”决定调用 OpenAI/Gemini，再在这里选对应模型。"
+    },
+    {
+      "identifier": "customModel",
+      "type": "text",
+      "title": "自定义模型名",
+      "desc": "当上面选择“自定义模型”时必填。",
+      "textConfig": {
+        "placeholderText": "例如: gpt-5.2 或 gemini-3-flash-preview",
+        "type": "visible"
+      }
+    },
+    {
+      "identifier": "requestTimeoutSec",
+      "type": "text",
+      "title": "请求超时(秒)",
+      "defaultValue": "90",
+      "desc": "单次翻译超时，范围 10-300。",
+      "textConfig": {
+        "placeholderText": "90",
+        "type": "visible"
+      }
+    },
+    {
+      "identifier": "temperature",
+      "type": "text",
+      "title": "温度",
+      "defaultValue": "0.2",
+      "desc": "范围 0-1，翻译建议 0-0.3。",
+      "textConfig": {
+        "placeholderText": "0.2",
+        "type": "visible"
+      }
+    },
+    {
+      "identifier": "maxOutputTokens",
+      "type": "text",
+      "title": "最大输出 Token",
+      "defaultValue": "1024",
+      "desc": "范围 64-8192。",
+      "textConfig": {
+        "placeholderText": "1024",
+        "type": "visible"
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
+  "versions": [
+    {
+      "version": "0.1.0",
+      "desc": "首个公开版本：支持 Sub2API + OpenAI/Gemini 双通道翻译，单开关模型选择。",
+      "sha256": "a740e378c9b1cae72a946fb06df6687432d52d9059450363d52df046e5ffb587",
+      "url": "https://github.com/GravityPoet/AI-VIP-0-token-plan/releases/download/v0.1.0/AI-VIP-0-token-plan.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1771178185828
+    }
+  ]
+}
