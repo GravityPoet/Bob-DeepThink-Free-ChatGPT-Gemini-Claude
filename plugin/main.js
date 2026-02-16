@@ -287,6 +287,10 @@ function translate(query, completion) {
 }
 
 function buildApiEndpoint(baseUrl, apiMode) {
+    if (isCompleteEndpoint(baseUrl)) {
+        return baseUrl;
+    }
+
     if (apiMode === 'chat_completions') {
         return baseUrl + '/chat/completions';
     }
@@ -763,6 +767,10 @@ function parseValidateResponse(resp, config) {
         config.provider === 'custom' &&
         (statusCode === 404 || statusCode === 405 || statusCode === 501)
     ) {
+        return { ok: true };
+    }
+
+    if (config && statusCode === 404 && isCompleteEndpoint(config.baseUrl)) {
         return { ok: true };
     }
 
@@ -1433,6 +1441,10 @@ function normalizeBaseUrl(raw) {
         return '';
     }
 
+    if (isCompleteEndpoint(value)) {
+        return value;
+    }
+
     if (/\/v1$/.test(value)) {
         return value;
     }
@@ -1442,6 +1454,13 @@ function normalizeBaseUrl(raw) {
     }
 
     return value + '/v1';
+}
+
+function isCompleteEndpoint(urlValue) {
+    if (typeof urlValue !== 'string') {
+        return false;
+    }
+    return /\/(chat\/completions|responses)$/.test(urlValue);
 }
 
 function isBedrockRuntimeOpenAiBaseUrl(baseUrl) {

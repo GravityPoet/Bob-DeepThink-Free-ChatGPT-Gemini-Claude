@@ -2,12 +2,12 @@
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
   "versions": [
     {
-      "version": "0.1.9",
-      "desc": "统一品牌命名为 Bob-DeepThink-Free-ChatGPT-Gemini-Claude；保留全通道翻译、流式输出、思考强度与思考链折叠能力。",
-      "sha256": "375b9a2499f1881721ff8235531fcc6e9ed21d039ef85c5a536d8ad27966ee7d",
-      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.9/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
+      "version": "0.1.10",
+      "desc": "修复完整端点直连 404：当 Base URL 已是 /chat/completions 或 /responses 时不再自动补 /v1 和二次拼接路径（适配 opencode / kilo）。",
+      "sha256": "1ebf3180a0613807def1e53b2530de3211b2713ec266090e8ec69e8721982303",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.10/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
       "minBobVersion": "1.8.0",
-      "timestamp": 1771192238194
+      "timestamp": 1771255886634
     }
   ]
 }

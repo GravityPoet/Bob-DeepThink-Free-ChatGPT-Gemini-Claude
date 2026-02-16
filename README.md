@@ -13,7 +13,7 @@
 - 通道可自定义：`OpenAI` / `Gemini` / `AWS Bedrock (Mantle)` / `自定义(兼容 OpenAI API)`
 - 接口协议可切换：`Responses API` / `Chat Completions`
 - 单模型入口：同一处选择模型，支持预设与自定义模型名
-- 自动标准化 Base URL：自动补齐到 `/v1`，减少配置错误
+- Base URL 智能处理：普通网关自动补齐到 `/v1`；若已填完整端点（如 `/chat/completions` 或 `/responses`）则直连不再二次拼接
 - 支持 Bob 流式输出：接入 `query.onStream` + `$http.streamRequest`
 - 支持思考强度：`none / low / medium / high`（默认 `none` 不传该参数；`Responses` 协议映射 `reasoning.effort`，`Chat Completions` 协议映射 `reasoning_effort`）
 - 思考链折叠：自动识别并折叠常见思考字段（`<reasoning>/<think>`、`reasoning_content`、`thinking`、Gemini thought parts、OpenAI 兼容 `reasoning_*` 增量等）
@@ -33,7 +33,7 @@
 1. 到 [Releases](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases) 下载 `Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin`
 2. 双击安装到 Bob
 3. 在 Bob 插件配置里填写：
-   - `Base URL / Endpoint`：你的 OpenAI 兼容网关地址（会自动标准化到 `/v1`）
+   - `Base URL / Endpoint`：你的 OpenAI 兼容网关地址（普通网关会自动标准化到 `/v1`；完整端点将原样直连）
    - `API Key`：对应上游的 Bearer Key
    - `翻译通道`：OpenAI / Gemini / AWS Bedrock / 自定义
    - `接口协议`：`Responses API` 或 `Chat Completions`
@@ -49,6 +49,12 @@
 5. `接口协议`：若用 `bedrock-runtime.../openai/v1`，优先选 `Chat Completions`；若用 `bedrock-mantle.../v1` 可选 `Responses API` 或 `Chat Completions`  
 
 > 说明：`Bedrock Region` 仅 AWS 通道使用；Bob 官方配置 schema 当前不支持“按通道动态隐藏某个配置项”，所以该项会一直显示，但在非 AWS 通道会被插件忽略。
+
+### Opencode / Kilo 直连示例（避免 404）
+
+1. Opencode：`Base URL / Endpoint` 填 `https://opencode.ai/zen/v1/chat/completions`，协议选 `Chat Completions`。  
+2. Kilo：`Base URL / Endpoint` 填 `https://api.kilo.ai/api/gateway/chat/completions`，协议选 `Chat Completions`。  
+3. 以上两种都属于“完整端点直连”，插件不会再自动补 `/v1` 或追加 `/chat/completions`。
 
 ## 版本更新
 

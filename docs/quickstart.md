@@ -12,6 +12,9 @@
   - Sub2API SSH 隧道：`http://127.0.0.1:18081`
   - AWS Bedrock Mantle：`https://bedrock-mantle.<region>.api.aws/v1`
   - AWS Bedrock Runtime(OpenAI)：`https://bedrock-runtime.<region>.amazonaws.com/openai/v1`
+  - Opencode 完整端点：`https://opencode.ai/zen/v1/chat/completions`
+  - Kilo 完整端点：`https://api.kilo.ai/api/gateway/chat/completions`
+  - 规则：若你填的是完整端点（结尾是 `/chat/completions` 或 `/responses`），插件会原样直连，不再补 `/v1`
 - **API Key**：
   - Sub2API：填 Sub2API 的 key
   - Bedrock：填 Amazon Bedrock API key（Bearer）
@@ -32,3 +35,4 @@
 - 报错 `Invalid API key`：key 错误或已失效
 - 报错 `Upstream request failed`：上游服务不可用/容量不足
 - Bedrock 报 403/401：确认 API key 有效、区域是否正确、模型是否已开通
+- 报错 `HTTP 404`：通常是把“完整端点”又被拼接了一次。请确保 `Base URL` 只填网关根地址，或直接填完整端点并保持 `Chat Completions` 协议
