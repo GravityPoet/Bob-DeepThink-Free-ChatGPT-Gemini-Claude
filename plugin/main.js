@@ -163,15 +163,17 @@ function pluginValidate(completion) {
         return;
     }
 
+    var modelsEndpoint = buildModelsEndpoint(config.baseUrl);
+
     $http.request({
         method: 'GET',
-        url: config.baseUrl + '/models',
+        url: modelsEndpoint,
         header: {
             Authorization: 'Bearer ' + config.apiKey,
         },
         timeout: clamp(config.timeoutSec, 10, 30),
         handler: function (resp) {
-            var parsed = parseValidateResponse(resp, config);
+            var parsed = parseValidateResponse(resp, config, modelsEndpoint);
             if (!parsed.ok) {
                 done({ result: false, error: parsed.error });
                 return;
@@ -286,7 +288,12 @@ function requestWithoutStream(params) {
         timeout: params.config.timeoutSec,
         body: params.requestBody,
         handler: function (resp) {
-            var parsed = parseTranslateResponse(resp);
+            var parsed = parseTranslateResponse(resp, {
+                provider: params.config.provider,
+                baseUrl: params.config.baseUrl,
+                apiEndpoint: params.apiEndpoint,
+                modelName: params.requestBody && params.requestBody.model,
+            });
             if (!parsed.ok) {
                 params.done({ error: parsed.error });
                 return;
@@ -313,6 +320,13 @@ function buildApiEndpoint(baseUrl, apiMode) {
         return baseUrl + '/chat/completions';
     }
     return baseUrl + '/responses';
+}
+
+function buildModelsEndpoint(baseUrl) {
+    if (isCompleteEndpoint(baseUrl)) {
+        return baseUrl.replace(/\/(chat\/completions|responses)$/, '') + '/models';
+    }
+    return baseUrl + '/models';
 }
 
 function applyReasoningParam(body, params) {
@@ -421,7 +435,14 @@ function requestWithStream(params) {
 
             var statusCode = getStatusCode(resp);
             if (statusCode !== 200) {
-                params.done({ error: parseApiError(resp && resp.data, statusCode) });
+                params.done({
+                    error: parseApiError(resp && resp.data, statusCode, {
+                        provider: params.config.provider,
+                        baseUrl: params.config.baseUrl,
+                        apiEndpoint: params.apiEndpoint,
+                        modelName: params.requestBody && params.requestBody.model,
+                    }),
+                });
                 return;
             }
 
@@ -766,7 +787,7 @@ function extractGeminiCandidateThinkText(candidate) {
     return cleanInlineText(chunks.join(''));
 }
 
-function parseValidateResponse(resp, config) {
+function parseValidateResponse(resp, config, modelsEndpoint) {
     if (!isPlainObject(resp)) {
         return {
             ok: false,
@@ -823,6 +844,18 @@ function parseValidateResponse(resp, config) {
         config.provider === 'custom' &&
         (statusCode === 404 || statusCode === 405 || statusCode === 501)
     ) {
+        if (statusCode === 404 && isCerebrasBaseUrl(config.baseUrl)) {
+            return {
+                ok: false,
+                error: makeServiceError(
+                    'param',
+                    'Cerebras 校验失败：/models 返回 404。请确认 Base URL 为 https://api.cerebras.ai/v1（或保持完整端点），并确认 API Key 可访问模型列表。',
+                    {
+                        modelsEndpoint: modelsEndpoint,
+                    }
+                ),
+            };
+        }
         return { ok: true };
     }
 
@@ -836,7 +869,7 @@ function parseValidateResponse(resp, config) {
     };
 }
 
-function parseTranslateResponse(resp) {
+function parseTranslateResponse(resp, context) {
     if (!isPlainObject(resp)) {
         return {
             ok: false,
@@ -858,7 +891,7 @@ function parseTranslateResponse(resp) {
     if (statusCode !== 200) {
         return {
             ok: false,
-            error: parseApiError(resp.data, statusCode),
+            error: parseApiError(resp.data, statusCode, context),
         };
     }
 
@@ -1276,16 +1309,20 @@ function pushUniqueChunk(chunks, value) {
     }
 }
 
-function parseApiError(data, statusCode) {
+function parseApiError(data, statusCode, context) {
     var type = statusCode === 401 ? 'secretKey' : 'api';
     var message = '上游请求失败 (HTTP ' + statusCode + ')';
-    if (isPlainObject(data)) {
+    if (typeof data === 'string' && data.trim()) {
+        message = data.trim();
+    } else if (isPlainObject(data)) {
         if (isPlainObject(data.error)) {
             if (typeof data.error.message === 'string' && data.error.message) {
                 message = data.error.message;
             } else if (typeof data.error.code === 'string') {
                 message = 'API error: ' + data.error.code;
             }
+        } else if (typeof data.error === 'string' && data.error) {
+            message = data.error;
         } else if (typeof data.message === 'string' && data.message) {
             message = data.message;
         } else if (typeof data.detail === 'string' && data.detail) {
@@ -1293,7 +1330,21 @@ function parseApiError(data, statusCode) {
         }
     }
 
-    return makeServiceError(type, message, data);
+    if (
+        statusCode === 404 &&
+        context &&
+        isCerebrasBaseUrl(context.baseUrl) &&
+        (message.indexOf('Not Found') >= 0 || message.indexOf('上游请求失败') >= 0)
+    ) {
+        message =
+            'Cerebras 返回 404：通常是模型名不可用或当前 Key 无权限访问该模型。请先请求 /v1/models 确认可用模型，再重试。';
+    }
+
+    return makeServiceError(type, message, {
+        detail: data,
+        endpoint: context && context.apiEndpoint ? context.apiEndpoint : '',
+        model: context && context.modelName ? context.modelName : '',
+    });
 }
 
 function validateTranslateQuery(query) {

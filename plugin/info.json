@@ -1,6 +1,6 @@
 {
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "category": "translate",
   "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude",
   "summary": "OpenAI/Gemini/AWS/自定义网关翻译插件，支持流式、思考强度与思考链折叠",
@@ -102,6 +102,22 @@
         {
           "title": "gemini-2.5-pro",
           "value": "gemini-2.5-pro"
+        },
+        {
+          "title": "gpt-oss-120b (Cerebras)",
+          "value": "gpt-oss-120b"
+        },
+        {
+          "title": "llama3.1-8b (Cerebras)",
+          "value": "llama3.1-8b"
+        },
+        {
+          "title": "qwen-3-235b-a22b-instruct-2507 (Cerebras)",
+          "value": "qwen-3-235b-a22b-instruct-2507"
+        },
+        {
+          "title": "zai-glm-4.7 (Cerebras)",
+          "value": "zai-glm-4.7"
         },
         {
           "title": "自定义模型",
