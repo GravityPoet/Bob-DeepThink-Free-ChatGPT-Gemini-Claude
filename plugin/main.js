@@ -1288,6 +1288,8 @@ function parseApiError(data, statusCode) {
             }
         } else if (typeof data.message === 'string' && data.message) {
             message = data.message;
+        } else if (typeof data.detail === 'string' && data.detail) {
+            message = data.detail;
         }
     }
 
@@ -1363,6 +1365,16 @@ function buildRuntimeConfig() {
             error: makeServiceError('param', 'Base URL 格式错误，请填写 http:// 或 https:// 地址。', {
                 baseUrl: baseUrlRaw,
             }),
+        };
+    }
+
+    if (isCerebrasBaseUrl(baseUrl) && apiMode === 'responses' && !isCompleteEndpoint(baseUrl)) {
+        return {
+            ok: false,
+            error: makeServiceError(
+                'param',
+                'Cerebras 不支持 /responses。请将“接口协议”切到 Chat Completions，或把 Base URL 直接填为 https://api.cerebras.ai/v1/chat/completions。'
+            ),
         };
     }
 
@@ -1510,6 +1522,13 @@ function normalizeBaseUrl(raw) {
     }
 
     return value + '/v1';
+}
+
+function isCerebrasBaseUrl(urlValue) {
+    if (typeof urlValue !== 'string') {
+        return false;
+    }
+    return /^https?:\/\/api\.cerebras\.ai(?:\/|$)/.test(urlValue);
 }
 
 function isCompleteEndpoint(urlValue) {

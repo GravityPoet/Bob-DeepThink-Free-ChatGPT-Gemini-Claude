@@ -1,6 +1,6 @@
 {
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "category": "translate",
   "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude",
   "summary": "OpenAI/Gemini/AWS/自定义网关翻译插件，支持流式、思考强度与思考链折叠",
@@ -125,7 +125,7 @@
           "value": "chat_completions"
         }
       ],
-      "desc": "自定义厂商时可切换协议；Bedrock Runtime(OpenAI)建议选 Chat Completions。"
+      "desc": "自定义厂商时可切换协议；Bedrock Runtime(OpenAI)/Cerebras 建议选 Chat Completions。"
     },
     {
       "identifier": "customModel",

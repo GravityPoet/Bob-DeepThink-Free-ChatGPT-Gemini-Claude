@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
   "versions": [
     {
+      "version": "0.1.12",
+      "desc": "修复：Cerebras 通道防呆（禁止 /responses，提示切换 Chat Completions）；错误信息补充 detail 字段，404 定位更清晰。",
+      "sha256": "9802a9192ee2201eb140ef2eaff93fdf78158a0c126ba49c40053cc224f10f3a",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.12/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1771357614324
+    },
+    {
       "version": "0.1.11",
       "desc": "修复 Kilo 流式空正文：流式结束时先从响应体兜底提取文本，仍为空则自动回退一次非流式请求。",
       "sha256": "b7f7ba95f9cc5cfbd550597e4e5e51fb0263920fafd3d2419b12efbd4181131f",
