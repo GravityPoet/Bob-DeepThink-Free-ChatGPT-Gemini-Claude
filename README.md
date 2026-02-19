@@ -6,14 +6,14 @@
 [![Platform](https://img.shields.io/badge/platform-Bob%20Plugin-black?style=flat-square)](https://bobtranslate.com/)
 [![Gateway](https://img.shields.io/badge/backend-OpenAI%20Compatible-blue?style=flat-square)](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude)
 
-> 一个面向 Bob 的高兼容翻译插件：OpenAI / Gemini / AWS Bedrock / 自定义 OpenAI 兼容网关，支持流式输出、思考强度与思考链折叠。
+> 一个面向 Bob 的高兼容翻译插件：OpenAI / Gemini / AWS Bedrock / 自定义网关，支持 OpenAI 兼容协议与 Gemini Native(v1beta generateContent)。
 
 ## 核心特性
 
 - 通道可自定义：`OpenAI` / `Gemini` / `AWS Bedrock (Mantle)` / `自定义(兼容 OpenAI API)`
-- 接口协议可切换：`Responses API` / `Chat Completions`
+- 接口协议可切换：`Responses API` / `Chat Completions` / `Gemini Native (/v1beta ...:generateContent)`
 - 单模型入口：同一处选择模型，支持预设与自定义模型名
-- Base URL 智能处理：普通网关自动补齐到 `/v1`；若已填完整端点（如 `/chat/completions` 或 `/responses`）则直连不再二次拼接
+- Base URL 智能处理：OpenAI 兼容模式自动补齐到 `/v1`；Gemini Native 自动补齐到 `/v1beta`；若已填完整端点（如 `/chat/completions`、`/responses`、`/models/<model>:generateContent`）则直连不再二次拼接
 - 支持 Bob 流式输出：接入 `query.onStream` + `$http.streamRequest`
 - 流式兜底回退：若上游流式没有正文，插件会自动回退一次非流式请求，降低 `流式响应里没有可用翻译结果` 的概率
 - 支持思考强度：`none / low / medium / high`（默认 `none` 不传该参数；`Responses` 协议映射 `reasoning.effort`，`Chat Completions` 协议映射 `reasoning_effort`）
@@ -34,10 +34,10 @@
 1. 到 [Releases](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases) 下载 `Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin`
 2. 双击安装到 Bob
 3. 在 Bob 插件配置里填写：
-   - `Base URL / Endpoint`：你的 OpenAI 兼容网关地址（普通网关会自动标准化到 `/v1`；完整端点将原样直连）
+   - `Base URL / Endpoint`：你的网关地址（OpenAI 兼容会标准化到 `/v1`；Gemini Native 会标准化到 `/v1beta`；完整端点将原样直连）
    - `API Key`：对应上游的 Bearer Key
    - `翻译通道`：OpenAI / Gemini / AWS Bedrock / 自定义
-   - `接口协议`：`Responses API` 或 `Chat Completions`
+   - `接口协议`：`Responses API` / `Chat Completions` / `Gemini Native`
    - `模型`：可选预设或自定义模型名
    - `思考强度`：建议默认 `无(不设置)`，仅在模型支持时再开启低/中/高
 
@@ -56,6 +56,16 @@
 1. Opencode：`Base URL / Endpoint` 填 `https://opencode.ai/zen/v1/chat/completions`，协议选 `Chat Completions`。  
 2. Kilo：`Base URL / Endpoint` 填 `https://api.kilo.ai/api/gateway/chat/completions`，协议选 `Chat Completions`。  
 3. 以上两种都属于“完整端点直连”，插件不会再自动补 `/v1` 或追加 `/chat/completions`。
+
+### Gemini Native (v1beta generateContent) 示例
+
+1. `翻译通道` 可选 `Gemini` 或 `自定义`。  
+2. `接口协议` 选择 `Gemini Native (/v1beta ...:generateContent)`。  
+3. `Base URL / Endpoint` 可填：
+   - 网关根地址：`http://127.0.0.1:18080`（插件自动补成 `/v1beta`）
+   - 或完整端点：`http://127.0.0.1:18080/v1beta/models/gemini-3-flash-preview:generateContent`
+4. `模型` 选择 `gemini-3-flash-preview`（或自定义模型名）。  
+5. 说明：Gemini Native 模式当前默认走非流式 `generateContent`；`思考强度`参数不会下发到该协议。
 
 ## 版本更新
 

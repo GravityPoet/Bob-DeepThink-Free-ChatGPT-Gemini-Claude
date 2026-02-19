@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
+      "version": "0.1.14",
+      "desc": "兼容过渡更新：新增 Gemini Native 协议（v1beta generateContent）。",
+      "sha256": "30df3f77b2a7bd2c1f87eb3bceaad7384748b4f2f723e21bfeccaad6a218c420",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.14/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1771474787113
+    },
+    {
       "version": "0.1.13",
       "desc": "兼容过渡更新：修复完整端点下模型校验地址，并增强 Cerebras 404 排查提示。",
       "sha256": "c66b9e8437b0b10138673e1eccf3f78e9fdf7dd1b189c7b3e13cc6749c19ae77",

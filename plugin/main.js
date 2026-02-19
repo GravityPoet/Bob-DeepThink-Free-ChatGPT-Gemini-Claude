@@ -134,6 +134,7 @@ var REASONING_EFFORT_VALUES = {
 var API_MODE_VALUES = {
     responses: true,
     chat_completions: true,
+    gemini_generate_content: true,
 };
 
 var THINK_BLOCK_REGEXP = /<\s*(reasoning|think)\b[^>]*>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
@@ -234,7 +235,7 @@ function translate(query, completion) {
         ':\n\n' +
         String(normalizedQuery.text);
 
-    var apiEndpoint = buildApiEndpoint(config.baseUrl, config.apiMode);
+    var apiEndpoint = buildApiEndpoint(config.baseUrl, config.apiMode, model.name);
     var requestBody = buildTranslateRequestBody({
         apiMode: config.apiMode,
         modelName: model.name,
@@ -247,6 +248,7 @@ function translate(query, completion) {
 
     var useStream =
         !!config.streamOutput &&
+        config.apiMode !== 'gemini_generate_content' &&
         typeof $http === 'object' &&
         $http !== null &&
         typeof $http.streamRequest === 'function';
@@ -261,6 +263,7 @@ function translate(query, completion) {
             config: config,
             apiEndpoint: apiEndpoint,
             requestBody: requestBody,
+            modelName: model.name,
         });
         return;
     }
@@ -273,6 +276,7 @@ function translate(query, completion) {
         config: config,
         apiEndpoint: apiEndpoint,
         requestBody: requestBody,
+        modelName: model.name,
     });
 }
 
@@ -292,7 +296,7 @@ function requestWithoutStream(params) {
                 provider: params.config.provider,
                 baseUrl: params.config.baseUrl,
                 apiEndpoint: params.apiEndpoint,
-                modelName: params.requestBody && params.requestBody.model,
+                modelName: params.modelName,
             });
             if (!parsed.ok) {
                 params.done({ error: parsed.error });
@@ -311,9 +315,13 @@ function requestWithoutStream(params) {
     });
 }
 
-function buildApiEndpoint(baseUrl, apiMode) {
+function buildApiEndpoint(baseUrl, apiMode, modelName) {
     if (isCompleteEndpoint(baseUrl)) {
         return baseUrl;
+    }
+
+    if (apiMode === 'gemini_generate_content') {
+        return baseUrl + '/models/' + encodeURIComponent(normalizeGeminiNativeModelName(modelName)) + ':generateContent';
     }
 
     if (apiMode === 'chat_completions') {
@@ -323,6 +331,13 @@ function buildApiEndpoint(baseUrl, apiMode) {
 }
 
 function buildModelsEndpoint(baseUrl) {
+    if (isGeminiNativeEndpoint(baseUrl)) {
+        return baseUrl.replace(
+            /\/models\/[^/?#]+:(?:generatecontent|streamgeneratecontent)(?:\?.*)?$/i,
+            '/models'
+        );
+    }
+
     if (isCompleteEndpoint(baseUrl)) {
         return baseUrl.replace(/\/(chat\/completions|responses)$/, '') + '/models';
     }
@@ -331,6 +346,10 @@ function buildModelsEndpoint(baseUrl) {
 
 function applyReasoningParam(body, params) {
     if (params.reasoningEffort === 'none') {
+        return;
+    }
+
+    if (params.apiMode === 'gemini_generate_content') {
         return;
     }
 
@@ -354,6 +373,33 @@ function applyReasoningParam(body, params) {
 }
 
 function buildTranslateRequestBody(params) {
+    if (params.apiMode === 'gemini_generate_content') {
+        var geminiBody = {
+            contents: [
+                {
+                    role: 'user',
+                    parts: [
+                        {
+                            text: params.userPrompt,
+                        },
+                    ],
+                },
+            ],
+            systemInstruction: {
+                parts: [
+                    {
+                        text: params.systemPrompt,
+                    },
+                ],
+            },
+            generationConfig: {
+                maxOutputTokens: params.maxOutputTokens,
+            },
+        };
+
+        return geminiBody;
+    }
+
     if (params.apiMode === 'chat_completions') {
         var chatBody = {
             model: params.modelName,
@@ -440,7 +486,7 @@ function requestWithStream(params) {
                         provider: params.config.provider,
                         baseUrl: params.config.baseUrl,
                         apiEndpoint: params.apiEndpoint,
-                        modelName: params.requestBody && params.requestBody.model,
+                        modelName: params.modelName,
                     }),
                 });
                 return;
@@ -480,6 +526,7 @@ function requestWithStream(params) {
                     config: params.config,
                     apiEndpoint: params.apiEndpoint,
                     requestBody: fallbackBody,
+                    modelName: params.modelName,
                 });
                 return;
             }
@@ -856,6 +903,10 @@ function parseValidateResponse(resp, config, modelsEndpoint) {
                 ),
             };
         }
+        return { ok: true };
+    }
+
+    if (config && config.apiMode === 'gemini_generate_content' && (statusCode === 404 || statusCode === 405 || statusCode === 501)) {
         return { ok: true };
     }
 
@@ -1409,7 +1460,7 @@ function buildRuntimeConfig() {
     if (provider === 'bedrock' && isDefaultSub2ApiUrl(baseUrlRaw)) {
         baseUrlRaw = buildBedrockMantleBaseUrl(bedrockRegion);
     }
-    var baseUrl = normalizeBaseUrl(baseUrlRaw);
+    var baseUrl = normalizeBaseUrl(baseUrlRaw, apiMode);
     if (!baseUrl) {
         return {
             ok: false,
@@ -1545,7 +1596,7 @@ function splitToParagraphs(text) {
     return chunks;
 }
 
-function normalizeBaseUrl(raw) {
+function normalizeBaseUrl(raw, apiMode) {
     if (typeof raw !== 'string') {
         return '';
     }
@@ -1562,6 +1613,13 @@ function normalizeBaseUrl(raw) {
 
     if (isCompleteEndpoint(value)) {
         return value;
+    }
+
+    if (apiMode === 'gemini_generate_content') {
+        if (/\/v1beta$/.test(value) || /\/v1$/.test(value)) {
+            return value;
+        }
+        return value + '/v1beta';
     }
 
     if (/\/v1$/.test(value)) {
@@ -1586,7 +1644,25 @@ function isCompleteEndpoint(urlValue) {
     if (typeof urlValue !== 'string') {
         return false;
     }
-    return /\/(chat\/completions|responses)$/.test(urlValue);
+    return /\/(chat\/completions|responses)$/.test(urlValue) || isGeminiNativeEndpoint(urlValue);
+}
+
+function isGeminiNativeEndpoint(urlValue) {
+    if (typeof urlValue !== 'string') {
+        return false;
+    }
+    return /\/models\/[^/?#]+:(?:generatecontent|streamgeneratecontent)(?:\?.*)?$/i.test(urlValue);
+}
+
+function normalizeGeminiNativeModelName(modelName) {
+    var name = String(modelName || '').trim();
+    if (!name) {
+        return '';
+    }
+    if (name.indexOf('models/') === 0) {
+        return name.slice(7);
+    }
+    return name;
 }
 
 function isBedrockRuntimeOpenAiBaseUrl(baseUrl) {

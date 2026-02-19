@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
   "versions": [
     {
+      "version": "0.1.14",
+      "desc": "新增 Gemini Native 协议（/v1beta ...:generateContent）：支持根地址自动补 /v1beta 与完整端点直连。",
+      "sha256": "265007caa02be80dfb2e07596969334eacb24562bedac6c3067af57454a75600",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.14/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1771474787113
+    },
+    {
       "version": "0.1.13",
       "desc": "修复：完整端点模式下 /models 校验地址错误；增强 Cerebras 404 错误提示（优先指向模型可用性排查）。",
       "sha256": "e0c209e24dd25c936d09ac6162d25a6c9838a06b8381d87e929aa4da19285a59",

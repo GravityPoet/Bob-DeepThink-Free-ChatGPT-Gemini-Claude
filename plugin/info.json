@@ -1,6 +1,6 @@
 {
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "category": "translate",
   "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude",
   "summary": "OpenAI/Gemini/AWS/自定义网关翻译插件，支持流式、思考强度与思考链折叠",
@@ -45,7 +45,7 @@
       "identifier": "baseUrl",
       "type": "text",
       "title": "Base URL / Endpoint",
-      "desc": "Sub2API: http://127.0.0.1:18080/v1；Bedrock Mantle: https://bedrock-mantle.us-east-1.api.aws/v1；Bedrock Runtime(OpenAI): https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1；完整端点直连示例: https://opencode.ai/zen/v1/chat/completions 或 https://api.kilo.ai/api/gateway/chat/completions。未填写完整端点时，插件会自动标准化到 /v1。",
+      "desc": "Sub2API(OpenAI兼容): http://127.0.0.1:18080/v1；Gemini Native 示例: http://127.0.0.1:18080/v1beta 或完整端点 /v1beta/models/<model>:generateContent；Bedrock Mantle: https://bedrock-mantle.us-east-1.api.aws/v1；Bedrock Runtime(OpenAI): https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1；完整端点直连示例: https://opencode.ai/zen/v1/chat/completions 或 https://api.kilo.ai/api/gateway/chat/completions。",
       "defaultValue": "http://127.0.0.1:18080/v1",
       "textConfig": {
         "placeholderText": "http://127.0.0.1:18080/v1",
@@ -139,9 +139,13 @@
         {
           "title": "Chat Completions (/chat/completions)",
           "value": "chat_completions"
+        },
+        {
+          "title": "Gemini Native (/v1beta ...:generateContent)",
+          "value": "gemini_generate_content"
         }
       ],
-      "desc": "自定义厂商时可切换协议；Bedrock Runtime(OpenAI)/Cerebras 建议选 Chat Completions。"
+      "desc": "自定义厂商时可切换协议；Gemini 原生网关请选 Gemini Native；Bedrock Runtime(OpenAI)/Cerebras 建议选 Chat Completions。"
     },
     {
       "identifier": "customModel",
