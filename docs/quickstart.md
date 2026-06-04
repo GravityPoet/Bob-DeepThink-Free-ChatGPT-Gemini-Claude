@@ -13,6 +13,7 @@
   - Gemini Native 根地址：`http://127.0.0.1:18080/v1beta`
   - Gemini Native 完整端点：`http://127.0.0.1:18080/v1beta/models/gemini-3-flash-preview:generateContent`
   - AWS Bedrock OpenAI 模型：`https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1`
+  - AWS Bedrock Claude / Converse：可留默认，或填 `https://bedrock-runtime.us-east-1.amazonaws.com`
   - AWS Bedrock Mantle / Bearer 网关：`https://bedrock-mantle.<region>.api.aws/v1`
   - Opencode 完整端点：`https://opencode.ai/zen/v1/chat/completions`
   - Kilo 完整端点：`https://api.kilo.ai/api/gateway/chat/completions`
@@ -29,9 +30,11 @@
 - **接口类型**：
   - `OpenAI 接口 / 兼容接口`：CPA/Sub2API/OpenAI 兼容网关
   - `Gemini 官方接口`：Google 官方 /v1beta
-  - `AWS Bedrock 官方链路`：AWS 官方 Bedrock，支持 Amazon Bedrock API Key 或 SigV4
+  - `AWS Bedrock 官方链路`：AWS 官方 Bedrock，支持 Amazon Bedrock API Key 或 SigV4 / Converse
   - `其他完整端点`：直接填写完整 endpoint
-  - AWS 官方 Bedrock 建议 `接口协议` 选择 `Chat Completions`
+  - Amazon Bedrock API Key + OpenAI 模型：`接口协议` 选择 `Chat Completions`
+  - AWS IAM 双密钥 + Claude：`接口协议` 选择 `AWS Converse（Claude 官方）`
+  - 这个账号已实测可用 Claude 模型：`global.anthropic.claude-sonnet-4-6`
   - 若走 Gemini 原生 `v1beta ... :generateContent`，`接口协议` 选 `Gemini Native`
   - `AWS Region` 仅 AWS Bedrock 生效；其他通道会自动忽略
 - **思考强度**：
@@ -47,6 +50,7 @@
 - 报错 `Upstream request failed`：上游服务不可用/容量不足
 - AWS Bedrock 报 403/401：确认 Amazon Bedrock API Key 或 Access Key / Secret Key / Session Token、Region、模型权限和账号是否已开通 Bedrock
 - AWS Bedrock 报 `model_not_found`：Key 和 endpoint 多半已通，换成该 endpoint 支持的模型 ID，例如 `openai.gpt-oss-20b-1:0`
+- Claude Opus 4.8/4.7 报 `not available for this account`：账号未开放该模型；可先用已验证的 `global.anthropic.claude-sonnet-4-6`
 - Bedrock Mantle / Bearer 网关报 403/401：确认 Bearer API Key 和网关地址
 - 报错 `HTTP 404`：通常是把“完整端点”又被拼接了一次。请确保 `Base URL` 只填网关根地址，或直接填完整端点并保持 `Chat Completions` 协议
 - Gemini Native 报错 404：优先检查是否选了 `Gemini Native` 协议，以及模型名是否与网关路径一致（如 `gemini-3-flash-preview`）

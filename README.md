@@ -6,13 +6,13 @@
 [![Platform](https://img.shields.io/badge/platform-Bob%20Plugin-black?style=flat-square)](https://bobtranslate.com/)
 [![Gateway](https://img.shields.io/badge/backend-OpenAI%20Compatible-blue?style=flat-square)](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude)
 
-> 一个面向 Bob 的高兼容翻译插件：OpenAI / Gemini / AWS Bedrock 官方链路 / 自定义网关，支持 OpenAI 兼容协议、Amazon Bedrock API Key、AWS SigV4 与 Gemini Native(v1beta generateContent)。
+> 一个面向 Bob 的高兼容翻译插件：OpenAI / Gemini / AWS Bedrock 官方链路 / 自定义网关，支持 OpenAI 兼容协议、Amazon Bedrock API Key、AWS SigV4、AWS Converse 与 Gemini Native(v1beta generateContent)。
 
 ## 核心特性
 
 - 通道可自定义：`OpenAI 接口 / 兼容接口` / `Gemini 官方接口` / `AWS Bedrock 官方链路` / `其他完整端点`
 - 接口协议可切换：`Responses API` / `Chat Completions` / `Gemini Native (/v1beta ...:generateContent)`
-- AWS Bedrock 官方链路：支持 `Amazon Bedrock API Key`（Bearer），也支持 `AWS Access Key ID`、`AWS Secret Access Key`、可选 `AWS Session Token` 与 SigV4 签名
+- AWS Bedrock 官方链路：支持 `Amazon Bedrock API Key`（Bearer）调用 OpenAI 模型，也支持 `AWS Access Key ID`、`AWS Secret Access Key`、可选 `AWS Session Token` + AWS Converse 调用 Claude
 - 单模型入口：同一处选择模型，支持预设与自定义模型名
 - Base URL 智能处理：OpenAI 兼容模式自动补齐到 `/v1`；Gemini Native 自动补齐到 `/v1beta`；若已填完整端点（如 `/chat/completions`、`/responses`、`/models/<model>:generateContent`）则直连不再二次拼接
 - 支持 Bob 流式输出：接入 `query.onStream` + `$http.streamRequest`
@@ -48,10 +48,10 @@
 2. `接口协议` 通常选择 `Chat Completions`
 3. `AWS Region` 填你的区域（默认 `us-east-1`）
 4. 如果使用 Amazon Bedrock API Key，填到 `API Key（网关 / Bedrock API Key）`
-5. 如果使用 AWS IAM 凭证，填写 `AWS Access Key ID` 与 `AWS Secret Access Key`
+5. 如果使用 AWS IAM 凭证调用 Claude，填写 `AWS Access Key ID` 与 `AWS Secret Access Key`，接口协议选 `AWS Converse（Claude 官方）`
 6. 如果使用 STS 临时凭证，再填写 `AWS Session Token`
 7. `接口地址` 可填 `https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1`
-8. `模型` 选择自定义模型并填你在 Bedrock 可用的模型 ID，例如 `openai.gpt-oss-20b-1:0`
+8. `模型` 选择自定义模型并填你在 Bedrock 可用的模型 ID，例如 `openai.gpt-oss-20b-1:0` 或 `global.anthropic.claude-sonnet-4-6`
 
 ### Bedrock Mantle / Bearer 网关快速配置
 

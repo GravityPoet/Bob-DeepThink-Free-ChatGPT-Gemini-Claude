@@ -1,9 +1,9 @@
 {
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
-  "version": "0.1.23",
+  "version": "0.1.24",
   "category": "translate",
   "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude",
-  "summary": "OpenAI/兼容接口、Gemini 官方接口、AWS Bedrock API Key/SigV4 与完整端点翻译插件，支持流式、思考强度与思考链折叠",
+  "summary": "OpenAI/兼容接口、Gemini 官方接口、AWS Bedrock API Key/SigV4/Converse 与完整端点翻译插件，支持 Claude、流式、思考强度与思考链折叠",
   "icon": "favicon1",
   "icons": [
     {
@@ -59,15 +59,19 @@
         {
           "title": "Gemini Native（官方 /v1beta）",
           "value": "gemini_generate_content"
+        },
+        {
+          "title": "AWS Converse（Claude 官方）",
+          "value": "aws_converse"
         }
       ],
-      "desc": "兼容接口通常选 Chat Completions；OpenAI Responses 选 Responses API；Google 官方 Gemini /v1beta 选 Gemini Native。AWS Bedrock 官方 OpenAI 模型通常选 Chat Completions。"
+      "desc": "兼容接口通常选 Chat Completions；OpenAI Responses 选 Responses API；Google 官方 Gemini /v1beta 选 Gemini Native。AWS IAM 双密钥调用 Claude 选 AWS Converse。"
     },
     {
       "identifier": "baseUrl",
       "type": "text",
       "title": "接口地址",
-      "desc": "填写 Base URL 或完整端点。CPA/兼容接口示例：https://api.example.com/v1；Google 官方示例：https://generativelanguage.googleapis.com/v1beta；AWS Bedrock OpenAI 模型示例：https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1。",
+      "desc": "填写 Base URL 或完整端点。CPA/兼容接口示例：https://api.example.com/v1；AWS Bedrock API Key 调 OpenAI 模型示例：https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1；AWS Converse 可留默认或填 https://bedrock-runtime.us-east-1.amazonaws.com。",
       "defaultValue": "http://127.0.0.1:18080/v1",
       "textConfig": {
         "placeholderText": "https://api.example.com/v1",
@@ -88,7 +92,7 @@
       "identifier": "awsAccessKeyId",
       "type": "text",
       "title": "AWS Access Key ID（仅 AWS Bedrock）",
-      "desc": "使用 AWS IAM SigV4 直连 Bedrock 时填写。若使用 Amazon Bedrock API Key，则不用填。",
+      "desc": "使用 AWS IAM SigV4 / AWS Converse 调 Claude 时填写。若使用 Amazon Bedrock API Key 调 OpenAI 模型，则不用填。",
       "textConfig": {
         "placeholderText": "AKIA...",
         "type": "secure"
@@ -98,7 +102,7 @@
       "identifier": "awsSecretAccessKey",
       "type": "text",
       "title": "AWS Secret Access Key（仅 AWS Bedrock）",
-      "desc": "使用 AWS IAM SigV4 直连 Bedrock 时填写。若使用 Amazon Bedrock API Key，则不用填。",
+      "desc": "使用 AWS IAM SigV4 / AWS Converse 调 Claude 时填写。若使用 Amazon Bedrock API Key 调 OpenAI 模型，则不用填。",
       "textConfig": {
         "placeholderText": "xxxxxxxx",
         "type": "secure"
@@ -171,9 +175,9 @@
       "identifier": "customModel",
       "type": "text",
       "title": "自定义模型名",
-      "desc": "当“模型”选择自定义模型时填写，例如 gemini-3.5-flash-low、gpt-5.4、deepseek-ai/DeepSeek-V3.2。",
+      "desc": "当“模型”选择自定义模型时填写，例如 global.anthropic.claude-sonnet-4-6、openai.gpt-oss-20b-1:0、gemini-3.5-flash-low。",
       "textConfig": {
-        "placeholderText": "例如: gemini-3.5-flash-low",
+        "placeholderText": "例如: global.anthropic.claude-sonnet-4-6",
         "type": "visible"
       }
     },

@@ -135,6 +135,7 @@ var API_MODE_VALUES = {
     responses: true,
     chat_completions: true,
     gemini_generate_content: true,
+    aws_converse: true,
 };
 
 var THINK_BLOCK_REGEXP = /<\s*(reasoning|think)\b[^>]*>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
@@ -247,6 +248,7 @@ function translate(query, completion) {
     var useStream =
         !!config.streamOutput &&
         config.apiMode !== 'gemini_generate_content' &&
+        config.apiMode !== 'aws_converse' &&
         typeof $http === 'object' &&
         $http !== null &&
         typeof $http.streamRequest === 'function';
@@ -316,6 +318,10 @@ function buildApiEndpoint(baseUrl, apiMode, modelName) {
         return baseUrl;
     }
 
+    if (apiMode === 'aws_converse') {
+        return baseUrl + '/model/' + encodeURIComponent(modelName) + '/converse';
+    }
+
     if (apiMode === 'gemini_generate_content') {
         return baseUrl + '/models/' + encodeURIComponent(normalizeGeminiNativeModelName(modelName)) + ':generateContent';
     }
@@ -327,6 +333,16 @@ function buildApiEndpoint(baseUrl, apiMode, modelName) {
 }
 
 function buildModelsEndpoint(baseUrl) {
+    if (isAwsConverseEndpoint(baseUrl)) {
+        return baseUrl
+            .replace(/:\/\/bedrock-runtime\./, '://bedrock.')
+            .replace(/\/model\/[^/?#]+\/converse$/i, '/foundation-models');
+    }
+
+    if (isBedrockRuntimeRootBaseUrl(baseUrl)) {
+        return baseUrl.replace(/:\/\/bedrock-runtime\./, '://bedrock.') + '/foundation-models';
+    }
+
     if (isGeminiNativeEndpoint(baseUrl)) {
         return baseUrl.replace(
             /\/models\/[^/?#]+:(?:generatecontent|streamgeneratecontent)(?:\?.*)?$/i,
@@ -369,6 +385,31 @@ function applyReasoningParam(body, params) {
 }
 
 function buildTranslateRequestBody(params) {
+    if (params.apiMode === 'aws_converse') {
+        var converseBody = {
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            text: params.userPrompt,
+                        },
+                    ],
+                },
+            ],
+            system: [
+                {
+                    text: params.systemPrompt,
+                },
+            ],
+            inferenceConfig: {
+                maxTokens: params.maxOutputTokens,
+            },
+        };
+
+        return converseBody;
+    }
+
     if (params.apiMode === 'gemini_generate_content') {
         var geminiBody = {
             contents: [
@@ -1112,6 +1153,13 @@ function extractTranslatedText(data) {
         }
     }
 
+    if (isPlainObject(data.output) && isPlainObject(data.output.message)) {
+        var converseText = normalizeMessageContent(data.output.message.content);
+        if (converseText) {
+            return converseText;
+        }
+    }
+
     if (Array.isArray(data.choices) && data.choices.length > 0) {
         var choice = data.choices[0];
         if (choice && isPlainObject(choice.message)) {
@@ -1495,7 +1543,9 @@ function buildRuntimeConfig() {
     }
 
     var baseUrlRaw = getOptionString('baseUrl', DEFAULT_BASE_URL);
-    if (provider === 'bedrock' && authMode === 'aws_sigv4' && isDefaultSub2ApiUrl(baseUrlRaw)) {
+    if (provider === 'bedrock' && authMode === 'aws_sigv4' && apiMode === 'aws_converse' && isDefaultSub2ApiUrl(baseUrlRaw)) {
+        baseUrlRaw = buildBedrockRuntimeBaseUrl(bedrockRegion);
+    } else if (provider === 'bedrock' && authMode === 'aws_sigv4' && isDefaultSub2ApiUrl(baseUrlRaw)) {
         baseUrlRaw = buildBedrockRuntimeOpenAiBaseUrl(bedrockRegion);
     } else if (provider === 'bedrock' && isDefaultSub2ApiUrl(baseUrlRaw)) {
         baseUrlRaw = buildBedrockMantleBaseUrl(bedrockRegion);
@@ -1694,6 +1744,10 @@ function normalizeBaseUrl(raw, apiMode) {
         return value;
     }
 
+    if (apiMode === 'aws_converse') {
+        return value.replace(/\/openai\/v1$/, '').replace(/\/v1$/, '');
+    }
+
     if (apiMode === 'gemini_generate_content') {
         if (/\/v1beta$/.test(value)) {
             return value;
@@ -1726,7 +1780,14 @@ function isCompleteEndpoint(urlValue) {
     if (typeof urlValue !== 'string') {
         return false;
     }
-    return /\/(chat\/completions|responses)$/.test(urlValue) || isGeminiNativeEndpoint(urlValue);
+    return /\/(chat\/completions|responses)$/.test(urlValue) || isGeminiNativeEndpoint(urlValue) || isAwsConverseEndpoint(urlValue);
+}
+
+function isAwsConverseEndpoint(urlValue) {
+    if (typeof urlValue !== 'string') {
+        return false;
+    }
+    return /\/model\/[^/?#]+\/converse$/i.test(urlValue);
 }
 
 function isGeminiNativeEndpoint(urlValue) {
@@ -1754,6 +1815,13 @@ function isBedrockRuntimeOpenAiBaseUrl(baseUrl) {
     return /^https?:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/openai\/v1$/.test(baseUrl);
 }
 
+function isBedrockRuntimeRootBaseUrl(baseUrl) {
+    if (typeof baseUrl !== 'string') {
+        return false;
+    }
+    return /^https?:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com$/.test(baseUrl);
+}
+
 function normalizeRegion(raw) {
     var region = String(raw || '').trim().toLowerCase();
     if (!region) {
@@ -1771,6 +1839,10 @@ function buildBedrockMantleBaseUrl(region) {
 
 function buildBedrockRuntimeOpenAiBaseUrl(region) {
     return 'https://bedrock-runtime.' + region + '.amazonaws.com/openai/v1';
+}
+
+function buildBedrockRuntimeBaseUrl(region) {
+    return 'https://bedrock-runtime.' + region + '.amazonaws.com';
 }
 
 function isDefaultSub2ApiUrl(raw) {
@@ -1942,7 +2014,7 @@ function canonicalAwsPath(path) {
     return value
         .split('/')
         .map(function (part) {
-            return awsPercentEncode(decodeURIComponentSafe(part));
+            return awsPercentEncode(part);
         })
         .join('/');
 }

@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
+      "version": "0.1.24",
+      "desc": "兼容过渡更新：新增 AWS Converse 协议，可用 AWS IAM 双密钥调用 Claude。",
+      "sha256": "346d07758ad471eb65fff2528bd52f6fcfb76679c9b0c00c71e40b4f96539547",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.24/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1780588928923
+    },
+    {
       "version": "0.1.23",
       "desc": "兼容过渡更新：修正 AWS Bedrock API Key / SigV4 两种凭证说明。",
       "sha256": "d5c46117b4671ae7e5c27cb45aae89bd5b956cc173438fae68e5b0cbd323b762",
@@ -32,14 +40,6 @@
       "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.14/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
       "minBobVersion": "1.8.0",
       "timestamp": 1771474787113
-    },
-    {
-      "version": "0.1.13",
-      "desc": "兼容过渡更新：修复完整端点下模型校验地址，并增强 Cerebras 404 排查提示。",
-      "sha256": "c66b9e8437b0b10138673e1eccf3f78e9fdf7dd1b189c7b3e13cc6749c19ae77",
-      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.13/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
-      "minBobVersion": "1.8.0",
-      "timestamp": 1771360808227
     }
   ]
 }
