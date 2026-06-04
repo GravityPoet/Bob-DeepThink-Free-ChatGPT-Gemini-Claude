@@ -1,9 +1,9 @@
 {
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
-  "version": "0.1.15",
+  "version": "0.1.22",
   "category": "translate",
   "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude",
-  "summary": "OpenAI/Gemini/AWS/自定义网关翻译插件，支持流式、思考强度与思考链折叠",
+  "summary": "OpenAI/兼容接口、Gemini 官方接口、AWS Bedrock 官方链路与完整端点翻译插件，支持流式、思考强度与思考链折叠",
   "icon": "favicon1",
   "icons": [
     {
@@ -20,57 +20,98 @@
     {
       "identifier": "provider",
       "type": "menu",
-      "title": "翻译通道",
+      "title": "接口类型",
       "defaultValue": "openai",
       "menuValues": [
         {
-          "title": "OpenAI",
+          "title": "OpenAI 接口 / 兼容接口",
           "value": "openai"
         },
         {
-          "title": "Gemini",
+          "title": "Gemini 官方接口",
           "value": "gemini"
         },
         {
-          "title": "AWS Bedrock (Mantle)",
+          "title": "AWS Bedrock 官方链路",
           "value": "bedrock"
         },
         {
-          "title": "自定义(兼容 OpenAI API)",
+          "title": "其他完整端点",
           "value": "custom"
         }
-      ]
+      ],
+      "desc": "先选接口类型，不按模型品牌选。CPA/Sub2API/OpenAI 兼容地址选“OpenAI 接口 / 兼容接口”；Google 官方 /v1beta 选“Gemini 官方接口”；直连 AWS 官方 Bedrock 选“AWS Bedrock 官方链路”。"
+    },
+    {
+      "identifier": "apiMode",
+      "type": "menu",
+      "title": "接口协议",
+      "defaultValue": "chat_completions",
+      "menuValues": [
+        {
+          "title": "Chat Completions（兼容接口）",
+          "value": "chat_completions"
+        },
+        {
+          "title": "Responses API",
+          "value": "responses"
+        },
+        {
+          "title": "Gemini Native（官方 /v1beta）",
+          "value": "gemini_generate_content"
+        }
+      ],
+      "desc": "兼容接口通常选 Chat Completions；OpenAI Responses 选 Responses API；Google 官方 Gemini /v1beta 选 Gemini Native。AWS Bedrock 官方链路通常选 Chat Completions。"
     },
     {
       "identifier": "baseUrl",
       "type": "text",
-      "title": "Base URL / Endpoint",
-      "desc": "Sub2API(OpenAI兼容): http://127.0.0.1:18080/v1；Gemini Native 示例: http://127.0.0.1:18080/v1beta 或完整端点 /v1beta/models/<model>:generateContent；Bedrock Mantle: https://bedrock-mantle.us-east-1.api.aws/v1；Bedrock Runtime(OpenAI): https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1；完整端点直连示例: https://opencode.ai/zen/v1/chat/completions 或 https://api.kilo.ai/api/gateway/chat/completions。",
+      "title": "接口地址",
+      "desc": "填写 Base URL 或完整端点。CPA/兼容接口示例：https://api.example.com/v1；Google 官方示例：https://generativelanguage.googleapis.com/v1beta；AWS 官方留默认时会按 Region 自动使用 bedrock-runtime.<region>.amazonaws.com/openai/v1。",
       "defaultValue": "http://127.0.0.1:18080/v1",
       "textConfig": {
-        "placeholderText": "http://127.0.0.1:18080/v1",
+        "placeholderText": "https://api.example.com/v1",
         "type": "visible"
       }
     },
     {
       "identifier": "apiKey",
       "type": "text",
-      "title": "API Key",
-      "desc": "Sub2API 或 Amazon Bedrock API Key（Bearer）。",
+      "title": "API Key（网关 / Bearer）",
+      "desc": "CPA、Sub2API、OpenAI 兼容网关、Mantle/Bearer 路线填这里。直连 AWS 官方 Bedrock 不填这里，填下面两个 AWS 密钥。",
       "textConfig": {
         "placeholderText": "sk-xxxxxxxx",
         "type": "secure"
       }
     },
     {
-      "identifier": "bedrockRegion",
+      "identifier": "awsAccessKeyId",
       "type": "text",
-      "title": "Bedrock Region",
-      "defaultValue": "us-east-1",
-      "desc": "仅 AWS Bedrock 通道使用。若 Base URL 仍为默认值，将自动生成为 bedrock-mantle.<region>.api.aws/v1。非 AWS 通道会忽略该项（Bob 配置项当前不支持按通道动态隐藏）。",
+      "title": "AWS Access Key ID（仅 AWS Bedrock）",
+      "desc": "直连 AWS 官方 Bedrock 时填写。CPA/兼容网关不用填。",
       "textConfig": {
-        "placeholderText": "us-east-1",
-        "type": "visible"
+        "placeholderText": "AKIA...",
+        "type": "secure"
+      }
+    },
+    {
+      "identifier": "awsSecretAccessKey",
+      "type": "text",
+      "title": "AWS Secret Access Key（仅 AWS Bedrock）",
+      "desc": "直连 AWS 官方 Bedrock 时填写。CPA/兼容网关不用填。",
+      "textConfig": {
+        "placeholderText": "xxxxxxxx",
+        "type": "secure"
+      }
+    },
+    {
+      "identifier": "awsSessionToken",
+      "type": "text",
+      "title": "AWS Session Token（可选）",
+      "desc": "使用 STS 临时凭证时填写；长期 IAM Access Key 留空。",
+      "textConfig": {
+        "placeholderText": "可选",
+        "type": "secure"
       }
     },
     {
@@ -124,65 +165,39 @@
           "value": "custom"
         }
       ],
-      "desc": "可直接选预设模型，或选择“自定义模型”后手填任何模型名。"
-    },
-    {
-      "identifier": "apiMode",
-      "type": "menu",
-      "title": "接口协议",
-      "defaultValue": "responses",
-      "menuValues": [
-        {
-          "title": "Responses API (/responses)",
-          "value": "responses"
-        },
-        {
-          "title": "Chat Completions (/chat/completions)",
-          "value": "chat_completions"
-        },
-        {
-          "title": "Gemini Native (/v1beta ...:generateContent)",
-          "value": "gemini_generate_content"
-        }
-      ],
-      "desc": "自定义厂商时可切换协议；Gemini 原生网关请选 Gemini Native；Bedrock Runtime(OpenAI)/Cerebras 建议选 Chat Completions。"
+      "desc": "选择预设模型；没有就选“自定义模型”，再在下一项填写真实模型名。"
     },
     {
       "identifier": "customModel",
       "type": "text",
       "title": "自定义模型名",
-      "desc": "当上面选择“自定义模型”时必填。",
+      "desc": "当“模型”选择自定义模型时填写，例如 gemini-3.5-flash-low、gpt-5.4、deepseek-ai/DeepSeek-V3.2。",
       "textConfig": {
-        "placeholderText": "例如: gpt-5.2 或 gemini-3-flash-preview",
+        "placeholderText": "例如: gemini-3.5-flash-low",
         "type": "visible"
       }
     },
     {
-      "identifier": "requestTimeoutSec",
-      "type": "text",
-      "title": "请求超时(秒)",
-      "defaultValue": "90",
-      "desc": "单次翻译超时，范围 10-300。",
-      "textConfig": {
-        "placeholderText": "90",
-        "type": "visible"
-      }
-    },
-    {
-      "identifier": "maxOutputTokens",
-      "type": "text",
-      "title": "最大输出 Token",
-      "defaultValue": "1024",
-      "desc": "范围 64-8192。",
-      "textConfig": {
-        "placeholderText": "1024",
-        "type": "visible"
-      }
+      "identifier": "streamOutput",
+      "type": "menu",
+      "title": "流式输出",
+      "defaultValue": "true",
+      "menuValues": [
+        {
+          "title": "开启",
+          "value": "true"
+        },
+        {
+          "title": "关闭",
+          "value": "false"
+        }
+      ],
+      "desc": "建议开启。若上游流式没有返回正文，插件会自动回退一次非流式请求。"
     },
     {
       "identifier": "reasoningEffort",
       "type": "menu",
-      "title": "思考强度",
+      "title": "高级：思考强度",
       "defaultValue": "none",
       "menuValues": [
         {
@@ -202,24 +217,40 @@
           "value": "high"
         }
       ],
-      "desc": "默认“无”表示不传思考参数。Responses 协议映射 reasoning.effort（OpenAI/自定义）；Chat Completions 协议映射 reasoning_effort（OpenAI/Gemini/AWS/自定义）。插件会识别常见 reasoning/thinking 字段并自动折叠到 Bob 思考区。"
+      "desc": "默认“无”最稳。兼容接口会按协议传 reasoning_effort 或 reasoning.effort；Gemini Native 不传。"
     },
     {
-      "identifier": "streamOutput",
-      "type": "menu",
-      "title": "流式输出",
-      "defaultValue": "true",
-      "menuValues": [
-        {
-          "title": "开启",
-          "value": "true"
-        },
-        {
-          "title": "关闭",
-          "value": "false"
-        }
-      ],
-      "desc": "开启后优先流式输出；若上游流式未返回可用正文，插件会自动回退一次非流式请求。"
+      "identifier": "maxOutputTokens",
+      "type": "text",
+      "title": "高级：最大输出 Token",
+      "defaultValue": "1024",
+      "desc": "范围 64-8192。普通翻译保持默认即可。",
+      "textConfig": {
+        "placeholderText": "1024",
+        "type": "visible"
+      }
+    },
+    {
+      "identifier": "requestTimeoutSec",
+      "type": "text",
+      "title": "高级：请求超时(秒)",
+      "defaultValue": "90",
+      "desc": "范围 10-300。网络慢或模型慢时再调大。",
+      "textConfig": {
+        "placeholderText": "90",
+        "type": "visible"
+      }
+    },
+    {
+      "identifier": "bedrockRegion",
+      "type": "text",
+      "title": "AWS Region（仅 AWS Bedrock）",
+      "defaultValue": "us-east-1",
+      "desc": "AWS 官方 Bedrock 直连和 Bedrock 链路使用，例如 us-east-1。其他接口忽略。",
+      "textConfig": {
+        "placeholderText": "us-east-1",
+        "type": "visible"
+      }
     }
   ]
 }

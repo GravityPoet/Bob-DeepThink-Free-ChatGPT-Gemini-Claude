@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
+      "version": "0.1.22",
+      "desc": "兼容过渡更新：新增 AWS Bedrock 官方 SigV4 双密钥链路，并整理接口类型/协议排版。",
+      "sha256": "7932ba2fcc6b7d4371a9d2e2fccf74383ef99aa7aebed58df15d6e96a11219fd",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.22/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1780569387277
+    },
+    {
       "version": "0.1.15",
       "desc": "兼容过渡更新：Gemini Native 自动将 /v1 调整为 /v1beta。",
       "sha256": "a11017e93bdd410c5e5d4a467f4d67c7d44ff064bbacbe8704efbf08f8b9d559",
@@ -32,14 +40,6 @@
       "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.12/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
       "minBobVersion": "1.8.0",
       "timestamp": 1771357614324
-    },
-    {
-      "version": "0.1.11",
-      "desc": "兼容过渡更新：沿用旧 identifier 自动覆盖老插件，并修复流式空正文自动回退非流式。",
-      "sha256": "0035101baace85b9f5a915c1584c0948a70d049672ef419030a2f86a001d4ef7",
-      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.11/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
-      "minBobVersion": "1.8.0",
-      "timestamp": 1771259936878
     }
   ]
 }

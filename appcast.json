@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
   "versions": [
     {
+      "version": "0.1.22",
+      "desc": "新增 AWS Bedrock 官方链路：支持 Access Key ID、Secret Access Key、可选 Session Token 与 SigV4；整理接口类型/协议排版，并保留 CPA/OpenAI 兼容网关与 Gemini Native。",
+      "sha256": "186c5ad6bb73f790f4bc9921cb2d7f77afe835da01ea405d0c48aa82cafd34fc",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.22/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1780569387277
+    },
+    {
       "version": "0.1.15",
       "desc": "修复 Gemini Native 自动路径：从默认 /v1 切换协议时自动转为 /v1beta，避免 404。",
       "sha256": "d798f4cd877d44f918e4499ac35fd533506dc4e83004fa556d72838b51c4f11a",
@@ -32,14 +40,6 @@
       "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.12/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
       "minBobVersion": "1.8.0",
       "timestamp": 1771357614324
-    },
-    {
-      "version": "0.1.11",
-      "desc": "修复 Kilo 流式空正文：流式结束时先从响应体兜底提取文本，仍为空则自动回退一次非流式请求。",
-      "sha256": "b7f7ba95f9cc5cfbd550597e4e5e51fb0263920fafd3d2419b12efbd4181131f",
-      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.11/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
-      "minBobVersion": "1.8.0",
-      "timestamp": 1771259936878
     }
   ]
 }
