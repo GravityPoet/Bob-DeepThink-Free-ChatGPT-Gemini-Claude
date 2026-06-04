@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
   "versions": [
     {
+      "version": "0.1.23",
+      "desc": "修正文案并支持 Amazon Bedrock API Key：AWS 官方链路可用 Bedrock API Key（Bearer）或 AWS IAM SigV4；补充 OpenAI 模型 endpoint 示例。",
+      "sha256": "9888cc595cf66a06c8da1c37e2e5eafb3c8ddf1e098c66ae42596c8257847d26",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.23/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1780586686745
+    },
+    {
       "version": "0.1.22",
       "desc": "新增 AWS Bedrock 官方链路：支持 Access Key ID、Secret Access Key、可选 Session Token 与 SigV4；整理接口类型/协议排版，并保留 CPA/OpenAI 兼容网关与 Gemini Native。",
       "sha256": "186c5ad6bb73f790f4bc9921cb2d7f77afe835da01ea405d0c48aa82cafd34fc",
@@ -32,14 +40,6 @@
       "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.13/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
       "minBobVersion": "1.8.0",
       "timestamp": 1771360808227
-    },
-    {
-      "version": "0.1.12",
-      "desc": "修复：Cerebras 通道防呆（禁止 /responses，提示切换 Chat Completions）；错误信息补充 detail 字段，404 定位更清晰。",
-      "sha256": "9802a9192ee2201eb140ef2eaff93fdf78158a0c126ba49c40053cc224f10f3a",
-      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.1.12/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
-      "minBobVersion": "1.8.0",
-      "timestamp": 1771357614324
     }
   ]
 }

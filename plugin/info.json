@@ -1,9 +1,9 @@
 {
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
-  "version": "0.1.22",
+  "version": "0.1.23",
   "category": "translate",
   "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude",
-  "summary": "OpenAI/兼容接口、Gemini 官方接口、AWS Bedrock 官方链路与完整端点翻译插件，支持流式、思考强度与思考链折叠",
+  "summary": "OpenAI/兼容接口、Gemini 官方接口、AWS Bedrock API Key/SigV4 与完整端点翻译插件，支持流式、思考强度与思考链折叠",
   "icon": "favicon1",
   "icons": [
     {
@@ -40,7 +40,7 @@
           "value": "custom"
         }
       ],
-      "desc": "先选接口类型，不按模型品牌选。CPA/Sub2API/OpenAI 兼容地址选“OpenAI 接口 / 兼容接口”；Google 官方 /v1beta 选“Gemini 官方接口”；直连 AWS 官方 Bedrock 选“AWS Bedrock 官方链路”。"
+      "desc": "先选接口类型，不按模型品牌选。CPA/Sub2API/OpenAI 兼容地址选“OpenAI 接口 / 兼容接口”；Google 官方 /v1beta 选“Gemini 官方接口”；直连 AWS 官方 Bedrock 选“AWS Bedrock 官方链路”，可用 Bedrock API Key 或 AWS IAM SigV4。"
     },
     {
       "identifier": "apiMode",
@@ -61,13 +61,13 @@
           "value": "gemini_generate_content"
         }
       ],
-      "desc": "兼容接口通常选 Chat Completions；OpenAI Responses 选 Responses API；Google 官方 Gemini /v1beta 选 Gemini Native。AWS Bedrock 官方链路通常选 Chat Completions。"
+      "desc": "兼容接口通常选 Chat Completions；OpenAI Responses 选 Responses API；Google 官方 Gemini /v1beta 选 Gemini Native。AWS Bedrock 官方 OpenAI 模型通常选 Chat Completions。"
     },
     {
       "identifier": "baseUrl",
       "type": "text",
       "title": "接口地址",
-      "desc": "填写 Base URL 或完整端点。CPA/兼容接口示例：https://api.example.com/v1；Google 官方示例：https://generativelanguage.googleapis.com/v1beta；AWS 官方留默认时会按 Region 自动使用 bedrock-runtime.<region>.amazonaws.com/openai/v1。",
+      "desc": "填写 Base URL 或完整端点。CPA/兼容接口示例：https://api.example.com/v1；Google 官方示例：https://generativelanguage.googleapis.com/v1beta；AWS Bedrock OpenAI 模型示例：https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1。",
       "defaultValue": "http://127.0.0.1:18080/v1",
       "textConfig": {
         "placeholderText": "https://api.example.com/v1",
@@ -77,10 +77,10 @@
     {
       "identifier": "apiKey",
       "type": "text",
-      "title": "API Key（网关 / Bearer）",
-      "desc": "CPA、Sub2API、OpenAI 兼容网关、Mantle/Bearer 路线填这里。直连 AWS 官方 Bedrock 不填这里，填下面两个 AWS 密钥。",
+      "title": "API Key（网关 / Bedrock API Key）",
+      "desc": "CPA、Sub2API、OpenAI 兼容网关、Mantle/Bearer 路线，以及 Amazon Bedrock API Key 都填这里。若使用 AWS IAM Access Key ID / Secret Access Key，则填下面两个 AWS 密钥。",
       "textConfig": {
-        "placeholderText": "sk-xxxxxxxx",
+        "placeholderText": "sk-... 或 ABSK...",
         "type": "secure"
       }
     },
@@ -88,7 +88,7 @@
       "identifier": "awsAccessKeyId",
       "type": "text",
       "title": "AWS Access Key ID（仅 AWS Bedrock）",
-      "desc": "直连 AWS 官方 Bedrock 时填写。CPA/兼容网关不用填。",
+      "desc": "使用 AWS IAM SigV4 直连 Bedrock 时填写。若使用 Amazon Bedrock API Key，则不用填。",
       "textConfig": {
         "placeholderText": "AKIA...",
         "type": "secure"
@@ -98,7 +98,7 @@
       "identifier": "awsSecretAccessKey",
       "type": "text",
       "title": "AWS Secret Access Key（仅 AWS Bedrock）",
-      "desc": "直连 AWS 官方 Bedrock 时填写。CPA/兼容网关不用填。",
+      "desc": "使用 AWS IAM SigV4 直连 Bedrock 时填写。若使用 Amazon Bedrock API Key，则不用填。",
       "textConfig": {
         "placeholderText": "xxxxxxxx",
         "type": "secure"
@@ -108,7 +108,7 @@
       "identifier": "awsSessionToken",
       "type": "text",
       "title": "AWS Session Token（可选）",
-      "desc": "使用 STS 临时凭证时填写；长期 IAM Access Key 留空。",
+      "desc": "使用 STS 临时凭证时填写；长期 IAM Access Key 或 Amazon Bedrock API Key 留空。",
       "textConfig": {
         "placeholderText": "可选",
         "type": "secure"
@@ -246,7 +246,7 @@
       "type": "text",
       "title": "AWS Region（仅 AWS Bedrock）",
       "defaultValue": "us-east-1",
-      "desc": "AWS 官方 Bedrock 直连和 Bedrock 链路使用，例如 us-east-1。其他接口忽略。",
+      "desc": "AWS Bedrock 官方链路使用，例如 us-east-1。其他接口忽略。",
       "textConfig": {
         "placeholderText": "us-east-1",
         "type": "visible"
