@@ -663,7 +663,11 @@ function handleStreamChunk(stream, state, query, sourceLang, targetLang) {
         }
 
         var delta = extractStreamDeltaText(eventData);
-        var changed = mergeStreamText(state, delta);
+        var changed = delta.length > 0;
+        if (changed) {
+            // Deltas may legitimately repeat preceding text, including digits.
+            state.text += delta;
+        }
 
         var thinkDelta = extractStreamDeltaThink(eventData);
         if (mergeStreamThink(state, thinkDelta)) {
@@ -673,7 +677,8 @@ function handleStreamChunk(stream, state, query, sourceLang, targetLang) {
         var snapshot = extractStreamSnapshotText(eventData);
         if (snapshot) {
             state.finalSnapshot = snapshot;
-            if (mergeStreamText(state, snapshot)) {
+            if (state.text !== snapshot) {
+                state.text = snapshot;
                 changed = true;
             }
         }
@@ -690,33 +695,6 @@ function handleStreamChunk(stream, state, query, sourceLang, targetLang) {
             emitStreamResult(query, sourceLang, targetLang, state.text, state.thinkText);
         }
     }
-}
-
-function mergeStreamText(state, incomingText) {
-    if (typeof incomingText !== 'string' || incomingText.length === 0) {
-        return false;
-    }
-
-    if (!state.text) {
-        state.text = incomingText;
-        return true;
-    }
-
-    if (incomingText === state.text) {
-        return false;
-    }
-
-    if (incomingText.indexOf(state.text) === 0) {
-        state.text = incomingText;
-        return true;
-    }
-
-    if (state.text.indexOf(incomingText) === 0 || state.text.slice(-incomingText.length) === incomingText) {
-        return false;
-    }
-
-    state.text += incomingText;
-    return true;
 }
 
 function mergeStreamThink(state, incomingText) {
