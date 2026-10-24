@@ -9,7 +9,7 @@
     {
       "identifier": "favicon1",
       "type": "file",
-      "filePath": "favicon1.ico"
+      "filePath": "icon.png"
     }
   ],
   "author": "GravityPoet",
@@ -70,6 +70,42 @@
       "defaultValue": "gpt-5.2",
       "menuValues": [
         {
+          "title": "gpt-6.1-sol",
+          "value": "gpt-6.1-sol"
+        },
+        {
+          "title": "gpt-6-astra",
+          "value": "gpt-6-astra"
+        },
+        {
+          "title": "gpt-5.5",
+          "value": "gpt-5.5"
+        },
+        {
+          "title": "claude-opus-5-5",
+          "value": "claude-opus-5-5"
+        },
+        {
+          "title": "claude-sonnet-5-5",
+          "value": "claude-sonnet-5-5"
+        },
+        {
+          "title": "claude-opus-4-6",
+          "value": "claude-opus-4-6"
+        },
+        {
+          "title": "gemini-3.8-flash",
+          "value": "gemini-3.8-flash"
+        },
+        {
+          "title": "gemini-3.6-flash",
+          "value": "gemini-3.6-flash"
+        },
+        {
+          "title": "gemini-3.1-pro-preview",
+          "value": "gemini-3.1-pro-preview"
+        },
+        {
           "title": "gpt-5.2",
           "value": "gpt-5.2"
         },
@@ -110,11 +146,27 @@
           "value": "zai-glm-4.7"
         },
         {
+          "title": "deepseek-ai/DeepSeek-V3.2 (SiliconFlow)",
+          "value": "deepseek-ai/DeepSeek-V3.2"
+        },
+        {
+          "title": "deepseek-ai/DeepSeek-V4-Flash (SiliconFlow)",
+          "value": "deepseek-ai/DeepSeek-V4-Flash"
+        },
+        {
+          "title": "deepseek-ai/DeepSeek-V4-Pro (SiliconFlow)",
+          "value": "deepseek-ai/DeepSeek-V4-Pro"
+        },
+        {
+          "title": "Qwen/Qwen3.5-122B-A10B (SiliconFlow)",
+          "value": "Qwen/Qwen3.5-122B-A10B"
+        },
+        {
           "title": "自定义模型",
           "value": "custom"
         }
       ],
-      "desc": "列表没有时选择“自定义模型”。"
+      "desc": "常用模型直接选；在翻译浮窗输入 /models 可查询更多模型。"
     },
     {
       "identifier": "customModel",
@@ -141,7 +193,11 @@
           "value": "responses"
         },
         {
-          "title": "Gemini Native",
+          "title": "Gemini Interactions（推荐）",
+          "value": "gemini_interactions"
+        },
+        {
+          "title": "Gemini generateContent（兼容）",
           "value": "gemini_generate_content"
         },
         {
@@ -179,23 +235,39 @@
       "defaultValue": "none",
       "menuValues": [
         {
-          "title": "无(不设置)",
+          "title": "跟随模型（不设置）",
           "value": "none"
         },
         {
-          "title": "低",
+          "title": "关闭（模型支持时）",
+          "value": "off"
+        },
+        {
+          "title": "极低 · minimal",
+          "value": "minimal"
+        },
+        {
+          "title": "低 · low",
           "value": "low"
         },
         {
-          "title": "中",
+          "title": "中 · medium",
           "value": "medium"
         },
         {
-          "title": "高",
+          "title": "高 · high",
           "value": "high"
+        },
+        {
+          "title": "极高 · xhigh",
+          "value": "xhigh"
+        },
+        {
+          "title": "最大 · max",
+          "value": "max"
         }
       ],
-      "desc": "默认不传；仅 Chat / Responses 适用。"
+      "desc": "按模型支持选择；不兼容的档位会在发送请求前明确提示。"
     },
     {
       "identifier": "maxOutputTokens",

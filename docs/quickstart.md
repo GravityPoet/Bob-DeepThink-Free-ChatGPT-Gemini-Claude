@@ -6,7 +6,7 @@
 
 - **通用版**：常见 OpenAI 兼容网关、Google、Claude，以及 AWS API Key。原插件名称与标识符保持不变。
 - **AWS IAM 专用版**：仅使用 Access Key ID / Secret Access Key / STS 时安装 `DeepThink-AWS-IAM.bobplugin`；安装后在 Bob 添加专用服务，区域与凭据在该服务里设置。普通服务不显示这些字段。
-- 原有 IAM 配置需要在专用服务中单独设置；请保留旧服务，确认新服务可用后再调整。当前本机的 8 个原服务都未使用 IAM，升级前后已逐项核对配置。
+- 原有 IAM 配置需要在专用服务中单独设置；请保留旧服务，确认新服务可用后再调整。
 
 1. 双击 `.bobplugin` 安装；普通用户选标准包，已使用 `io.github.gravitypoet.ai-vip-0-token-plan` 的旧用户选 legacy 包。
 2. Bob → 偏好设置 → 服务 → 文本翻译，添加本插件。升级已有插件时会保留服务配置。
@@ -18,19 +18,29 @@
 | --- | --- | --- | --- |
 | OpenAI / 兼容网关 | `https://api.example.com/v1` | Chat Completions 或 Responses | API Key |
 | 完整端点 | `https://api.example.com/custom/responses?api-version=example` | 自动按端点识别 | API Key |
-| Google Gemini 原生 | `https://generativelanguage.googleapis.com/v1beta` | Gemini Native | Google API Key |
+| Google Gemini Interactions | `https://generativelanguage.googleapis.com/v1` | Gemini Interactions | Google API Key |
+| Google Gemini generateContent | `https://generativelanguage.googleapis.com/v1beta` | Gemini generateContent | Google API Key |
 | Google OpenAI 兼容 | `https://generativelanguage.googleapis.com/v1beta/openai` | Chat Completions | Google API Key |
 | Anthropic Claude 原生 | `https://api.anthropic.com/v1/messages` | Anthropic Messages | Anthropic API Key |
 | Bedrock OpenAI | `https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1` | 按 AWS 当前支持情况选择 Chat/Responses | Bedrock API Key 或 AWS IAM |
 | Bedrock Claude | `https://bedrock-runtime.us-east-1.amazonaws.com` | AWS Converse | Bedrock API Key 或 AWS IAM |
+| Bedrock Mantle Claude | `https://bedrock-mantle.us-east-1.api.aws/anthropic/v1` | Claude Messages | Bedrock API Key 或 AWS IAM |
 | 本地兼容服务 | `http://127.0.0.1:18080/v1` | Chat Completions | 服务端要求的 Key |
 
-完整端点包含 `/chat/completions`、`/responses`、`/messages`、`/models/<model>:generateContent` 或 `/model/<model>/converse`。插件使用相应请求格式，不会修改你保存的选择。根地址按“接口协议”补齐；代理路径、`/v2`、Google `/v1beta/openai` 和 query 会保留。URL 不允许内嵌用户名/密码、空主机或 fragment。
+完整端点包含 `/chat/completions`、`/responses`、`/messages`、`/interactions`、`/models/<model>:generateContent` 或 `/model/<model>/converse`（含流式变体）。插件使用相应请求格式，不会修改你保存的选择。根地址按“接口协议”补齐；代理路径、`/v2`、Google `/v1beta/openai` 和 query 会保留。URL 不允许内嵌用户名/密码、空主机或 fragment。
+
+### 获取模型
+
+只安装 `.bobplugin` 即可使用。常用模型直接在原生下拉选择；更多模型在输入翻译浮窗输入 `/models` 查询，输入 `/models deepseek` 等关键词筛选。复制目录中的模型 ID，在该服务选择“自定义模型”并粘贴保存。目录最多展示 200 个匹配结果，超过时明确提示继续筛选；不修改当前模型，不需要读取 Bob 配置文件的权限。
+
+Bob 的第三方插件 API 不支持动态下拉或自动回填选项，所以实时目录需要复制 ID；不会另装 App 来承担这一步。供应商不开放目录时保留原生预设和手填入口。完整端点仍决定实际协议。
+
+OpenAI / 兼容网关使用 `/models`，Claude 和 Gemini 自动分页。AWS Mantle 使用 OpenAI 模型列表；AWS Runtime 需 IAM 的 `ListFoundationModels` / `ListInferenceProfiles` 权限。Runtime API Key 没有可用的 OpenAI 模型列表端点，窗口会明确提示，保留当前选择。[协议与档位详细说明](protocols.md)
 
 ### 高级设置与异常恢复
 
-- **流式输出**：OpenAI、Gemini 原生与 Claude 原生可用；AWS Converse 使用非流式。成功空流最多重试一次，可能产生第二次 API 调用。
-- **思考强度**：默认“无”表示不传参数；仅 Chat Completions / Responses 映射相应字段。原生 Gemini / Claude 和 AWS Converse 不传。
+- **流式输出**：OpenAI、Gemini Interactions / generateContent、Claude Messages 与 AWS ConverseStream 均有对应路径。SSE 成功空流最多重试一次，可能产生第二次 API 调用；AWS 二进制流不自动重发。
+- **思考强度**：“跟随模型”保留旧 `none` 的含义，通常不传参数；显式“关闭思考”独立映射。原生协议按模型发送 effort、thinking level 或思考预算。已知不支持的档位在发请求前报错，未知兼容模型以网关实际支持为准。
 - **最大输出 Token**：新服务默认 4096，范围 64–65536；现有值保持不变，实际需服务商与模型支持。
 - **截断**：明确显示失败，避免把半篇译文当成功。提高 Token 上限、降低思考强度或缩短原文。
 - **超时**：范围 10–300 秒；流式和回退共享预算。为 Bob 回调预留 5 秒，单次实际请求最多 295 秒；验证请求最多 30 秒。
@@ -42,7 +52,7 @@
 - **字面思考标签**：原文中的 `<think>` / `<reasoning>` 会被保护并还原，不会当成模型的推理内容删除。上游未完整返回这些标记时会明确报错。
 - **Markdown**：Bob 1.21+ 且开启 Markdown 渲染时显示标题、列表和代码；旧版本保留原文格式的纯文本。
 
-AWS IAM 专用服务需成对填写 Access Key ID 与 Secret Access Key；临时凭据另填 Session Token，Region 需与目标端点一致。专用服务留空端点时按区域生成；模型填写 Bedrock 实际模型或推理配置 ID。通用服务的 AWS API Key 路线直接填写完整区域端点。Google 官方原生使用 `x-goog-api-key`，Gemini 网关保留 Bearer 兼容；Claude 原生使用 `x-api-key` 和 `anthropic-version: 2023-06-01`。
+AWS IAM 专用服务需成对填写 Access Key ID 与 Secret Access Key；临时凭据另填 Session Token，Region 需与目标端点一致。专用服务留空端点时按区域生成；模型填写 Bedrock 实际模型或推理配置 ID。通用服务的 AWS API Key 路线直接填写完整区域端点。Google 官方原生使用 `x-goog-api-key`，Gemini 网关保留 Bearer 兼容；Claude Messages 使用 `x-api-key` 和 `anthropic-version: 2026-10-21`，经典 Bedrock Runtime 保留 `2023-06-01`。Mantle 的 Claude 请求按官方要求使用 `x-api-key`，Mantle `/models` 使用 Bearer；IAM 按对应服务名签名。
 
 ## English
 
@@ -50,6 +60,8 @@ The regular package has no IAM/STS credential fields. AWS API keys continue to u
 
 Install the standard `.bobplugin`, or the legacy package if your existing plugin uses the legacy identifier. Add the plugin in Bob's translation services, enter your endpoint, API key, model and protocol, then click **Validate**. Validation performs a small real translation and may incur API charges. Existing service settings are preserved during upgrades.
 
-Complete endpoints select the matching request format automatically. Root endpoints follow the selected protocol. OpenAI Chat/Responses, native Gemini, native Claude Messages and AWS Converse are supported. Native Gemini and Claude stream; Converse is buffered. Existing token limits stay unchanged; new services default to 4096. Explicit truncation, cancellation and API failures are reported instead of being treated as success. Empty successful streams may retry once within the original deadline.
+Complete endpoints select the matching request format automatically. Root endpoints follow the selected protocol. OpenAI Chat/Responses, Gemini Interactions/generateContent, Claude Messages and AWS ConverseStream have protocol-specific streaming paths. Reasoning levels and wire fields depend on the model. Existing token limits stay unchanged; new services default to 4096. Truncation, cancellation and API failures are explicit. Empty successful SSE streams may retry once within the original deadline; binary AWS streams do not automatically retry.
+
+Only the `.bobplugin` is required. Use the native preset menu, or enter `/models` and an optional filter keyword in Bob's input translation window. Copy the desired ID into the existing custom-model setting. Bob's public plugin API does not expose dynamic menus or option writeback, so automatic live selection is not claimed. The directory never changes saved options. AWS Runtime discovery requires IAM list permissions; its API keys have no OpenAI model-list endpoint. See [protocols and model rules](protocols.md).
 
 Use the table above for endpoint examples. Model access and charges depend on your provider. The plugin is free and does not provide API credits or accounts. See [architecture and verification](architecture.md) for development commands and release boundaries.

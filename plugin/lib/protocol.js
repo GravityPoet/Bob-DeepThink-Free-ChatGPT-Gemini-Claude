@@ -8,39 +8,26 @@ var result = require('./result.js');
 var cleanInlineText = result.cleanInlineText;
 var mergeThinkText = result.mergeThinkText;
 var splitThoughtAndAnswer = result.splitThoughtAndAnswer;
+var reasoning = require('./reasoning.js');
+var interactions = require('./interactions.js');
 
 function applyReasoningParam(body, params) {
-    if (params.reasoningEffort === 'none') {
-        return;
+    var plan = params.reasoningPlan || reasoning.prepare(params);
+    if (!plan.ok) {
+        var error = new Error(plan.error.message); error.serviceError = plan.error; throw error;
     }
-
-    if (params.apiMode === 'gemini_generate_content') {
-        return;
-    }
-
-    if (params.apiMode === 'responses') {
-        if (params.provider === 'openai' || params.provider === 'custom') {
-            body.reasoning = {
-                effort: params.reasoningEffort,
-            };
-        }
-        return;
-    }
-
-    if (
-        params.provider === 'openai' ||
-        params.provider === 'gemini' ||
-        params.provider === 'bedrock' ||
-        params.provider === 'custom'
-    ) {
-        body.reasoning_effort = params.reasoningEffort;
-    }
+    return reasoning.apply(body, plan);
 }
 
 function buildTranslateRequestBody(params) {
+    if (params.apiMode === 'gemini_interactions') {
+        return applyReasoningParam({ model: urls.normalizeGeminiNativeModelName(params.modelName),
+            input: params.userPrompt, system_instruction: params.systemPrompt, store: false,
+            generation_config: { max_output_tokens: params.maxOutputTokens } }, params);
+    }
     if (params.apiMode === 'anthropic_messages') {
-        return { model: params.modelName, system: params.systemPrompt,
-            messages: [{ role: 'user', content: params.userPrompt }], max_tokens: params.maxOutputTokens };
+        return applyReasoningParam({ model: params.modelName, system: params.systemPrompt,
+            messages: [{ role: 'user', content: params.userPrompt }], max_tokens: params.maxOutputTokens }, params);
     }
     if (params.apiMode === 'aws_converse') {
         var converseBody = {
@@ -64,7 +51,7 @@ function buildTranslateRequestBody(params) {
             },
         };
 
-        return converseBody;
+        return applyReasoningParam(converseBody, params);
     }
 
     if (params.apiMode === 'gemini_generate_content') {
@@ -91,7 +78,7 @@ function buildTranslateRequestBody(params) {
             },
         };
 
-        return geminiBody;
+        return applyReasoningParam(geminiBody, params);
     }
 
     if (params.apiMode === 'chat_completions') {
@@ -166,7 +153,9 @@ function buildHttpBody(config, requestBody) {
 
 function buildRequestHeaders(config, method, url, payload, hasJsonBody) {
     if (config.authMode === 'aws_sigv4') {
-        return require('./aws.js').buildAwsSigV4Headers(config, method, url, payload || '', hasJsonBody);
+        var signed = require('./aws.js').buildAwsSigV4Headers(config, method, url, payload || '', hasJsonBody);
+        if (config.apiMode === 'anthropic_messages') signed['anthropic-version'] = anthropicVersion(config, url);
+        return signed;
     }
 
     var headers = {};
@@ -176,8 +165,8 @@ function buildRequestHeaders(config, method, url, payload, hasJsonBody) {
     var parsed = urls.parseHttpUrl(url);
     if (config.apiMode === 'anthropic_messages') {
         headers['x-api-key'] = config.apiKey;
-        headers['anthropic-version'] = '2023-06-01';
-    } else if (config.apiMode === 'gemini_generate_content' && parsed.ok && parsed.host === 'generativelanguage.googleapis.com') {
+        headers['anthropic-version'] = anthropicVersion(config, url);
+    } else if ((config.apiMode === 'gemini_generate_content' || config.apiMode === 'gemini_interactions') && parsed.ok && parsed.host === 'generativelanguage.googleapis.com') {
         headers['x-goog-api-key'] = config.apiKey;
     } else {
         headers.Authorization = 'Bearer ' + config.apiKey;
@@ -185,15 +174,25 @@ function buildRequestHeaders(config, method, url, payload, hasJsonBody) {
     return headers;
 }
 
+function anthropicVersion(config, url) {
+    var parsed = urls.parseHttpUrl(url);
+    // AWS supports the new API version only for Claude 4.7 and later.
+    var aws = config.provider === 'bedrock' || parsed.ok && /^bedrock-(?:runtime|mantle)\./.test(parsed.host);
+    var legacy = /claude-(?:opus|sonnet|haiku)-4[-.][0-6](?:-|$)|claude-(?:opus|sonnet|haiku)-4(?:-|$)|claude-[123]/i.test(config.modelName || '');
+    return aws && legacy || parsed.ok && /^bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com(?::\d+)?$/.test(parsed.host) ? '2023-06-01' : '2026-10-21';
+}
+
 function responseFailure(data, context) {
     if (!isPlainObject(data)) return null;
-    var response = isPlainObject(data.response) ? data.response : data;
+    var response = isPlainObject(data.interaction) ? data.interaction : isPlainObject(data.response) ? data.response : data;
     if (data.error || response.error || data.type === 'error' || response.status === 'failed' || data.type === 'response.failed') {
         return parseApiError(response.error ? response : data, 200, context);
     }
     if (response.status === 'incomplete' || data.type === 'response.incomplete') {
         return makeServiceError('api', '译文未完成或被截断，请提高最大输出 Token、降低思考强度或缩短原文。');
     }
+    if (response.status === 'cancelled' || response.status === 'requires_action') return makeServiceError('api', '上游交互未完成：已取消或需要额外输入。');
+    if (data.type === 'interaction.completed' && response.status !== 'completed') return makeServiceError('api', '上游交互没有确认完成，请重试。');
     var choice = Array.isArray(data.choices) && data.choices[0];
     var candidate = Array.isArray(data.candidates) && data.candidates[0];
     var reason = choice && choice.finish_reason || candidate && candidate.finishReason || data.stopReason || data.stop_reason || data.delta && data.delta.stop_reason;
@@ -236,6 +235,9 @@ function parseTranslateResponse(resp, context) {
 
     var failure = responseFailure(resp.data, context);
     if (failure) return { ok: false, error: failure };
+    if (resp.data && resp.data.object === 'interaction' && resp.data.status !== 'completed') {
+        return { ok: false, error: makeServiceError('api', '上游交互尚未完成，请重试。') };
+    }
 
     var text = extractTranslatedText(resp.data);
     if (!text) {
@@ -266,6 +268,7 @@ function extractTranslatedText(data) {
     if (!isPlainObject(data)) {
         return '';
     }
+    if (Array.isArray(data.steps)) return interactions.text(data);
 
     if (Array.isArray(data.content)) return normalizeMessageContent(data.content);
     if (typeof data.output_text === 'string' && data.output_text.trim()) {
@@ -309,6 +312,7 @@ function extractStructuredThinkText(data) {
     }
 
     var chunks = [];
+    pushUniqueChunk(chunks, interactions.thinking(data));
     pushUniqueChunk(chunks, extractThinkingFromMessageContent(data.content));
     if (data.output && data.output.message) pushUniqueChunk(chunks, extractThinkingFromMessageContent(data.output.message.content));
     pushUniqueChunk(chunks, extractAnyText(data.reasoning_content));

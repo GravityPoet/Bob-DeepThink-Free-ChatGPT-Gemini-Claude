@@ -4,10 +4,17 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 插件免费；API 账号、模型权限、配额及费用由所选服务商提供。名称中的 Free 不代表所有模型或接口免费。
 
-## 0.2.3 修复 Bob 流式显示
+## 0.2.3 模型选择、协议维护与显示修复
+
+- **单插件模型目录**：常用模型在 Bob 原生下拉中选择；在输入翻译中输入 `/models` 查询服务商目录，输入 `/models 关键词` 筛选。无需另外安装 App 或授权读取 Bob 配置。
+- **按模型映射思考强度**：补齐 `minimal`、`xhigh`、`max` 和显式关闭，区分 GPT、Claude、Gemini 与 SiliconFlow 的支持范围及原生参数，提前拦截已知无效组合。
+- **协议更新**：加入稳定版 Gemini Interactions，保持无状态请求；Claude Messages 更新到 `2026-10-21`，旧 Bedrock Runtime 维持所需版本；AWS Converse 加入二进制流式解码和完整性检查。
 
 - 修正 `onStream` 的 `{ result: ... }` 回调包装，使 Bob 在请求完成前持续显示译文。
 - 新增按 Bob 回调结构读取中途结果的回归测试，避免仅验证网络分包就误判界面流式通过。
+- Markdown 输入改用 Bob 的 `originalText`，保留预处理可能移除的标题、加粗、斜体与嵌套缩进；普通文本继续使用 Bob 的预处理结果。
+- 行内代码与围栏代码块在本地保护并原样还原，保留标识符、代码内容、缩进和字面标签，减少上游改写代码。
+- 图标使用用户提供的渐变闪电设计，放大主体、提高小尺寸清晰度，保留白色底板与原图标标识符。
 - 保留原名称、供应商、模型及服务配置。
 
 ## 0.2.2 流式与排版修复
@@ -42,12 +49,22 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 3. Bob → 偏好设置 → 服务 → 文本翻译，选择本插件，填写接口地址、API Key、模型和协议。
 4. 点击 **验证**，检查所选模型的真实翻译请求；之后用翻译浮窗验证实际结果。
 
+### 获取和选择模型
+
+新用户只需安装一个 `.bobplugin`。常用模型直接在 Bob 设置中的“模型”下拉选择。
+
+更多模型可在 Bob 的输入翻译浮窗中输入 `/models` 查询，或输入 `/models deepseek`、`/models gpt` 等进行筛选。目录直接由本插件请求当前供应商，显示模型 ID 和已核实的思考档位，不调用生成接口、不读取其他服务的配置。
+
+复制需要的模型 ID，在本服务的“模型”选择“自定义模型”，粘贴到“自定义模型”并保存。目录可见不等于账号已有调用权限。供应商未开放目录时会明确报错，已有模型设置保持原值。
+
+**宿主限制**：Bob 第三方设置当前只提供固定下拉和输入框，实时目录不能直接变成设置中的动态下拉，也不能自动回填 `$option`。因此这里提供原生预设选择与实时目录查询，不声称已实现实时列表一键回填。[档位、协议核查与限制](docs/protocols.md)
+
 | 服务 | 协议 |
 | --- | --- |
 | OpenAI / CPA / Sub2API / 兼容网关 | Chat Completions、Responses |
-| Google Gemini | Gemini Native、Google OpenAI 兼容 |
+| Google Gemini | Gemini Interactions、generateContent、Google OpenAI 兼容 |
 | Anthropic Claude | Messages、经兼容网关的 Chat/Responses |
-| AWS Bedrock | AWS Converse、AWS 支持的 OpenAI 协议；API Key 或 IAM SigV4 |
+| AWS Bedrock | Converse / ConverseStream、OpenAI 兼容、Mantle Claude Messages；API Key 或 IAM SigV4 |
 
 [完整配置与排错](docs/quickstart.md) · [架构、验证与发布说明](docs/architecture.md) · [已发布版本](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases)
 
@@ -68,7 +85,11 @@ npm run verify
 
 ## English
 
-Version 0.2.3 fixes the `{ result: ... }` envelope passed to Bob's `onStream` callback so intermediate translations can appear before the HTTP request completes. A regression test consumes the same callback structure as Bob. The original name and service configuration are preserved.
+Version 0.2.3 ships as a single `.bobplugin`, with no companion app. Choose a preset in Bob's native model menu, or enter `/models` in the input translation window to fetch the current provider's catalog. Add a keyword, such as `/models gpt`, to filter it. Copy an ID into the existing custom-model setting. The directory uses only the current service's credentials and performs model-list GET requests. Bob's public plugin settings API cannot populate a live dropdown or write back options; one-click live selection is not claimed. Catalog visibility does not guarantee inference access.
+
+Reasoning now includes model-specific minimal, xhigh, max and explicit off mappings. Protocol maintenance adds stable Gemini Interactions, the Claude `2026-10-21` API version with classic Bedrock compatibility, and binary AWS ConverseStream support. See [verified protocol rules and limitations](docs/protocols.md).
+
+The `{ result: ... }` streaming callback envelope is fixed. Markdown inputs use Bob's `originalText` to retain headings, emphasis and indentation; ordinary prose keeps Bob's preprocessing. Inline code and fenced blocks are protected and restored locally. The supplied gradient lightning design is enlarged on an opaque white backplate. The original plugin name and existing service settings are preserved during installation.
 
 Version 0.2.2 restricts legacy thinking-wrapper handling to response prefixes, preserves literal tags inside source documents and code, protects source `<think>` / `<reasoning>` markup across upstream APIs, and restores it locally. Partial wrappers and protection markers do not appear in streaming output, and empty frames are suppressed. Missing protected markup is reported as an API error. The original plugin name and service settings are preserved.
 

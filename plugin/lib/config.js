@@ -5,6 +5,7 @@ var parseIntegerInRange = util.parseIntegerInRange;
 var parseMenuBoolean = util.parseMenuBoolean;
 var parseMenuChoice = util.parseMenuChoice;
 var urls = require('./urls.js');
+var reasoning = require('./reasoning.js');
 var buildBedrockMantleBaseUrl = urls.buildBedrockMantleBaseUrl;
 var buildBedrockRuntimeBaseUrl = urls.buildBedrockRuntimeBaseUrl;
 var buildBedrockRuntimeOpenAiBaseUrl = urls.buildBedrockRuntimeOpenAiBaseUrl;
@@ -22,17 +23,11 @@ var DEFAULT_STREAM_OUTPUT = true;
 var DEFAULT_API_MODE = 'chat_completions';
 var DEFAULT_BEDROCK_REGION = 'us-east-1';
 
-var REASONING_EFFORT_VALUES = {
-    none: true,
-    low: true,
-    medium: true,
-    high: true,
-};
-
 var API_MODE_VALUES = {
     responses: true,
     chat_completions: true,
     gemini_generate_content: true,
+    gemini_interactions: true,
     aws_converse: true,
     anthropic_messages: true,
 };
@@ -75,7 +70,9 @@ function buildRuntimeConfig() {
     }
 
     var baseUrlRaw = getOptionString('baseUrl', DEFAULT_BASE_URL);
-    if (provider === 'bedrock' && authMode === 'aws_sigv4' && apiMode === 'aws_converse' && isDefaultSub2ApiUrl(baseUrlRaw)) {
+    if (provider === 'bedrock' && apiMode === 'anthropic_messages' && isDefaultSub2ApiUrl(baseUrlRaw)) {
+        baseUrlRaw = urls.buildBedrockMantleAnthropicBaseUrl(bedrockRegion);
+    } else if (provider === 'bedrock' && authMode === 'aws_sigv4' && apiMode === 'aws_converse' && isDefaultSub2ApiUrl(baseUrlRaw)) {
         baseUrlRaw = buildBedrockRuntimeBaseUrl(bedrockRegion);
     } else if (provider === 'bedrock' && authMode === 'aws_sigv4' && isDefaultSub2ApiUrl(baseUrlRaw)) {
         baseUrlRaw = buildBedrockRuntimeOpenAiBaseUrl(bedrockRegion);
@@ -90,9 +87,7 @@ function buildRuntimeConfig() {
     if (!baseUrl) {
         return {
             ok: false,
-            error: makeServiceError('param', 'Base URL 格式错误，请填写 http:// 或 https:// 地址。', {
-                baseUrl: baseUrlRaw,
-            }),
+            error: makeServiceError('param', 'Base URL 格式错误，请填写 http:// 或 https:// 地址；不要在地址中嵌入用户名或密码。'),
         };
     }
 
@@ -120,11 +115,8 @@ function buildRuntimeConfig() {
         65536
     );
 
-    var reasoningEffort = parseMenuChoice(
-        'reasoningEffort',
-        DEFAULT_REASONING_EFFORT,
-        REASONING_EFFORT_VALUES
-    );
+    var reasoningEffort = reasoning.normalizeEffort(getOptionString('reasoningEffort', DEFAULT_REASONING_EFFORT));
+    if (!reasoningEffort) return { ok: false, error: makeServiceError('param', '思考强度无效，请重新选择。') };
     var streamOutput = parseMenuBoolean('streamOutput', DEFAULT_STREAM_OUTPUT);
 
     return {

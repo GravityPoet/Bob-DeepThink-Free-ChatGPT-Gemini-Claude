@@ -8,6 +8,33 @@ function buffered(answer, source = 'Translate this technical documentation.') {
     return q.completions[0];
 }
 
+test('Markdown translation uses originalText before Bob strips emphasis and indentation', () => {
+    for (const original of ['# Heading\n\nNormal **important words**.', '*emphasis*', '- Parent\n    - Nested']) {
+        const q = query();
+        q.value.text = 'Bob processed text';
+        q.value.originalText = original;
+        loadPlugin({ streamOutput: 'false' }, { request(r) {
+            assert.ok(r.body.messages[1].content.endsWith(original));
+            r.handler(ok(chat('译文')));
+        } }).translate(q.value);
+        assert.ok(q.completions[0].result);
+        assert.equal(q.value.text, 'Bob processed text');
+    }
+});
+
+test('plain text still uses Bob preprocessing and older Bob queries remain supported', () => {
+    for (const originalText of ['A hyphen-\nated word.', '', undefined]) {
+        const q = query();
+        q.value.text = 'A hyphenated word.';
+        q.value.originalText = originalText;
+        loadPlugin({ streamOutput: 'false' }, { request(r) {
+            assert.ok(r.body.messages[1].content.endsWith(q.value.text));
+            r.handler(ok(chat('译文')));
+        } }).translate(q.value);
+        assert.ok(q.completions[0].result);
+    }
+});
+
 test('Markdown headings, lists, tables, paragraphs and fenced code preserve their source formatting', () => {
     const answer = '# 标题\n\n正文 **加粗** 和 `inline code`。\n\n- 第一项\n  - 子项\n\n| 参数 | 数值 |\n| --- | ---: |\n| XY-Z100 | 1000 |\n\n```js\n  const total = 1000;\n```';
     const p = buffered(answer);

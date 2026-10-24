@@ -2,8 +2,10 @@ var util = require('./util.js');
 var protocol = require('./protocol.js');
 var result = require('./result.js');
 var literalTags = require('./literal-tags.js');
+var interactions = require('./interactions.js');
 
 function requestWithStream(params) {
+    if (params.config.apiMode === 'aws_converse') { requestConverseStream(params); return; }
     var state = { text: '', thinkText: '', buffer: '', dataLines: [], eventName: '', raw: '', events: 0, error: null, pendingBytes: [], ended: false, terminalRequired: false, terminal: false };
     var requestBody = protocol.buildHttpBody(params.config, params.requestBody);
     var endpoint = params.apiEndpoint;
@@ -63,13 +65,80 @@ function requestWithStream(params) {
                     return;
                 }
                 if (!literalTags.complete(parsedFinal.answerText, params.literalTags)) {
-                    params.done({ error: util.makeServiceError('api', '上游没有完整保留原文标记，请重试或更换服务。') }); return;
+                    params.done({ error: util.makeServiceError('api', '上游没有完整保留原文格式，请重试或更换服务。') }); return;
                 }
                 params.done({ result: result.buildTranslateResult(params.sourceLang, params.targetLang, parsedFinal.answerText,
                     result.mergeThinkText(state.thinkText, parsedFinal.thinkText), false, params.literalTags) });
             } catch (error) {
                 params.done({ error: util.makeServiceError('api', '无法处理流式翻译结果。', error.message) });
             }
+        },
+    });
+}
+
+function requestConverseStream(params) {
+    var state = { text: '', thinkText: '', error: null, terminal: false };
+    var endpoint = params.apiEndpoint.replace(/\/converse(?=\?|$)/i, '/converse-stream');
+    var requestBody = protocol.buildHttpBody(params.config, params.requestBody);
+    var rawError = '', format = '';
+    function utf8(bytes) { return decodeChunk({ rawData: { toByteArray: function () { return bytes; } } }, { pendingBytes: [] }, true); }
+    var decoder = require('./eventstream.js').decoder(utf8, function (headers, raw) {
+        if (state.error || params.done.completed) return;
+        var event = util.safeJsonParse(raw);
+        if (!util.isPlainObject(event)) throw new Error('AWS 流式事件不是有效 JSON 对象');
+        var type = headers[':message-type'];
+        if (type === 'exception' || type === 'error') {
+            state.error = util.makeServiceError('api', event.message || headers[':error-message'] || headers[':exception-type'] || 'AWS 流式请求失败'); return;
+        }
+        if (type !== 'event') throw new Error('AWS 流式消息类型无效');
+        var eventType = headers[':event-type'];
+        if (typeof eventType !== 'string' || !eventType) throw new Error('AWS 流式事件类型缺失');
+        if (eventType === 'messageStop') {
+            if (typeof event.stopReason !== 'string' || !event.stopReason) throw new Error('AWS 流式结束原因缺失');
+            state.error = protocol.responseFailure(event);
+            if (event.stopReason === 'tool_use') state.error = util.makeServiceError('api', 'AWS 模型需要工具调用，没有完成翻译。');
+            state.terminal = true;
+        } else if (eventType === 'contentBlockDelta') {
+            if (state.terminal) throw new Error('AWS 在消息结束后继续返回正文');
+            var delta = event.delta || {};
+            if (typeof delta.text === 'string') state.text += delta.text;
+            if (delta.reasoningContent && typeof delta.reasoningContent.text === 'string') state.thinkText += delta.reasoningContent.text;
+            emitStreamResult(params, state);
+        }
+    });
+    var headers = protocol.buildRequestHeaders(params.config, 'POST', endpoint, requestBody.signingPayload, true);
+    headers.Accept = 'application/vnd.amazon.eventstream';
+    $http.streamRequest({ method: 'POST', url: endpoint, header: headers, body: requestBody.body,
+        cancelSignal: params.normalizedQuery.cancelSignal, timeout: Math.max(0.001, (params.deadline-Date.now())/1000),
+        streamHandler: function (chunk) {
+            if (params.done.completed || state.error) return;
+            try {
+                if (!chunk.rawData || typeof chunk.rawData.toByteArray !== 'function') {
+                    format = 'text'; rawError += chunk.text || ''; return;
+                }
+                var bytes = Array.prototype.slice.call(chunk.rawData.toByteArray());
+                if (!format && bytes.length) format = bytes[0] >= 9 && bytes[0] <= 126 ? 'text' : 'binary';
+                if (format === 'text') rawError += utf8(bytes);
+                else decoder.feed(bytes);
+                if (rawError.length > 2097152) throw new Error('AWS 错误响应过大');
+            } catch (error) { state.error = util.makeServiceError('api', '无法解析 AWS 流式结果。', error.message); }
+        },
+        handler: function (resp) {
+            if (params.done.completed) return;
+            var status = util.getStatusCode(resp);
+            if (status && (status < 200 || status >= 300)) {
+                params.done({ error: protocol.parseApiError(util.safeJsonParse(rawError) || resp.data || rawError, status) }); return;
+            }
+            if (!resp || resp.error || !status) { params.done({ error: util.makeServiceError('network', 'AWS 流式连接中断，请重试。') }); return; }
+            try { decoder.finish(); } catch (error) { state.error = util.makeServiceError('network', error.message); }
+            if (state.error) { params.done({ error: state.error }); return; }
+            if (!state.terminal) { params.done({ error: util.makeServiceError('network', 'AWS 流式响应提前结束，译文可能不完整。') }); return; }
+            var parsed = result.splitThoughtAndAnswer(state.text, params.parserSourceText);
+            if (!parsed.answerText || !literalTags.complete(parsed.answerText, params.literalTags)) {
+                params.done({ error: util.makeServiceError('api', 'AWS 没有返回完整翻译，请重试或更换模型。') }); return;
+            }
+            params.done({ result: result.buildTranslateResult(params.sourceLang, params.targetLang, parsed.answerText,
+                result.mergeThinkText(state.thinkText, parsed.thinkText), false, params.literalTags) });
         },
     });
 }
@@ -116,11 +185,17 @@ function dispatch(state, params) {
     }
     state.events += 1;
     state.raw = '';
-    if (!event.type && eventName) event.type = eventName;
+    if (!event.type) event.type = event.event_type || eventName;
     if (/^response\./.test(event.type || '') || event.type === 'message_start' || event.type === 'content_block_delta') state.terminalRequired = true;
     if (event.type === 'response.completed' || event.type === 'message_stop') state.terminal = true;
+    if (/^(?:interaction|step)\./.test(event.type || '')) state.terminalRequired = true;
+    if (event.type === 'interaction.completed') state.terminal = true;
     state.error = protocol.responseFailure(event);
     if (state.error) return;
+    if (/^step\./.test(event.type || '')) {
+        if (interactions.update(event, state)) emitStreamResult(params, state);
+        return;
+    }
     var changed = false;
     var delta = extractStreamDeltaText(event);
     if (delta) { state.text += delta; changed = true; }
@@ -129,7 +204,7 @@ function dispatch(state, params) {
     var snapshot = extractStreamSnapshotText(event);
     if (snapshot !== null && snapshot !== state.text) { state.text = snapshot; changed = true; }
     if (/\.done$|\.completed$/.test(event.type || '')) {
-        var think = protocol.extractStructuredThinkText(event.response || event);
+        var think = protocol.extractStructuredThinkText(event.interaction || event.response || event);
         if (think && think !== state.thinkText) { state.thinkText = think; changed = true; }
     }
     if (changed) emitStreamResult(params, state);
@@ -184,6 +259,7 @@ function extractStreamSnapshotText(event) {
         var text = protocol.extractTranslatedText(event.response);
         return text || null;
     }
+    if (event.interaction) return protocol.extractTranslatedText(event.interaction) || null;
     if (Array.isArray(event.output)) return protocol.extractFromOutputArray(event.output) || null;
     var choice = Array.isArray(event.choices) && event.choices[0];
     if (choice && choice.message) return protocol.normalizeMessageContent(choice.message.content);

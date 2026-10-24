@@ -4,12 +4,55 @@ const { loadPlugin, query, ok, chat, sse, text } = require('./helpers');
 
 function tokens(request) { return [...new Set(JSON.stringify(request.body).match(/XLT_LITERAL_[A-Z0-9]+_\d+__/g) || [])]; }
 
+test('inline code survives upstream rewriting with its backticks and identifier intact', () => {
+    const q = query(); q.value.text = 'Use `inline_code` here.';
+    loadPlugin({streamOutput:'false'}, {request(r) {
+        const ids=tokens(r); assert.equal(ids.length,1);
+        assert.ok(!r.body.messages[1].content.includes('inline_code'));
+        r.handler(ok(chat('在这里使用 '+ids[0]+'。')));
+    }}).translate(q.value);
+    assert.equal(text(q.completions[0].result),'在这里使用 `inline_code`。');
+});
+
+test('code spans use matching delimiter lengths and keep inner markup verbatim', () => {
+    const literal=require('../plugin/lib/literal-tags');
+    for(const source of ['Use ``a ` b`` here.', 'Use `<think>literal</think>` here.', 'Use `first\nsecond` here.']) {
+        const value=literal.protect(source); assert.equal(value.meta.values.length,1);
+        assert.equal(literal.restore(value.text,value.meta,false),source);
+    }
+});
+
+test('escaped, unclosed and cross-paragraph backticks remain ordinary source text', () => {
+    const literal=require('../plugin/lib/literal-tags');
+    for(const source of ['Escaped \\`tick', 'Unclosed `code', '`first\n\nsecond`', '`first\r\n\r\nsecond`']) {
+        const value=literal.protect(source); assert.equal(value.meta,null); assert.equal(value.text,source);
+    }
+});
+
+test('fenced code is restored verbatim instead of being translated by the upstream model', () => {
+    for (const source of [
+        '```js\nfunction total() {\n    return 1000;\n}\n```',
+        '~~~~md\n```html\n<think>Keep literal markup.</think>\n```\n~~~~~',
+        '````md\n```\nnot a closing fence\n`````',
+        '```js\n    const unfinished = 1;',
+    ]) {
+        const q = query(); q.value.text = source;
+        loadPlugin({ streamOutput: 'false' }, { request(r) {
+            const ids = tokens(r);
+            assert.equal(ids.length, 1);
+            assert.ok(!r.body.messages[1].content.includes(source));
+            r.handler(ok(chat('译文\n\n' + ids[0])));
+        } }).translate(q.value);
+        assert.equal(text(q.completions[0].result), '译文\n\n' + source);
+    }
+});
+
 test('literal source tags bypass upstream tag filtering and are restored locally', () => {
     const q=query();q.value.text='```html\n<think>Keep literal markup.</think>\n```';
     loadPlugin({streamOutput:'false'}, {request(r){
         assert.ok(!JSON.stringify(r.body).includes('<think>'));
-        const ids=tokens(r);assert.equal(ids.length,2);
-        r.handler(ok(chat('```html\n'+ids[0]+'Keep literal markup.'+ids[1]+'\n```')));
+        const ids=tokens(r);assert.equal(ids.length,1);
+        r.handler(ok(chat(ids[0])));
     }}).translate(q.value);
     assert.equal(text(q.completions[0].result),q.value.text);
 });
@@ -33,7 +76,7 @@ test('missing protected source tags fail instead of silently losing markup', () 
     const q=query();q.value.text='<reasoning>hello</reasoning>';
     loadPlugin({streamOutput:'false'}, {request(r){r.handler(ok(chat('你好')));}}).translate(q.value);
     assert.equal(q.completions[0].result,undefined);
-    assert.match(q.completions[0].error.message,/原文标记/);
+    assert.match(q.completions[0].error.message,/原文格式/);
 });
 
 test('missing source tags in an otherwise completed stream report an error', () => {

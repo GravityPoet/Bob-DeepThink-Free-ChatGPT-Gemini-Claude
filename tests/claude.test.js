@@ -5,7 +5,7 @@ const options={apiMode:'anthropic_messages',baseUrl:'https://api.anthropic.com/v
 test('Claude native builds Messages with the documented version and API-key headers',()=>{
  const q=query();let r;
  loadPlugin({...options,streamOutput:'false'},{request(request){r=request;r.handler(ok({content:[{type:'text',text:'译文'}],stop_reason:'end_turn'}));}}).translate(q.value);
- assert.equal(r.url,'https://api.anthropic.com/v1/messages');assert.equal(r.header['x-api-key'],'test-key');assert.equal(r.header['anthropic-version'],'2023-06-01');
+ assert.equal(r.url,'https://api.anthropic.com/v1/messages');assert.equal(r.header['x-api-key'],'test-key');assert.equal(r.header['anthropic-version'],'2026-10-21');
  assert.equal(r.body.model,'claude-sonnet-4-6');assert.ok(r.body.system);assert.equal(r.body.messages[0].role,'user');assert.ok(r.body.max_tokens);assert.equal(r.body.reasoning_effort,undefined);
  assert.equal(text(q.completions[0].result),'译文');
 });
@@ -32,4 +32,9 @@ test('Claude stop reasons report truncation and refusal instead of success',()=>
 test('unknown typed string deltas are not mistaken for translated text',()=>{
  const q=query();loadPlugin({}, {streamRequest(r){r.streamHandler({text:sse({type:'response.function_call_arguments.delta',delta:'PRIVATE-TOOL-ARGS'})});r.streamHandler({text:sse({type:'response.output_text.delta',delta:'译文'})});r.streamHandler({text:sse({type:'response.completed',response:{status:'completed'}})});r.handler(ok());}}).translate(q.value);
  assert.equal(text(q.completions[0].result),'译文');
+});
+test('Bedrock Claude through 4.6 keeps its compatible API version',()=>{
+ let request;const q=query();
+ loadPlugin({...options,provider:'bedrock',baseUrl:'https://bedrock-mantle.us-east-1.api.aws/anthropic/v1',streamOutput:'false'}, {request(r){request=r;r.handler(ok({content:[{type:'text',text:'译文'}],stop_reason:'end_turn'}));}}).translate(q.value);
+ assert.equal(request.header['anthropic-version'],'2023-06-01');
 });

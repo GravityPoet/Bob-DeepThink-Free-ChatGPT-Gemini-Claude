@@ -50,6 +50,7 @@
     "apiMode",
     "customModel",
     "streamOutput",
+    "reasoningEffort",
     "maxOutputTokens",
     "requestTimeoutSec"
   ],
@@ -79,6 +80,10 @@
         {
           "title": "Responses",
           "value": "responses"
+        },
+        {
+          "title": "Claude Messages（Mantle）",
+          "value": "anthropic_messages"
         }
       ]
     },

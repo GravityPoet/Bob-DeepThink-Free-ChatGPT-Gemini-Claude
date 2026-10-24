@@ -18,8 +18,9 @@ function endpointMode(url) {
     if (/\/chat\/completions\/?$/i.test(parsed.path)) return 'chat_completions';
     if (/\/responses\/?$/i.test(parsed.path)) return 'responses';
     if (/\/messages\/?$/i.test(parsed.path)) return 'anthropic_messages';
+    if (/\/interactions\/?$/i.test(parsed.path)) return 'gemini_interactions';
     if (/\/models\/[^/?#]+:(?:generatecontent|streamgeneratecontent)\/?$/i.test(parsed.path)) return 'gemini_generate_content';
-    if (/\/model\/[^/?#]+\/converse\/?$/i.test(parsed.path)) return 'aws_converse';
+    if (/\/model\/[^/?#]+\/converse(?:-stream)?\/?$/i.test(parsed.path)) return 'aws_converse';
     return '';
 }
 
@@ -44,13 +45,15 @@ function buildApiEndpoint(baseUrl, apiMode, modelName) {
     if (!parsed.ok) throw new Error('接口地址无效');
     var path = parsed.path.replace(/\/+$/, '');
     if (isCompleteEndpoint(baseUrl)) {
+        if (apiMode === 'aws_converse') path = path.replace(/\/converse-stream$/i, '/converse');
         if (apiMode === 'gemini_generate_content') {
             path = path.replace(/:streamGenerateContent$/i, ':generateContent');
             parsed.query = parsed.query.split('&').filter(function (p) { return !/^alt=sse$/i.test(p); }).join('&');
         }
         return compose(parsed, path);
     }
-    if (apiMode === 'aws_converse') path += '/model/' + encodeURIComponent(modelName) + '/converse';
+    if (apiMode === 'gemini_interactions') path += '/interactions';
+    else if (apiMode === 'aws_converse') path += '/model/' + encodeURIComponent(modelName) + '/converse';
     else if (apiMode === 'gemini_generate_content') path += '/models/' + encodeURIComponent(normalizeGeminiNativeModelName(modelName)) + ':generateContent';
     else path += apiMode === 'anthropic_messages' ? '/messages' : apiMode === 'chat_completions' ? '/chat/completions' : '/responses';
     return compose(parsed, path);
@@ -59,6 +62,7 @@ function buildApiEndpoint(baseUrl, apiMode, modelName) {
 function normalizeGeminiNativeModelName(name) { return String(name || '').trim().replace(/^models\//, ''); }
 function normalizeRegion(raw) { var r = String(raw || '').trim().toLowerCase(); return /^[a-z0-9-]+$/.test(r) ? r : 'us-east-1'; }
 function buildBedrockMantleBaseUrl(region) { return 'https://bedrock-mantle.' + region + '.api.aws/v1'; }
+function buildBedrockMantleAnthropicBaseUrl(region) { return 'https://bedrock-mantle.' + region + '.api.aws/anthropic/v1'; }
 function buildBedrockRuntimeOpenAiBaseUrl(region) { return 'https://bedrock-runtime.' + region + '.amazonaws.com/openai/v1'; }
 function buildBedrockRuntimeBaseUrl(region) { return 'https://bedrock-runtime.' + region + '.amazonaws.com'; }
 function isDefaultSub2ApiUrl(raw) { return !String(raw || '').trim() || /^http:\/\/127\.0\.0\.1:18080(?:\/v1)?\/?$/i.test(raw); }
@@ -68,5 +72,6 @@ module.exports = {
     endpointMode: endpointMode, isCompleteEndpoint: isCompleteEndpoint, isCerebrasBaseUrl: isCerebrasBaseUrl,
     normalizeGeminiNativeModelName: normalizeGeminiNativeModelName, normalizeRegion: normalizeRegion,
     buildBedrockMantleBaseUrl: buildBedrockMantleBaseUrl, buildBedrockRuntimeOpenAiBaseUrl: buildBedrockRuntimeOpenAiBaseUrl,
+    buildBedrockMantleAnthropicBaseUrl: buildBedrockMantleAnthropicBaseUrl,
     buildBedrockRuntimeBaseUrl: buildBedrockRuntimeBaseUrl, isDefaultSub2ApiUrl: isDefaultSub2ApiUrl,
 };

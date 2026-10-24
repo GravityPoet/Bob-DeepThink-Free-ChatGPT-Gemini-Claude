@@ -44,7 +44,8 @@ function buildAwsSigV4Headers(config, method, url, payload, hasJsonBody) {
         signedHeaders +
         '\n' +
         payloadHash;
-    var credentialScope = dateStamp + '/' + config.bedrockRegion + '/bedrock/aws4_request';
+    var serviceName = /^bedrock-mantle\.[a-z0-9-]+\.api\.aws(?::\d+)?$/.test(parsed.host) ? 'bedrock-mantle' : 'bedrock';
+    var credentialScope = dateStamp + '/' + config.bedrockRegion + '/' + serviceName + '/aws4_request';
     var stringToSign =
         'AWS4-HMAC-SHA256\n' +
         amzDate +
@@ -52,7 +53,7 @@ function buildAwsSigV4Headers(config, method, url, payload, hasJsonBody) {
         credentialScope +
         '\n' +
         sha256Hex(utf8Bytes(canonicalRequest));
-    var signingKey = awsSigV4SigningKey(config.awsSecretAccessKey, dateStamp, config.bedrockRegion, 'bedrock');
+    var signingKey = awsSigV4SigningKey(config.awsSecretAccessKey, dateStamp, config.bedrockRegion, serviceName);
     var signature = bytesToHex(hmacSha256Bytes(signingKey, utf8Bytes(stringToSign)));
     var authorization =
         'AWS4-HMAC-SHA256 Credential=' +

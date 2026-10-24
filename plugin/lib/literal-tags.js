@@ -1,19 +1,63 @@
-// Keep source markup out of upstream thinking-tag filters, then restore it locally.
+// Keep verbatim code and reserved source markup out of upstream rewriting.
 var TAGS = /<\s*\/?\s*(?:think|reasoning)(?=[\s/>])(?:[^"'<>]|"[^"]*"|'[^']*')*>/gi;
 
 function protect(text) {
-    TAGS.lastIndex = 0;
-    if (!TAGS.test(text)) return { text: text, meta: null };
     var salt = Math.random().toString(36).slice(2).toUpperCase() || '0';
     var prefix = 'XLT_LITERAL_' + salt + '_';
     while (text.indexOf(prefix) >= 0) { salt += 'X'; prefix = 'XLT_LITERAL_' + salt + '_'; }
     var values = [];
-    TAGS.lastIndex = 0;
-    var protectedText = text.replace(TAGS, function (tag) {
-        values.push(tag);
+    function save(value) {
+        values.push(value);
         return prefix + (values.length - 1) + '__';
-    });
+    }
+    var protectedText = protectCodeBlocks(text, save);
+    protectedText = protectCodeSpans(protectedText, save);
+    TAGS.lastIndex = 0;
+    protectedText = protectedText.replace(TAGS, save);
+    if (!values.length) return { text: text, meta: null };
     return { text: protectedText, meta: { prefix: prefix, values: values, pattern: new RegExp(prefix + '(\\d+)__', 'g') } };
+}
+
+function protectCodeSpans(text, save) {
+    var runs = [], pattern = /`+/g, match;
+    while ((match = pattern.exec(text))) runs.push({ start: match.index, width: match[0].length });
+    var next = Object.create(null), i;
+    for (i = runs.length - 1; i >= 0; i -= 1) {
+        runs[i].closing = next[runs[i].width]; next[runs[i].width] = i;
+    }
+    var output = [], cursor = 0;
+    for (i = 0; i < runs.length; i += 1) {
+        var opening = runs[i], slashes = 0, at = opening.start - 1;
+        while (at >= 0 && text.charAt(at--) === '\\') slashes += 1;
+        if (slashes % 2 || opening.closing === undefined) continue;
+        var closing = runs[opening.closing], end = closing.start + closing.width;
+        var span = text.slice(opening.start, end);
+        if (/\r?\n[ \t]*\r?\n/.test(span)) continue;
+        output.push(text.slice(cursor, opening.start), save(span));
+        cursor = end; i = opening.closing;
+    }
+    output.push(text.slice(cursor));
+    return output.join('');
+}
+
+function protectCodeBlocks(text, save) {
+    var lines = text.split('\n'), output = [], pending = [], fence = '';
+    lines.forEach(function (line) {
+        if (!fence) {
+            var opening = /^[ \t]*(`{3,}|~{3,})([^\r\n]*)\r?$/.exec(line);
+            if (opening && (opening[1].charAt(0) !== '`' || opening[2].indexOf('`') < 0)) {
+                fence = opening[1]; pending = [line];
+            } else output.push(line);
+            return;
+        }
+        pending.push(line);
+        var closing = /^[ \t]*(`+|~+)[ \t]*\r?$/.exec(line);
+        if (closing && closing[1].charAt(0) === fence.charAt(0) && closing[1].length >= fence.length) {
+            output.push(save(pending.join('\n'))); fence = ''; pending = [];
+        }
+    });
+    if (fence) output.push(save(pending.join('\n')));
+    return output.join('\n');
 }
 
 function restore(text, meta, partial) {
