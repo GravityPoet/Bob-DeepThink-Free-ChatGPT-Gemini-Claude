@@ -72,6 +72,7 @@ git push origin main
 
 | 日期 | 版本 | 命令/信号 | 原因 | 修复 |
 | --- | --- | --- | --- | --- |
+| 2026-10-25 | 0.2.4 | legacy 更新源回读：curl 返回 `(35) LibreSSL SSL_connect: SSL_ERROR_SYSCALL`；网页抓取工具返回 `restricted URL` | curl 的 raw 主机 TLS 连接失败，具体网络根因未定；网页工具另有访问限制，不能用它代表源文件状态 | 保留包内实际 URL，改用 urllib 获取后返回 HTTP 200；两个公开 JSON 全文与仓库 0.2.4 一致，identifier、URL、SHA-256 均匹配公开包。区分传输失败与内容验证失败，不修改客户端地址或放宽 TLS 校验 |
 | 2026-10-25 | 0.2.4 | 预发布检查 `assert info['appcast'] == expected_raw_url` 返回 `AssertionError` | 检查器假定使用 `raw.githubusercontent.com`，安装包实际使用可正常重定向的 `github.com/.../raw/main/...`；属于检查假设错误 | 改从包内 `info.json` 直接获取 URL，验证最终 HTTP 200、identifier 与内容；两个真实更新源均通过，不修改已验收的插件包 |
 | 2026-10-25 | 0.2.4 | urllib 公开资产下载返回 `RemoteDisconnected: Remote end closed connection without response` | 重定向后的连接被关闭，具体网络根因未定，资产上传状态和 GitHub digest 正常 | 保持旧更新源，改用系统 curl 有界重试；四个公开资产均返回 200 并通过大小和 SHA-256 检查，三个插件另通过 ZIP、版本和 identifier 校验 |
 | 2026-10-25 | 0.2.3 | 发布后下载校验命令被本机执行器拒绝：`rm -rf style commands are not permitted` | 临时校验脚本使用了 `rm -rf` trap；发布资产本身没有失败或改变 | 改用隔离 `/tmp` 目录，不在命令中使用递归删除；逐个下载并运行 `shasum -a 256 -c`，再回读公开 appcast |
