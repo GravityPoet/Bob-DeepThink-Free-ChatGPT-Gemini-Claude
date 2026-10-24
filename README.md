@@ -4,6 +4,15 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 插件免费；API 账号、模型权限、配额及费用由所选服务商提供。名称中的 Free 不代表所有模型或接口免费。
 
+## 0.2.1 设置精简
+
+- 保留原插件名称与标识符；通用设置从 14 项减为 10 项，供应商、地址、密钥和模型优先。
+- 通用版移出 AWS IAM 凭据和区域字段；AWS API Key 仍使用普通 API Key 输入框。
+- IAM / STS 用户可按需安装 [AWS IAM 专用包](DeepThink-AWS-IAM.bobplugin)，在 Bob 的添加服务菜单选择专用插件。两种插件可以并存。
+- AWS 签名模块仅在实际使用 SigV4 时加载。
+
+> Bob 公开的设置 schema 只有输入框和下拉菜单，没有条件显示或折叠组件，见 [官方说明](https://bobtranslate.com/plugin/quickstart/info.html)。因此采用独立 IAM 设置入口。已有 IAM 用户请先保留原插件并配置专用服务；升级通用版不会自动迁移 IAM 凭据。
+
 ## 0.2.0 升级
 
 - **译文完整性**：修复重复字符被删、完整快照重复拼接、尾帧丢失与 Unicode 分包问题。
@@ -29,7 +38,7 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 [完整配置与排错](docs/quickstart.md) · [架构、验证与发布说明](docs/architecture.md) · [已发布版本](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases)
 
-**更新状态**：仓库源码与直装包为 0.2.0；自动更新源仍指向已发布的 v0.1.24。正式 Release 完成前不会把不存在的下载地址写入更新源。
+**更新状态**：仓库源码与直装包为 0.2.1；自动更新源仍指向已发布的 v0.1.24。正式 Release 完成前不会把不存在的下载地址写入更新源。
 
 ## 开发
 
@@ -46,13 +55,15 @@ npm run verify
 
 ## English
 
+Version 0.2.1 keeps the original plugin name and identity, reduces regular settings from 14 to 10, and moves IAM/STS credentials into an optional AWS IAM plugin. AWS API keys still work in the regular plugin. Install the IAM package only when needed, then add its service in Bob. Existing IAM users should retain their old setup until the dedicated service is configured; credentials are not automatically migrated. Bob's public settings schema has no conditional visibility or collapsible sections. AWS signing code loads only for SigV4 requests.
+
 A free, multi-protocol AI translation plugin for Bob. Connect OpenAI-compatible gateways, native Gemini, native Claude Messages and AWS Bedrock. API accounts, access, quotas and charges are supplied by your provider; the plugin does not include free API credits.
 
 Version 0.2.0 fixes missing/repeated streaming characters, incomplete frames, Unicode boundaries, duplicate callbacks, cancellation retries, endpoint/body mismatches and AWS payload serialization. It adds native Gemini/Claude streaming, Markdown output, explicit truncation and interruption errors, modular runtime code, regression tests and reproducible packages.
 
 Download the standard archive above, or the legacy archive matching your installed identifier. Upgrade without removing your existing services. Configure your endpoint, key, protocol and model, then use **Validate** to perform a small real translation. Validation may incur API charges. See the [quick start](docs/quickstart.md) and [architecture](docs/architecture.md).
 
-Source and direct-install archives are 0.2.0. Automatic update feeds remain on the published v0.1.24 release until a new release is completed. Build and CI do not publish releases.
+Source and direct-install archives are 0.2.1. Automatic update feeds remain on the published v0.1.24 release until a new release is completed. Build and CI do not publish releases.
 
 ## 许可 / License
 

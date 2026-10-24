@@ -14,7 +14,27 @@ NAME = "Bob-DeepThink-Free-ChatGPT-Gemini-Claude"
 LEGACY_ID = "io.github.gravitypoet.ai-vip-0-token-plan"
 
 
-def archive(legacy: bool) -> bytes:
+def manifest(variant: str) -> dict:
+    info = json.loads((ROOT / "plugin/info.json").read_bytes())
+    if variant == "legacy":
+        info["identifier"] = LEGACY_ID
+        info["appcast"] = info["appcast"].replace("appcast.json", "appcast-legacy.json")
+    elif variant == "aws-iam":
+        profile = json.loads((ROOT / "profiles/aws-iam.json").read_bytes())
+        shared = {option["identifier"]: option for option in info["options"]}
+        info.update({key: profile[key] for key in ("identifier", "name", "summary")})
+        info.pop("appcast", None)
+        info["options"] = profile["credentialOptions"]
+        for key in profile["sharedOptions"]:
+            option = shared[key]
+            option.update(profile["overrides"].get(key, {}))
+            info["options"].append(option)
+    elif variant != "standard":
+        raise ValueError(f"未知安装包类型：{variant}")
+    return info
+
+
+def archive(variant: str) -> bytes:
     source = ROOT / "plugin"
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as package:
@@ -24,10 +44,8 @@ def archive(legacy: bool) -> bytes:
             if not path.is_file() or path.name.startswith("."):
                 continue
             data = path.read_bytes()
-            if path.name == "info.json" and legacy:
-                info = json.loads(data)
-                info["identifier"] = LEGACY_ID
-                info["appcast"] = info["appcast"].replace("appcast.json", "appcast-legacy.json")
+            if path.name == "info.json" and variant != "standard":
+                info = manifest(variant)
                 data = (json.dumps(info, ensure_ascii=False, indent=2) + "\n").encode()
             entry = zipfile.ZipInfo(path.relative_to(source).as_posix(), date_time=(2020, 1, 1, 0, 0, 0))
             entry.compress_type = zipfile.ZIP_DEFLATED
@@ -50,9 +68,9 @@ def main() -> None:
     args = parser.parse_args()
     if not args.check:
         args.output_dir.mkdir(parents=True, exist_ok=True)
-    for legacy in (False, True):
-        path = args.output_dir / (NAME + ("-legacy-id" if legacy else "") + ".bobplugin")
-        data = archive(legacy)
+    for variant, filename in (("standard", NAME), ("legacy", NAME + "-legacy-id"), ("aws-iam", "DeepThink-AWS-IAM")):
+        path = args.output_dir / (filename + ".bobplugin")
+        data = archive(variant)
         if args.check:
             if not path.is_file() or path.read_bytes() != data:
                 raise SystemExit(f"安装包与源码不一致：{path.name}；请先运行 npm run build")

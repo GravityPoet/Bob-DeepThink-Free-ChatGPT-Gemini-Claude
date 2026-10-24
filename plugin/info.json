@@ -1,9 +1,9 @@
 {
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "category": "translate",
   "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude",
-  "summary": "多协议 AI 翻译：OpenAI、Gemini、Claude 原生、AWS Bedrock；支持可靠流式、Markdown 与真实请求验证。",
+  "summary": "多供应商 AI 翻译，支持流式与 Markdown。",
   "icon": "favicon1",
   "icons": [
     {
@@ -20,62 +20,33 @@
     {
       "identifier": "provider",
       "type": "menu",
-      "title": "接口类型",
+      "title": "供应商",
       "defaultValue": "openai",
       "menuValues": [
         {
-          "title": "OpenAI 接口 / 兼容接口",
+          "title": "OpenAI / 兼容网关",
           "value": "openai"
         },
         {
-          "title": "Gemini 官方接口",
+          "title": "Google Gemini",
           "value": "gemini"
         },
         {
-          "title": "AWS Bedrock 官方链路",
+          "title": "AWS Bedrock（API Key）",
           "value": "bedrock"
         },
         {
-          "title": "其他完整端点",
+          "title": "自定义接口",
           "value": "custom"
         }
       ],
-      "desc": "先选接口类型，不按模型品牌选。CPA/Sub2API/OpenAI 兼容地址选“OpenAI 接口 / 兼容接口”；Google 官方 /v1beta 选“Gemini 官方接口”；直连 AWS 官方 Bedrock 选“AWS Bedrock 官方链路”，可用 Bedrock API Key 或 AWS IAM SigV4。"
-    },
-    {
-      "identifier": "apiMode",
-      "type": "menu",
-      "title": "接口协议",
-      "defaultValue": "chat_completions",
-      "menuValues": [
-        {
-          "title": "Chat Completions（兼容接口）",
-          "value": "chat_completions"
-        },
-        {
-          "title": "Responses API",
-          "value": "responses"
-        },
-        {
-          "title": "Gemini Native（官方 /v1beta）",
-          "value": "gemini_generate_content"
-        },
-        {
-          "title": "AWS Converse（Claude 官方）",
-          "value": "aws_converse"
-        },
-        {
-          "title": "Anthropic Messages（Claude 原生）",
-          "value": "anthropic_messages"
-        }
-      ],
-      "desc": "完整端点自动识别协议；根地址按本项选择。支持 Chat Completions、Responses、Gemini Native、Claude Messages 和 AWS Converse。"
+      "desc": "兼容网关选“OpenAI / 兼容网关”。"
     },
     {
       "identifier": "baseUrl",
       "type": "text",
       "title": "接口地址",
-      "desc": "支持根地址或完整端点，保留代理路径和查询参数。Claude 原生：https://api.anthropic.com/v1/messages；OpenAI：https://api.openai.com/v1；Gemini：https://generativelanguage.googleapis.com/v1beta。",
+      "desc": "支持根地址或完整端点。",
       "defaultValue": "http://127.0.0.1:18080/v1",
       "textConfig": {
         "placeholderText": "https://api.example.com/v1",
@@ -85,40 +56,10 @@
     {
       "identifier": "apiKey",
       "type": "text",
-      "title": "API Key（网关 / Bedrock API Key）",
-      "desc": "CPA、Sub2API、OpenAI 兼容网关、Mantle/Bearer 路线，以及 Amazon Bedrock API Key 都填这里。若使用 AWS IAM Access Key ID / Secret Access Key，则填下面两个 AWS 密钥。",
+      "title": "API Key",
+      "desc": "填写所选供应商的密钥。",
       "textConfig": {
-        "placeholderText": "sk-... 或 ABSK...",
-        "type": "secure"
-      }
-    },
-    {
-      "identifier": "awsAccessKeyId",
-      "type": "text",
-      "title": "AWS Access Key ID（仅 AWS Bedrock）",
-      "desc": "使用 AWS IAM SigV4 / AWS Converse 调 Claude 时填写。若使用 Amazon Bedrock API Key 调 OpenAI 模型，则不用填。",
-      "textConfig": {
-        "placeholderText": "AKIA...",
-        "type": "secure"
-      }
-    },
-    {
-      "identifier": "awsSecretAccessKey",
-      "type": "text",
-      "title": "AWS Secret Access Key（仅 AWS Bedrock）",
-      "desc": "使用 AWS IAM SigV4 / AWS Converse 调 Claude 时填写。若使用 Amazon Bedrock API Key 调 OpenAI 模型，则不用填。",
-      "textConfig": {
-        "placeholderText": "xxxxxxxx",
-        "type": "secure"
-      }
-    },
-    {
-      "identifier": "awsSessionToken",
-      "type": "text",
-      "title": "AWS Session Token（可选）",
-      "desc": "使用 STS 临时凭证时填写；长期 IAM Access Key 或 Amazon Bedrock API Key 留空。",
-      "textConfig": {
-        "placeholderText": "可选",
+        "placeholderText": "API Key",
         "type": "secure"
       }
     },
@@ -173,17 +114,46 @@
           "value": "custom"
         }
       ],
-      "desc": "选择预设模型；没有就选“自定义模型”，再在下一项填写真实模型名。"
+      "desc": "列表没有时选择“自定义模型”。"
     },
     {
       "identifier": "customModel",
       "type": "text",
-      "title": "自定义模型名",
-      "desc": "当“模型”选择自定义模型时填写，例如 global.anthropic.claude-sonnet-4-6、openai.gpt-oss-20b-1:0、gemini-3.5-flash-low。",
+      "title": "自定义模型",
+      "desc": "仅选择“自定义模型”时填写。",
       "textConfig": {
-        "placeholderText": "例如: global.anthropic.claude-sonnet-4-6",
+        "placeholderText": "服务商提供的模型名",
         "type": "visible"
       }
+    },
+    {
+      "identifier": "apiMode",
+      "type": "menu",
+      "title": "接口协议",
+      "defaultValue": "chat_completions",
+      "menuValues": [
+        {
+          "title": "Chat Completions",
+          "value": "chat_completions"
+        },
+        {
+          "title": "Responses",
+          "value": "responses"
+        },
+        {
+          "title": "Gemini Native",
+          "value": "gemini_generate_content"
+        },
+        {
+          "title": "AWS Converse",
+          "value": "aws_converse"
+        },
+        {
+          "title": "Claude Messages",
+          "value": "anthropic_messages"
+        }
+      ],
+      "desc": "完整端点自动识别；根地址按本项选择。"
     },
     {
       "identifier": "streamOutput",
@@ -200,12 +170,12 @@
           "value": "false"
         }
       ],
-      "desc": "支持 OpenAI、Gemini 原生与 Claude 原生流式。仅空流成功结束时回退一次；取消、网络错误、截断或服务端错误不会重发。AWS Converse 使用非流式。"
+      "desc": "逐步显示译文。"
     },
     {
       "identifier": "reasoningEffort",
       "type": "menu",
-      "title": "高级：思考强度",
+      "title": "思考强度",
       "defaultValue": "none",
       "menuValues": [
         {
@@ -225,14 +195,14 @@
           "value": "high"
         }
       ],
-      "desc": "“无”不传参数。Responses 与 Chat Completions 按各自协议传递思考强度；Gemini/Claude 原生与 AWS Converse 不传。"
+      "desc": "默认不传；仅 Chat / Responses 适用。"
     },
     {
       "identifier": "maxOutputTokens",
       "type": "text",
-      "title": "高级：最大输出 Token",
+      "title": "输出上限",
       "defaultValue": "4096",
-      "desc": "范围 64-65536，需服务商和模型支持。输出被截断时提高此值、降低思考强度或缩短原文。",
+      "desc": "64–65536 Token，需模型支持。",
       "textConfig": {
         "placeholderText": "4096",
         "type": "visible"
@@ -241,22 +211,11 @@
     {
       "identifier": "requestTimeoutSec",
       "type": "text",
-      "title": "高级：请求超时(秒)",
+      "title": "超时（秒）",
       "defaultValue": "90",
-      "desc": "范围 10-300 秒。流式及一次空流回退共用此预算；为 Bob 完成回调预留 5 秒，实际请求最多 295 秒。",
+      "desc": "10–300 秒，包含一次空流回退。",
       "textConfig": {
         "placeholderText": "90",
-        "type": "visible"
-      }
-    },
-    {
-      "identifier": "bedrockRegion",
-      "type": "text",
-      "title": "AWS Region（仅 AWS Bedrock）",
-      "defaultValue": "us-east-1",
-      "desc": "AWS Bedrock 官方链路使用，例如 us-east-1。其他接口忽略。",
-      "textConfig": {
-        "placeholderText": "us-east-1",
         "type": "visible"
       }
     }

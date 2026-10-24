@@ -14,6 +14,7 @@ function loadPlugin(options = {}, http = {}, globals = {}) {
     const cache = new Map();
     function load(file) {
         if (cache.has(file)) return cache.get(file).exports;
+        if (typeof globals.__onModuleLoad === 'function') globals.__onModuleLoad(file);
         const module = { exports: {} };
         cache.set(file, module);
         const source = fs.readFileSync(file, 'utf8');

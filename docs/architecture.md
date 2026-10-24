@@ -24,12 +24,12 @@ flowchart TD
 - `config.js` / `urls.js`：保存值保持不变；完整端点决定有效协议；路径与 query 分开处理。根地址按用户选定协议补齐路径。
 - `protocol.js`：OpenAI Chat/Responses、Gemini Native、Claude Messages、AWS Converse 请求与响应；完成、拒绝、过滤和截断状态。
 - `stream.js`：跨网络包的 UTF-8 解码、SSE 多行事件与尾帧、delta 逐字追加、完整快照替换、独立的每请求状态。
-- `aws.js`：无依赖的 SigV4/SHA-256/HMAC；通过 `$data.fromUTF8` 发送签名原始字节。
+- `aws.js`：仅在 SigV4 请求时按需加载，无依赖的 SigV4/SHA-256/HMAC；通过 `$data.fromUTF8` 发送签名原始字节。
 - `result.js` / `languages.js` / `util.js`：语言、结果格式、思考区、配置读取与脱敏错误。
 
 ## 兼容与恢复
 
-1. 保留已有插件 identifier、所有旧选项 identifier、模型选择与服务配置；普通包和 legacy 包只在 identifier 与 appcast 上不同。
+1. 保留已有插件 identifier、所有旧选项 identifier、模型选择与服务配置；普通包和 legacy 包只在 identifier 与 appcast 上不同。AWS IAM 专用包使用独立 identifier，通过 `$info.identifier` 选择专用配置默认值。
 2. Bob 1.21+ 同时收到 `content: {format: 'markdown', text}`；旧版读取单元素 `toParagraphs`，避免逐行 trim 破坏缩进与空行。思考区需要 Bob 1.15+，更早版本只显示正文。
 3. 现代 `query.onCompletion` 优先，只有没有现代回调时才使用旧 completion，绝不同时调用。
 4. 取消后忽略所有迟到帧与回调，释放本次订阅。不会移除 Bob 或其他插件的订阅。
@@ -53,7 +53,7 @@ Node.js 20+、Python 3.9+，无需 `npm install`。测试使用 Node 内置 test
 
 ## 发布边界
 
-源码与本地安装包版本为 0.2.0。`appcast*.json` 仍指向已有的 v0.1.24 Release，直到实际完成新版本发布后再更新。构建命令不创建 tag、Release 或改更新源。发布时应先上传两个对应安装包，验证下载及 SHA-256，再更新各自 appcast；legacy identifier 不应改变。
+源码与本地安装包版本为 0.2.1。`appcast*.json` 仍指向已有的 v0.1.24 Release，直到实际完成新版本发布后再更新。构建命令不创建 tag、Release 或改更新源。发布时应先上传两个对应安装包，验证下载及 SHA-256，再更新各自 appcast；legacy identifier 不应改变。
 
 ## English
 
@@ -72,3 +72,15 @@ Build and verification require Node 20+ and Python 3.9+, with no package install
 - [AWS Converse](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html)
 
 流式重复字符的原始复现由 [PR #1](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/pull/1) 提供；本次基于该问题扩展了分包、生命周期与多协议回归。
+
+## 设置布局（0.2.1）
+
+Bob 当前公开的 `info.json` schema 只列出 `text` 与 `menu`，未提供折叠组或条件显示。`isKeyOption` 只能切换默认名称/图标，不能隐藏其他选项。采用原生设置与独立 IAM 插件，无自定义 Web UI 或常驻配置进程。
+
+- 通用版：14 项减为 10 项；描述总字数从 1230 降至 163；保持原插件名称和 identifier，不改服务昵称。
+- 供应商、地址、密钥、模型排在前面；协议、流式、思考与预算在后面。
+- `profiles/aws-iam.json` 定义专用 IAM 字段与共享字段覆盖，构建时生成独立 manifest；同一份运行代码以 `$info.identifier` 识别配置。
+- IAM 专用包不使用普通插件的 appcast，避免更新成错误身份；当前尚未发布独立更新源。
+- 旧 IAM 配置仍兼容读取，但通用界面不再编辑这些字段。其他机器升级前，应保留旧服务、配置并验证专用服务；本轮仅验证了当前本机无 IAM 的 8 个服务完整保留，不宣称自动迁移 IAM。
+
+本轮设计参考 Apple 模板的信息层级与简短说明，实际控件、间距、字体和配色均由 Bob 原生设置控制。官网与最新插件 schema 为实现约束；参考了当前同类插件的供应商/协议配置结构，未复制其实现。品牌社媒变化与插件原生设置无关，未据此改变名称或品牌。

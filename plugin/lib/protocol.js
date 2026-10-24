@@ -4,8 +4,6 @@ var isPlainObject = util.isPlainObject;
 var makeServiceError = util.makeServiceError;
 var urls = require('./urls.js');
 var isCerebrasBaseUrl = urls.isCerebrasBaseUrl;
-var aws = require('./aws.js');
-var buildAwsSigV4Headers = aws.buildAwsSigV4Headers;
 var result = require('./result.js');
 var cleanInlineText = result.cleanInlineText;
 var mergeThinkText = result.mergeThinkText;
@@ -168,7 +166,7 @@ function buildHttpBody(config, requestBody) {
 
 function buildRequestHeaders(config, method, url, payload, hasJsonBody) {
     if (config.authMode === 'aws_sigv4') {
-        return buildAwsSigV4Headers(config, method, url, payload || '', hasJsonBody);
+        return require('./aws.js').buildAwsSigV4Headers(config, method, url, payload || '', hasJsonBody);
     }
 
     var headers = {};

@@ -1,6 +1,6 @@
 {
   "name": "bob-deepthink",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "Bob 多协议 AI 翻译插件的无依赖开发工具",
   "scripts": {
@@ -9,5 +9,7 @@
     "build": "python3 scripts/build.py",
     "verify": "npm run check && npm test && python3 scripts/build.py --check"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

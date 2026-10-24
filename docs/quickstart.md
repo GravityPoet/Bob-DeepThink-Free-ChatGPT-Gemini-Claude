@@ -2,6 +2,12 @@
 
 ## 中文
 
+### 选择安装包
+
+- **通用版**：常见 OpenAI 兼容网关、Google、Claude，以及 AWS API Key。原插件名称与标识符保持不变。
+- **AWS IAM 专用版**：仅使用 Access Key ID / Secret Access Key / STS 时安装 `DeepThink-AWS-IAM.bobplugin`；安装后在 Bob 添加专用服务，区域与凭据在该服务里设置。普通服务不显示这些字段。
+- 原有 IAM 配置需要在专用服务中单独设置；请保留旧服务，确认新服务可用后再调整。当前本机的 8 个原服务都未使用 IAM，升级前后已逐项核对配置。
+
 1. 双击 `.bobplugin` 安装；普通用户选标准包，已使用 `io.github.gravitypoet.ai-vip-0-token-plan` 的旧用户选 legacy 包。
 2. Bob → 偏好设置 → 服务 → 文本翻译，添加本插件。升级已有插件时会保留服务配置。
 3. 填写接口地址、对应服务商 Key、模型与协议。模型名以服务商实际提供的为准，不存在的模型不能通过改协议解决。
@@ -35,9 +41,11 @@
 - **只有思考、没有正文**：模型可能耗尽输出预算；调整 Token 或思考强度后重试。
 - **Markdown**：Bob 1.21+ 且开启 Markdown 渲染时显示标题、列表和代码；旧版本保留原文格式的纯文本。
 
-AWS IAM 需成对填写 Access Key ID 与 Secret Access Key；临时凭据另填 Session Token，Region 需与目标端点一致。其他接口忽略 AWS 字段。Google 官方原生使用 `x-goog-api-key`，Gemini 网关保留 Bearer 兼容；Claude 原生使用 `x-api-key` 和 `anthropic-version: 2023-06-01`。
+AWS IAM 专用服务需成对填写 Access Key ID 与 Secret Access Key；临时凭据另填 Session Token，Region 需与目标端点一致。专用服务留空端点时按区域生成；模型填写 Bedrock 实际模型或推理配置 ID。通用服务的 AWS API Key 路线直接填写完整区域端点。Google 官方原生使用 `x-goog-api-key`，Gemini 网关保留 Bearer 兼容；Claude 原生使用 `x-api-key` 和 `anthropic-version: 2023-06-01`。
 
 ## English
+
+The regular package has no IAM/STS credential fields. AWS API keys continue to use its standard API Key field. For IAM signing, install the optional `DeepThink-AWS-IAM.bobplugin` and add its dedicated service in Bob. Region and IAM credentials live there. Both plugins can coexist. Preserve an existing IAM service until the new dedicated service is configured and verified.
 
 Install the standard `.bobplugin`, or the legacy package if your existing plugin uses the legacy identifier. Add the plugin in Bob's translation services, enter your endpoint, API key, model and protocol, then click **Validate**. Validation performs a small real translation and may incur API charges. Existing service settings are preserved during upgrades.
 

@@ -1,0 +1,90 @@
+{
+  "identifier": "io.github.gravitypoet.bobdeepthink.awsiam",
+  "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude · AWS IAM",
+  "summary": "AWS IAM / STS 专用翻译服务。",
+  "credentialOptions": [
+    {
+      "identifier": "bedrockRegion",
+      "type": "text",
+      "title": "AWS 区域",
+      "defaultValue": "us-east-1",
+      "desc": "与模型和端点所在区域一致。",
+      "textConfig": {
+        "placeholderText": "us-east-1",
+        "type": "visible"
+      }
+    },
+    {
+      "identifier": "awsAccessKeyId",
+      "type": "text",
+      "title": "Access Key ID",
+      "desc": "AWS IAM 访问密钥 ID。",
+      "textConfig": {
+        "placeholderText": "AKIA...",
+        "type": "secure"
+      }
+    },
+    {
+      "identifier": "awsSecretAccessKey",
+      "type": "text",
+      "title": "Secret Access Key",
+      "desc": "与 Access Key ID 配对的密钥。",
+      "textConfig": {
+        "placeholderText": "xxxxxxxx",
+        "type": "secure"
+      }
+    },
+    {
+      "identifier": "awsSessionToken",
+      "type": "text",
+      "title": "Session Token（可选）",
+      "desc": "仅 STS 临时凭据需要。",
+      "textConfig": {
+        "placeholderText": "可选",
+        "type": "secure"
+      }
+    }
+  ],
+  "sharedOptions": [
+    "baseUrl",
+    "apiMode",
+    "customModel",
+    "streamOutput",
+    "maxOutputTokens",
+    "requestTimeoutSec"
+  ],
+  "overrides": {
+    "baseUrl": {
+      "title": "端点（可选）",
+      "defaultValue": "",
+      "desc": "留空时按所选区域生成 Bedrock 端点。",
+      "textConfig": {
+        "type": "visible",
+        "placeholderText": "https://bedrock-runtime.us-east-1.amazonaws.com"
+      }
+    },
+    "apiMode": {
+      "title": "AWS 接口",
+      "defaultValue": "aws_converse",
+      "desc": "按 AWS 模型支持的协议选择。",
+      "menuValues": [
+        {
+          "title": "Converse",
+          "value": "aws_converse"
+        },
+        {
+          "title": "Chat Completions",
+          "value": "chat_completions"
+        },
+        {
+          "title": "Responses",
+          "value": "responses"
+        }
+      ]
+    },
+    "customModel": {
+      "title": "Bedrock 模型 ID",
+      "desc": "填写该区域与账号可访问的模型 ID。"
+    }
+  }
+}

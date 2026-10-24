@@ -38,18 +38,23 @@ var API_MODE_VALUES = {
 };
 
 function buildRuntimeConfig() {
+    var awsIamProfile = isAwsIamProfile();
     var apiKey = getOptionString('apiKey', '');
-    var provider = getOptionString('provider', 'openai');
+    var provider = awsIamProfile ? 'bedrock' : getOptionString('provider', 'openai');
     if (provider !== 'openai' && provider !== 'gemini' && provider !== 'bedrock' && provider !== 'custom') {
         provider = 'custom';
     }
-    var apiMode = parseMenuChoice('apiMode', DEFAULT_API_MODE, API_MODE_VALUES);
+    var apiMode = parseMenuChoice('apiMode', awsIamProfile ? 'aws_converse' : DEFAULT_API_MODE, API_MODE_VALUES);
     var bedrockRegion = normalizeRegion(getOptionString('bedrockRegion', DEFAULT_BEDROCK_REGION));
     var awsAccessKeyId = getOptionString('awsAccessKeyId', '');
     var awsSecretAccessKey = getOptionString('awsSecretAccessKey', '');
     var awsSessionToken = getOptionString('awsSessionToken', '');
     var hasAnyAwsCredential = !!(awsAccessKeyId || awsSecretAccessKey || awsSessionToken);
     var authMode = 'bearer';
+
+    if (awsIamProfile && !hasAnyAwsCredential) {
+        return { ok: false, error: makeServiceError('secretKey', '请填写 AWS Access Key ID 和 Secret Access Key。') };
+    }
 
     if (provider === 'bedrock' && hasAnyAwsCredential) {
         if (!awsAccessKeyId || !awsSecretAccessKey) {
@@ -141,7 +146,7 @@ function buildRuntimeConfig() {
 }
 
 function resolveModel() {
-    var selectedModel = getOptionString('model', 'gpt-5.2');
+    var selectedModel = getOptionString('model', isAwsIamProfile() ? 'custom' : 'gpt-5.2');
 
     if (selectedModel === 'custom') {
         var customModel = getOptionString('customModel', '');
@@ -161,6 +166,10 @@ function resolveModel() {
         ok: true,
         name: selectedModel,
     };
+}
+
+function isAwsIamProfile() {
+    return typeof $info === 'object' && $info !== null && $info.identifier === 'io.github.gravitypoet.bobdeepthink.awsiam';
 }
 
 module.exports = {
