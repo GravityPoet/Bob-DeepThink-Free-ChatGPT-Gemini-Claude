@@ -4,6 +4,12 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 插件免费；API 账号、模型权限、配额及费用由所选服务商提供。名称中的 Free 不代表所有模型或接口免费。
 
+## 0.2.4 可调翻译温度
+
+- 在服务设置中新增“翻译温度”：留空跟随模型，支持时可填写小数或 `0`；标准版、legacy 版与 AWS IAM 版均提供。
+- 按六种协议发送原生温度字段，流式输出、空流回退与“验证”使用相同设置。
+- 按模型、接口版本及思考状态检查兼容性。已知不支持、已弃用或越界时在请求前提示修正，不静默忽略温度或关闭思考。[兼容规则](docs/protocols.md#翻译温度)
+
 ## 0.2.3 模型选择、协议维护与显示修复
 
 - **单插件模型目录**：常用模型在 Bob 原生下拉中选择；在输入翻译中输入 `/models` 查询服务商目录，输入 `/models 关键词` 筛选。无需另外安装 App 或授权读取 Bob 配置。
@@ -68,7 +74,7 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 [完整配置与排错](docs/quickstart.md) · [架构、验证与发布说明](docs/architecture.md) · [已发布版本](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases)
 
-**更新状态**：仓库源码与直装包为 0.2.3；标准版与 legacy 版自动更新源已指向 GitHub Release `v0.2.3`。AWS IAM 专用包需要手动安装更新。
+**更新状态**：仓库源码与直装包为 0.2.4；标准版与 legacy 版自动更新源仍指向已发布的 GitHub Release `v0.2.3`。AWS IAM 专用包需要手动安装更新。
 
 ## 开发
 
@@ -84,6 +90,8 @@ npm run verify
 `plugin/main.js` 只保留 Bob 入口；`plugin/lib/` 按配置、协议、流式、签名与结果分工。构建时递归打包全部模块，`--check` 确保安装包对应当前源码。运行环境仍是 Bob JavaScriptCore，不依赖 Node 或浏览器 API。
 
 ## English
+
+Version 0.2.4 adds an optional translation temperature field to all three packages. Leave it blank to use the upstream default, or enter a number (including zero) when supported. Native fields are mapped across all six protocols, including streaming, fallback and validation. Known unsupported, deprecated or conflicting combinations return an actionable error before inference; the plugin does not silently ignore the selection, clamp it or disable reasoning. See [compatibility rules](docs/protocols.md#翻译温度).
 
 Version 0.2.3 ships as a single `.bobplugin`, with no companion app. Choose a preset in Bob's native model menu, or enter `/models` in the input translation window to fetch the current provider's catalog. Add a keyword, such as `/models gpt`, to filter it. Copy an ID into the existing custom-model setting. The directory uses only the current service's credentials and performs model-list GET requests. Bob's public plugin settings API cannot populate a live dropdown or write back options; one-click live selection is not claimed. Catalog visibility does not guarantee inference access.
 
@@ -101,7 +109,7 @@ Version 0.2.0 fixes missing/repeated streaming characters, incomplete frames, Un
 
 Download the standard archive above, or the legacy archive matching your installed identifier. Upgrade without removing your existing services. Configure your endpoint, key, protocol and model, then use **Validate** to perform a small real translation. Validation may incur API charges. See the [quick start](docs/quickstart.md) and [architecture](docs/architecture.md).
 
-Source and direct-install archives are 0.2.3. Automatic update feeds remain on the published v0.1.24 release until a new release is completed. Build and CI do not publish releases.
+Source and direct-install archives are 0.2.4. Automatic update feeds remain on the published v0.2.3 release until a new release is completed. Build and CI do not publish releases.
 
 ## 许可 / License
 

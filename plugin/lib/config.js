@@ -133,6 +133,7 @@ function buildRuntimeConfig() {
         timeoutSec: timeoutSec,
         maxOutputTokens: maxOutputTokens,
         reasoningEffort: reasoningEffort,
+        translationTemperature: getOptionString('translationTemperature', ''),
         streamOutput: streamOutput,
     };
 }

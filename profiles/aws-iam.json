@@ -51,6 +51,7 @@
     "customModel",
     "streamOutput",
     "reasoningEffort",
+    "translationTemperature",
     "maxOutputTokens",
     "requestTimeoutSec"
   ],

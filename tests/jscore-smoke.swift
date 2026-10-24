@@ -43,7 +43,24 @@ $http.request=function(r){if(r.method!=='POST'||r.body.model!=='gpt-5.2')throw n
 run('Hello again',function(p){if(!p.result||p.result.content.text!=='恢复翻译')throw new Error('translation after directory');});
 var bytes='123456789'.split('').map(function(c){return c.charCodeAt(0);});
 if(load('lib/eventstream.js').crc32(bytes)!==0xcbf43926)throw new Error('CRC32');successes++;
-if(successes!==11)throw new Error('missing results '+successes);
+$option.model='custom';$option.customModel='gpt-4.1';$option.translationTemperature='0';
+$http.request=function(r){if(r.body.temperature!==0)throw new Error('zero temperature');r.handler({response:{statusCode:200},data:{output_text:'零温度'}});};
+run('Hello',function(p){if(!p.result)throw new Error('temperature chat');});
+$option.customModel='gemini-2.5-flash';$option.apiMode='gemini_generate_content';$option.reasoningEffort='low';$option.translationTemperature='.3';
+$http.request=function(r){var c=r.body.generationConfig;if(c.temperature!==.3||c.maxOutputTokens!==4096||c.thinkingConfig.thinkingBudget!==1024)throw new Error('temperature Gemini config');r.handler({response:{statusCode:200},data:{output_text:'原生温度'}});};
+run('Hello',function(p){if(!p.result)throw new Error('temperature Gemini');});
+$option.apiMode='gemini_interactions';
+$http.request=function(r){var c=r.body.generation_config;if(c.temperature!==.3||c.thinking_level!=='low')throw new Error('temperature interactions config');r.handler({response:{statusCode:200},data:{output_text:'原生温度'}});};
+run('Hello',function(p){if(!p.result)throw new Error('temperature interactions');});
+$option.apiMode='chat_completions';$option.customModel='gpt-6-astra';
+$http.request=function(){throw new Error('unsupported temperature sent');};
+run('Hello',function(p){if(!p.error||p.error.type!=='param')throw new Error('temperature GPT restriction');});
+$option.apiMode='anthropic_messages';$option.customModel='claude-sonnet-4-6';$option.reasoningEffort='none';
+run('Hello',function(p){if(!p.error||p.error.type!=='param')throw new Error('temperature API version restriction');});
+$option.apiMode='aws_converse';$option.customModel='amazon.nova-pro-v1:0';$option.translationTemperature='.5';
+$http.request=function(r){if(r.body.inferenceConfig.temperature!==.5)throw new Error('temperature Converse config');r.handler({response:{statusCode:200},data:{output_text:'原生温度'}});};
+run('Hello',function(p){if(!p.result)throw new Error('temperature Converse');});
+if(successes!==17)throw new Error('missing results '+successes);
 """#)
 if failed { exit(1) }
-print("JavaScriptCore 检查通过：6 种缓冲协议、真实回调结构、行内代码、纯插件目录、目录后翻译与 CRC，共 11 条路径。")
+print("JavaScriptCore 检查通过：6 种缓冲协议、回调、格式、目录、CRC，以及温度参数与兼容性，共 17 条路径。")

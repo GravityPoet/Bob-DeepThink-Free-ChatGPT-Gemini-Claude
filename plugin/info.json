@@ -1,6 +1,6 @@
 {
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "category": "translate",
   "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude",
   "summary": "多供应商 AI 翻译，支持流式与 Markdown。",
@@ -268,6 +268,17 @@
         }
       ],
       "desc": "按模型支持选择；不兼容的档位会在发送请求前明确提示。"
+    },
+    {
+      "identifier": "translationTemperature",
+      "type": "text",
+      "title": "翻译温度",
+      "defaultValue": "",
+      "desc": "留空跟随模型；支持时填写 0–2，越低通常越稳定。Claude / AWS 范围 0–1；部分模型不支持，冲突会提示。",
+      "textConfig": {
+        "placeholderText": "留空跟随模型，例如 0.2",
+        "type": "visible"
+      }
     },
     {
       "identifier": "maxOutputTokens",

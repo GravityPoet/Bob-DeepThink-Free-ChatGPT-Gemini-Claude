@@ -73,6 +73,7 @@ function runTranslation(query, completion, validation) {
                 (protectedInput.meta ? ' Each XLT_LITERAL_ identifier represents verbatim content. Copy each identifier exactly once at its original position; do not wrap it in backticks or alter surrounding newlines.' : ''),
             userPrompt: 'Translate from ' + languages.languageName(sourceLang) + ' to ' + languages.languageName(targetLang) + ':\n\n' + protectedInput.text,
             maxOutputTokens: config.maxOutputTokens,
+            translationTemperature: config.translationTemperature, baseUrl: config.baseUrl,
             provider: config.provider, reasoningEffort: config.reasoningEffort,
             reasoningPlan: reasoningPlan,
         });
@@ -94,7 +95,7 @@ function runTranslation(query, completion, validation) {
             requestWithoutStream(params);
         }
     } catch (error) {
-        done({ error: util.makeServiceError('network', '翻译请求失败，请检查接口配置或网络。', error.message || String(error)) });
+        done({ error: error.serviceError || util.makeServiceError('network', '翻译请求失败，请检查接口配置或网络。', error.message || String(error)) });
     }
 }
 

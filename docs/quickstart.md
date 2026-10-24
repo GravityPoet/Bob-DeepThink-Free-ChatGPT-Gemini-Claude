@@ -41,6 +41,7 @@ OpenAI / 兼容网关使用 `/models`，Claude 和 Gemini 自动分页。AWS Man
 
 - **流式输出**：OpenAI、Gemini Interactions / generateContent、Claude Messages 与 AWS ConverseStream 均有对应路径。SSE 成功空流最多重试一次，可能产生第二次 API 调用；AWS 二进制流不自动重发。
 - **思考强度**：“跟随模型”保留旧 `none` 的含义，通常不传参数；显式“关闭思考”独立映射。原生协议按模型发送 effort、thinking level 或思考预算。已知不支持的档位在发请求前报错，未知兼容模型以网关实际支持为准。
+- **翻译温度**：留空跟随模型；支持时可填 `0`、`0.2` 等 0–2 之间的小数，Claude / AWS Converse 范围为 0–1。温度和思考强度独立；部分 GPT 需明确关闭思考，新 Claude API、部分新 Gemini 不接受自定义温度。不兼容时按提示调整，留空可恢复原行为。[完整兼容规则](protocols.md#翻译温度)
 - **最大输出 Token**：新服务默认 4096，范围 64–65536；现有值保持不变，实际需服务商与模型支持。
 - **截断**：明确显示失败，避免把半篇译文当成功。提高 Token 上限、降低思考强度或缩短原文。
 - **超时**：范围 10–300 秒；流式和回退共享预算。为 Bob 回调预留 5 秒，单次实际请求最多 295 秒；验证请求最多 30 秒。
@@ -61,6 +62,8 @@ The regular package has no IAM/STS credential fields. AWS API keys continue to u
 Install the standard `.bobplugin`, or the legacy package if your existing plugin uses the legacy identifier. Add the plugin in Bob's translation services, enter your endpoint, API key, model and protocol, then click **Validate**. Validation performs a small real translation and may incur API charges. Existing service settings are preserved during upgrades.
 
 Complete endpoints select the matching request format automatically. Root endpoints follow the selected protocol. OpenAI Chat/Responses, Gemini Interactions/generateContent, Claude Messages and AWS ConverseStream have protocol-specific streaming paths. Reasoning levels and wire fields depend on the model. Existing token limits stay unchanged; new services default to 4096. Truncation, cancellation and API failures are explicit. Empty successful SSE streams may retry once within the original deadline; binary AWS streams do not automatically retry.
+
+Translation temperature is optional: blank preserves the model default; supported values range from 0 to 2, narrowed to 0–1 for Claude and AWS Converse. Some GPT models require explicitly disabling reasoning. The new Claude API and some newer Gemini models do not accept custom sampling settings. Known conflicts fail before inference with instructions to correct the setting or leave it blank. See [compatibility rules](protocols.md#翻译温度).
 
 Only the `.bobplugin` is required. Use the native preset menu, or enter `/models` and an optional filter keyword in Bob's input translation window. Copy the desired ID into the existing custom-model setting. Bob's public plugin API does not expose dynamic menus or option writeback, so automatic live selection is not claimed. The directory never changes saved options. AWS Runtime discovery requires IAM list permissions; its API keys have no OpenAI model-list endpoint. See [protocols and model rules](protocols.md).
 

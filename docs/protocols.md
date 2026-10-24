@@ -40,6 +40,27 @@ AWS Converse 的原生思考映射当前覆盖 Claude；其他模型只显示“
 
 依据：[OpenAI reasoning](https://developers.openai.com/api/docs/guides/reasoning)、[GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol)、[GPT-5.5](https://developers.openai.com/api/docs/models/gpt-5.5)、[Claude effort](https://platform.claude.com/docs/en/build-with-claude/effort)、[Claude thinking](https://platform.claude.com/docs/en/build-with-claude/thinking)、[Gemini thinking](https://ai.google.dev/gemini-api/docs/thinking)、[SiliconFlow Chat 参数](https://docs.siliconflow.cn/docs/api/chat-completions-post)。
 
+## 翻译温度
+
+温度兼容性核查日期：2026-10-25。服务设置中的“翻译温度”默认留空，即不发送采样参数。支持时填写 0–2 的十进制数；Claude 和 AWS Converse 进一步限制为 0–1。`0` 是有效值，不代表留空。参数独立于提示词与思考强度。
+
+| 接口 / 模型 | 字段及兼容条件 |
+| --- | --- |
+| OpenAI Chat / Responses | 顶层 `temperature`；普通非推理模型及未知兼容别名按所选值透传 |
+| GPT-5.1 / 5.2 / 5.4 / 5.5 / 5.6，GPT-6 Sol / Luna 常规模型 | 需把“思考强度”明确设为“关闭”，发送原生 `none`，避免依赖不同模型的默认思考值；Chat 专用型号另行透传 |
+| GPT-6 Astra / 6.1 Sol、原始 GPT-5 / mini / nano、Pro、Codex、o 系列 | 已知不支持自定义温度，需留空；不把这条限制套用于开源 `gpt-oss` |
+| Gemini generateContent / Interactions | 分别使用 `generationConfig.temperature` / `generation_config.temperature`，保留输出上限与思考配置 |
+| Gemini 4、Gemini 3.6+、Gemini 3.5 Flash-Lite | 自定义采样已弃用、可能忽略或拒绝，需留空；更早的 Gemini 3 型号虽保留传参能力，官方建议维持默认采样以免降低推理质量 |
+| Claude Messages `2026-10-21` | 所有模型均已移除采样字段，需留空；不通过降低 API 版本绕过 |
+| Claude 4.7+ / 5.x（含兼容网关与 AWS） | 不支持自定义采样，需留空 |
+| 旧版 API / 兼容网关的 Claude ≤4.6 | 0–1，且不得显式开启思考；经典 Bedrock 与旧模型的兼容版本保持原逻辑 |
+| AWS Converse / ConverseStream | `inferenceConfig.temperature`，0–1，仍受具体模型限制；IAM 对含温度的最终载荷签名 |
+| Cerebras / SiliconFlow Chat | 顶层 `temperature`，接口文档范围 0–2，具体模型限制仍以上游为准 |
+
+已知不兼容或越界时，在生成请求前返回设置错误并提示如何修正。插件不静默省略显式设置、不截断数值、不自动关闭思考；留空可恢复原来的默认行为。未知模型的私有限制由上游返回，不能声称所有兼容别名都已验证。温度设置不会阻止 `/models` 查询。
+
+依据：[OpenAI GPT 参数兼容性](https://developers.openai.com/api/docs/guides/latest-model)、[Claude API 版本历史](https://platform.claude.com/docs/en/api/versioning)、[Claude 模型参数弃用](https://platform.claude.com/docs/en/docs/about-claude/model-deprecations)、[AWS Claude 思考限制](https://docs.aws.amazon.com/bedrock/latest/userguide/claude-messages-extended-thinking.html)、[Gemini 文本生成参数](https://ai.google.dev/gemini-api/docs/text-generation)、[Gemini 3.5 / 3.6 迁移](https://ai.google.dev/gemini-api/docs/generate-content/whats-new-gemini-3.6)、[AWS InferenceConfiguration](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InferenceConfiguration.html)、[Cerebras Chat](https://inference-docs.cerebras.ai/api-reference/chat-completions)、[SiliconFlow Chat](https://docs.siliconflow.cn/docs/api/chat-completions-post)。
+
 ## 插件内的模型目录
 
 Bob 第三方表单只有静态输入和菜单，没有插件可调用的动态模型按钮，见 [Bob schema](https://bobtranslate.com/plugin/quickstart/info.html)；[$option](https://bobtranslate.com/plugin/api/option.html) 只提供设置读取。插件内的 `/models` 命令直接请求当前供应商并在 Bob 浮窗显示目录，支持关键词筛选和已知档位提示。只安装 `.bobplugin` 即可，不需要伴随 App、本地服务或配置文件访问授权。实时结果不能自动回填设置，需复制 ID 到原生自定义模型字段。
@@ -53,6 +74,8 @@ Bob 第三方表单只有静态输入和菜单，没有插件可调用的动态�
 请求保持所配代理的路径和 query，不采用服务端提供的任意下一页 URL，最多 30 页 / 10,000 个模型，全部分页共享不超过 60 秒的预算。窗口展示前 200 个匹配项并提示继续筛选。取消后不再请求下一页；目录失败不重发、不修改已保存设置。HTTP 只由 Bob 的原生网络接口执行，目录不调用生成接口，也不保存模型选择或凭据副本。
 
 ## English
+
+Translation temperature was verified on 2026-10-25. Blank omits sampling settings. Explicit values use each protocol's native field and share the same streaming, fallback and validation path. Known model, reasoning, API-version and range conflicts fail before inference with an actionable correction. The table above records the adopted rules; private gateway aliases remain subject to upstream support. The plugin never silently clamps a value or disables reasoning to make it work.
 
 Verified on 2026-10-24. Reasoning is model-specific: GPT-6 supports max; GPT-5.5 has xhigh without max; Claude 4.6 has max without xhigh; Gemini has neither. Older thinking models use token budgets. Existing `none` settings keep their omit/default meaning; explicit off is separate. Unsupported known combinations fail before an inference request.
 

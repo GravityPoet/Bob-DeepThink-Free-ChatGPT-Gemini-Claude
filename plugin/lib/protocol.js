@@ -9,6 +9,7 @@ var cleanInlineText = result.cleanInlineText;
 var mergeThinkText = result.mergeThinkText;
 var splitThoughtAndAnswer = result.splitThoughtAndAnswer;
 var reasoning = require('./reasoning.js');
+var temperature = require('./temperature.js');
 var interactions = require('./interactions.js');
 
 function applyReasoningParam(body, params) {
@@ -20,6 +21,15 @@ function applyReasoningParam(body, params) {
 }
 
 function buildTranslateRequestBody(params) {
+    var version = params.apiMode === 'anthropic_messages' ? anthropicVersion(params, params.baseUrl) : '';
+    var plan = temperature.prepare(params, version);
+    if (!plan.ok) {
+        var error = new Error(plan.error.message); error.serviceError = plan.error; throw error;
+    }
+    return temperature.apply(buildBaseTranslateRequestBody(params), plan, params.apiMode);
+}
+
+function buildBaseTranslateRequestBody(params) {
     if (params.apiMode === 'gemini_interactions') {
         return applyReasoningParam({ model: urls.normalizeGeminiNativeModelName(params.modelName),
             input: params.userPrompt, system_instruction: params.systemPrompt, store: false,
