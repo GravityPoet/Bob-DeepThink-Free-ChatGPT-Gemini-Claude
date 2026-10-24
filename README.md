@@ -74,7 +74,7 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 [完整配置与排错](docs/quickstart.md) · [架构、验证与发布说明](docs/architecture.md) · [已发布版本](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases)
 
-**更新状态**：仓库源码与直装包为 0.2.4；标准版与 legacy 版自动更新源仍指向已发布的 GitHub Release `v0.2.3`。AWS IAM 专用包需要手动安装更新。
+**更新状态**：仓库源码与直装包为 0.2.4；标准版与 legacy 版自动更新源指向 GitHub Release `v0.2.4`。AWS IAM 专用包需要手动安装更新。
 
 ## 开发
 
@@ -109,7 +109,7 @@ Version 0.2.0 fixes missing/repeated streaming characters, incomplete frames, Un
 
 Download the standard archive above, or the legacy archive matching your installed identifier. Upgrade without removing your existing services. Configure your endpoint, key, protocol and model, then use **Validate** to perform a small real translation. Validation may incur API charges. See the [quick start](docs/quickstart.md) and [architecture](docs/architecture.md).
 
-Source and direct-install archives are 0.2.4. Automatic update feeds remain on the published v0.2.3 release until a new release is completed. Build and CI do not publish releases.
+Source and direct-install archives are 0.2.4. Automatic update feeds point to the v0.2.4 release. Build and CI do not publish releases.
 
 ## 许可 / License
 

@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
+      "version": "0.2.4",
+      "desc": "兼容更新 0.2.4：新增可调翻译温度与模型兼容提示；保留旧 identifier 和已有服务配置。",
+      "sha256": "53508cc2c25b20a21f3a9809755a33485a401dabc87e9e81901ff56d4a87b7fd",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.2.4/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1792884649185
+    },
+    {
       "version": "0.2.3",
       "desc": "兼容更新 0.2.3：与标准版同步流式、排版、模型目录、思考档位和协议维护；保留旧 identifier。",
       "sha256": "b312f4d1c47a8814c94492c9b898bf9ece523e30bf9e1176db7be8082792a895",
