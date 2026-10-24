@@ -24,8 +24,8 @@ test('all two-chunk splits of protected tokens avoid placeholder flashes', () =>
             r.handler(ok());
         }}).translate(q.value);
         assert.equal(text(q.completions[0].result),'<think>你好</think>');
-        assert.ok(q.streams.every(frame=>!/[A-Z_]/.test(text(frame)||'')), 'split '+split);
-        assert.ok(q.streams.every(frame=>(text(frame)||'').length>0 || !!frame.thinkInfo?.content), 'empty frame at split '+split);
+        assert.ok(q.streams.every(frame=>!/[A-Z_]/.test(text(frame.result)||'')), 'split '+split);
+        assert.ok(q.streams.every(frame=>(text(frame.result)||'').length>0 || !!frame.result.thinkInfo?.content), 'empty frame at split '+split);
     }
 });
 

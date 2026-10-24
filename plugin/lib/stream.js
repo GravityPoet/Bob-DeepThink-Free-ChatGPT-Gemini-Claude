@@ -141,7 +141,7 @@ function emitStreamResult(params, state) {
     var think = result.mergeThinkText(state.thinkText, parsed.thinkText);
     if (parsed.answerText || think) {
         var frame = result.buildTranslateResult(params.sourceLang, params.targetLang, parsed.answerText, think, true, params.literalTags);
-        if (frame.content.text || frame.thinkInfo && frame.thinkInfo.content) params.normalizedQuery.onStream(frame);
+        if (frame.content.text || frame.thinkInfo && frame.thinkInfo.content) params.normalizedQuery.onStream({ result: frame });
     }
 }
 

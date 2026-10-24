@@ -9,6 +9,25 @@ function translate(options, handler) {
     return q;
 }
 
+test('Bob receives visible stream results before HTTP completion', () => {
+    const q = query();
+    const visible = [];
+    let request;
+    // Bob reads the result envelope, as it does for onCompletion.
+    q.value.onStream = payload => visible.push(text(payload.result));
+    loadPlugin({}, { streamRequest(r) { request = r; } }).translate(q.value);
+    assert.equal(request.body.stream, true);
+    request.streamHandler({ text: sse({ choices: [{ delta: { content: '# 标题' } }] }) });
+    assert.deepEqual(visible, ['# 标题']);
+    assert.equal(q.completions.length, 0);
+    request.streamHandler({ text: sse({ choices: [{ delta: { content: '\n\n第一段' } }] }) });
+    assert.deepEqual(visible, ['# 标题', '# 标题\n\n第一段']);
+    assert.equal(q.completions.length, 0);
+    request.handler(ok());
+    assert.equal(q.completions.length, 1);
+    assert.equal(text(q.completions[0].result), '# 标题\n\n第一段');
+});
+
 test('all possible two-chunk splits preserve an SSE translation', () => {
     const source=sse({choices:[{delta:{content:'你好 🌎 100'}}]})+'data: [DONE]\r\n\r\n';
     for(let i=0;i<=source.length;i++) {

@@ -33,6 +33,7 @@ flowchart TD
 1. 保留已有插件 identifier、所有旧选项 identifier、模型选择与服务配置；普通包和 legacy 包只在 identifier 与 appcast 上不同。AWS IAM 专用包使用独立 identifier，通过 `$info.identifier` 选择专用配置默认值。
 2. Bob 1.21+ 同时收到 `content: {format: 'markdown', text}`；旧版读取单元素 `toParagraphs`，避免逐行 trim 破坏缩进与空行。思考区需要 Bob 1.15+，更早版本只显示正文。
 3. 现代 `query.onCompletion` 优先，只有没有现代回调时才使用旧 completion，绝不同时调用。
+   `query.onStream` 同样使用 `{result: translateResult}` 包装，`content.text` 为累计全文；直接传结果对象会导致本机 Bob 1.21.2 不刷新中途译文。测试必须在调用最终 HTTP handler 之前读取 `payload.result` 并确认可见文本。
 4. 取消后忽略所有迟到帧与回调，释放本次订阅。不会移除 Bob 或其他插件的订阅。
 5. 空流且 HTTP 成功时最多回退一次非流式；回退共用原请求截止时间。明确错误、截断、网络中断和取消不重发。
 6. Responses 和 Claude 原生流必须收到对应完成事件，提前结束报告错误。Chat 兼容流保留对不发送 `[DONE]` 的网关的兼容。
@@ -54,7 +55,7 @@ Node.js 20+、Python 3.9+，无需 `npm install`。测试使用 Node 内置 test
 
 ## 发布边界
 
-源码与本地安装包版本为 0.2.2。`appcast*.json` 仍指向已有的 v0.1.24 Release，直到实际完成新版本发布后再更新。构建命令不创建 tag、Release 或改更新源。发布时应先上传两个对应安装包，验证下载及 SHA-256，再更新各自 appcast；legacy identifier 不应改变。
+源码与本地安装包版本为 0.2.3。`appcast*.json` 仍指向已有的 v0.1.24 Release，直到实际完成新版本发布后再更新。构建命令不创建 tag、Release 或改更新源。发布时应先上传两个对应安装包，验证下载及 SHA-256，再更新各自 appcast；legacy identifier 不应改变。
 
 ## English
 

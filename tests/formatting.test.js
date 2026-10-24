@@ -47,6 +47,6 @@ test('partial leading thought tags do not flash in the translated answer', () =>
         for (const content of ['<thi', 'nk>', 'Plan', '</think>', '译文']) r.streamHandler({ text: sse({ choices: [{ delta: { content } }] }) });
         r.handler(ok());
     } }).translate(q.value);
-    assert.ok(q.streams.every(frame => !/[<>]/.test(text(frame) || '')));
+    assert.ok(q.streams.every(frame => !/[<>]/.test(text(frame.result) || '')));
     assert.equal(text(q.completions[0].result), '译文');
 });
