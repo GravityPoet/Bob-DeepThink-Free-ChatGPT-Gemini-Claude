@@ -60,7 +60,7 @@ Node.js 20+、Python 3.9+，无需 `npm install`。测试使用 Node 内置 test
 
 ## 发布边界
 
-源码与本地安装包版本为 0.2.3。`appcast*.json` 仍指向已有的 v0.1.24 Release，直到实际完成新版本发布后再更新。构建命令不创建 tag、Release 或改更新源。发布时应先上传两个对应安装包，验证下载及 SHA-256，再更新各自 appcast；legacy identifier 不应改变。
+源码与本地安装包版本为 0.2.3。标准版与 legacy 版 `appcast*.json` 在发布时指向对应的 v0.2.3 Release；AWS IAM 专用包没有自动更新源。构建命令不创建 tag、Release 或改更新源。发布时先上传对应安装包，验证下载及 SHA-256，再确认各自 appcast；legacy identifier 不应改变。
 
 ## English
 

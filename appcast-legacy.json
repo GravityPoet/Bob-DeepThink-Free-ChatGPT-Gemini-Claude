@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
+      "version": "0.2.3",
+      "desc": "兼容更新 0.2.3：与标准版同步流式、排版、模型目录、思考档位和协议维护；保留旧 identifier。",
+      "sha256": "b312f4d1c47a8814c94492c9b898bf9ece523e30bf9e1176db7be8082792a895",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.2.3/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1792879198359
+    },
+    {
       "version": "0.1.24",
       "desc": "兼容过渡更新：新增 AWS Converse 协议，可用 AWS IAM 双密钥调用 Claude。",
       "sha256": "346d07758ad471eb65fff2528bd52f6fcfb76679c9b0c00c71e40b4f96539547",
