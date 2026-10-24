@@ -56,5 +56,6 @@ gh release create v<version> \
 
 | 日期 | 版本 | 命令/信号 | 原因 | 修复 |
 | --- | --- | --- | --- | --- |
+| 2026-10-25 | 0.2.3 | 发布后下载校验命令被本机执行器拒绝：`rm -rf style commands are not permitted` | 临时校验脚本使用了 `rm -rf` trap；发布资产本身没有失败或改变 | 改用隔离 `/tmp` 目录，不在命令中使用递归删除；逐个下载并运行 `shasum -a 256 -c`，再回读公开 appcast |
 | 2026-10-25 | 0.2.3 | `gh release view v0.2.3` / tag collision check 返回 not found | 目标 tag 与 Release 尚未创建；这是发布前的预期空状态，不是发布失败 | 确认远端没有同名 tag/Release 后继续创建唯一的 v0.2.3 |
 | 2026-10-25 | 0.2.3 | 预检发现 appcast 顶部仍为 0.1.24 | 源码已升级但更新源尚未随 Release 更新 | 发布前生成包 SHA，更新两个 appcast 顶部条目并在发布后下载校验 |
