@@ -1,9 +1,9 @@
 {
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
-  "version": "0.1.24",
+  "version": "0.2.0",
   "category": "translate",
   "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude",
-  "summary": "OpenAI/兼容接口、Gemini 官方接口、AWS Bedrock API Key/SigV4/Converse 与完整端点翻译插件，支持 Claude、流式、思考强度与思考链折叠",
+  "summary": "多协议 AI 翻译：OpenAI、Gemini、Claude 原生、AWS Bedrock；支持可靠流式、Markdown 与真实请求验证。",
   "icon": "favicon1",
   "icons": [
     {
@@ -63,15 +63,19 @@
         {
           "title": "AWS Converse（Claude 官方）",
           "value": "aws_converse"
+        },
+        {
+          "title": "Anthropic Messages（Claude 原生）",
+          "value": "anthropic_messages"
         }
       ],
-      "desc": "兼容接口通常选 Chat Completions；OpenAI Responses 选 Responses API；Google 官方 Gemini /v1beta 选 Gemini Native。AWS IAM 双密钥调用 Claude 选 AWS Converse。"
+      "desc": "完整端点自动识别协议；根地址按本项选择。支持 Chat Completions、Responses、Gemini Native、Claude Messages 和 AWS Converse。"
     },
     {
       "identifier": "baseUrl",
       "type": "text",
       "title": "接口地址",
-      "desc": "填写 Base URL 或完整端点。CPA/兼容接口示例：https://api.example.com/v1；AWS Bedrock API Key 调 OpenAI 模型示例：https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1；AWS Converse 可留默认或填 https://bedrock-runtime.us-east-1.amazonaws.com。",
+      "desc": "支持根地址或完整端点，保留代理路径和查询参数。Claude 原生：https://api.anthropic.com/v1/messages；OpenAI：https://api.openai.com/v1；Gemini：https://generativelanguage.googleapis.com/v1beta。",
       "defaultValue": "http://127.0.0.1:18080/v1",
       "textConfig": {
         "placeholderText": "https://api.example.com/v1",
@@ -196,7 +200,7 @@
           "value": "false"
         }
       ],
-      "desc": "建议开启。若上游流式没有返回正文，插件会自动回退一次非流式请求。"
+      "desc": "支持 OpenAI、Gemini 原生与 Claude 原生流式。仅空流成功结束时回退一次；取消、网络错误、截断或服务端错误不会重发。AWS Converse 使用非流式。"
     },
     {
       "identifier": "reasoningEffort",
@@ -221,16 +225,16 @@
           "value": "high"
         }
       ],
-      "desc": "默认“无”最稳。兼容接口会按协议传 reasoning_effort 或 reasoning.effort；Gemini Native 不传。"
+      "desc": "“无”不传参数。Responses 与 Chat Completions 按各自协议传递思考强度；Gemini/Claude 原生与 AWS Converse 不传。"
     },
     {
       "identifier": "maxOutputTokens",
       "type": "text",
       "title": "高级：最大输出 Token",
-      "defaultValue": "1024",
-      "desc": "范围 64-8192。普通翻译保持默认即可。",
+      "defaultValue": "4096",
+      "desc": "范围 64-65536，需服务商和模型支持。输出被截断时提高此值、降低思考强度或缩短原文。",
       "textConfig": {
-        "placeholderText": "1024",
+        "placeholderText": "4096",
         "type": "visible"
       }
     },
@@ -239,7 +243,7 @@
       "type": "text",
       "title": "高级：请求超时(秒)",
       "defaultValue": "90",
-      "desc": "范围 10-300。网络慢或模型慢时再调大。",
+      "desc": "范围 10-300 秒。流式及一次空流回退共用此预算；为 Bob 完成回调预留 5 秒，实际请求最多 295 秒。",
       "textConfig": {
         "placeholderText": "90",
         "type": "visible"

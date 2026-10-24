@@ -1,57 +1,46 @@
-# 快速开始
+# 快速开始 / Quick start
 
-## 1) 前置条件
+## 中文
 
-- Bob 已安装
-- 你有可用的 API Key（CPA/Sub2API/兼容网关/Amazon Bedrock API Key）或 AWS IAM Bedrock 凭证
+1. 双击 `.bobplugin` 安装；普通用户选标准包，已使用 `io.github.gravitypoet.ai-vip-0-token-plan` 的旧用户选 legacy 包。
+2. Bob → 偏好设置 → 服务 → 文本翻译，添加本插件。升级已有插件时会保留服务配置。
+3. 填写接口地址、对应服务商 Key、模型与协议。模型名以服务商实际提供的为准，不存在的模型不能通过改协议解决。
+4. 点击 **验证**：会向所选模型发送一条 `Hello` 翻译请求，可能产生少量 API 费用；不再用模型列表接口判断翻译可用。
+5. 在 Bob 翻译浮窗输入文本并翻译。若有多个启用的服务，以本插件对应的卡片结果为准。
 
-## 2) 基本配置
+| 接入方式 | 接口地址示例 | 协议 | 凭据 |
+| --- | --- | --- | --- |
+| OpenAI / 兼容网关 | `https://api.example.com/v1` | Chat Completions 或 Responses | API Key |
+| 完整端点 | `https://api.example.com/custom/responses?api-version=example` | 自动按端点识别 | API Key |
+| Google Gemini 原生 | `https://generativelanguage.googleapis.com/v1beta` | Gemini Native | Google API Key |
+| Google OpenAI 兼容 | `https://generativelanguage.googleapis.com/v1beta/openai` | Chat Completions | Google API Key |
+| Anthropic Claude 原生 | `https://api.anthropic.com/v1/messages` | Anthropic Messages | Anthropic API Key |
+| Bedrock OpenAI | `https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1` | 按 AWS 当前支持情况选择 Chat/Responses | Bedrock API Key 或 AWS IAM |
+| Bedrock Claude | `https://bedrock-runtime.us-east-1.amazonaws.com` | AWS Converse | Bedrock API Key 或 AWS IAM |
+| 本地兼容服务 | `http://127.0.0.1:18080/v1` | Chat Completions | 服务端要求的 Key |
 
-- **Base URL / Endpoint**：
-  - Sub2API 本机直连：`http://127.0.0.1:18080`
-  - Sub2API SSH 隧道：`http://127.0.0.1:18081`
-  - Gemini Native 根地址：`http://127.0.0.1:18080/v1beta`
-  - Gemini Native 完整端点：`http://127.0.0.1:18080/v1beta/models/gemini-3-flash-preview:generateContent`
-  - AWS Bedrock OpenAI 模型：`https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1`
-  - AWS Bedrock Claude / Converse：可留默认，或填 `https://bedrock-runtime.us-east-1.amazonaws.com`
-  - AWS Bedrock Mantle / Bearer 网关：`https://bedrock-mantle.<region>.api.aws/v1`
-  - Opencode 完整端点：`https://opencode.ai/zen/v1/chat/completions`
-  - Kilo 完整端点：`https://api.kilo.ai/api/gateway/chat/completions`
-  - 规则：若你填的是完整端点（结尾是 `/chat/completions`、`/responses` 或 `/models/<model>:generateContent`），插件会原样直连；OpenAI 兼容根地址自动补 `/v1`，Gemini Native 根地址自动补 `/v1beta`
-- **API Key（网关 / Bedrock API Key）**：
-  - CPA/Sub2API：填网关 key
-  - Bedrock Mantle / Bearer 网关：填网关 Bearer key
-  - Amazon Bedrock API Key：也填这里，例如 `ABSK...`
-- **AWS 官方 Bedrock 凭证**：
-  - `AWS Access Key ID`：AWS IAM Access Key ID。若使用 Amazon Bedrock API Key，不用填
-  - `AWS Secret Access Key`：AWS IAM Secret Access Key。若使用 Amazon Bedrock API Key，不用填
-  - `AWS Session Token`：只在 STS 临时凭证时填写
-  - `AWS Region`：例如 `us-east-1`
-- **接口类型**：
-  - `OpenAI 接口 / 兼容接口`：CPA/Sub2API/OpenAI 兼容网关
-  - `Gemini 官方接口`：Google 官方 /v1beta
-  - `AWS Bedrock 官方链路`：AWS 官方 Bedrock，支持 Amazon Bedrock API Key 或 SigV4 / Converse
-  - `其他完整端点`：直接填写完整 endpoint
-  - Amazon Bedrock API Key + OpenAI 模型：`接口协议` 选择 `Chat Completions`
-  - AWS IAM 双密钥 + Claude：`接口协议` 选择 `AWS Converse（Claude 官方）`
-  - 这个账号已实测可用 Claude 模型：`global.anthropic.claude-sonnet-4-6`
-  - 若走 Gemini 原生 `v1beta ... :generateContent`，`接口协议` 选 `Gemini Native`
-  - `AWS Region` 仅 AWS Bedrock 生效；其他通道会自动忽略
-- **思考强度**：
-  - `无(不设置)`：默认，完全不发送思考参数（兼容性最好）
-  - `低/中/高`：`Responses` 协议会发送 `reasoning.effort`（OpenAI/自定义）；`Chat Completions` 协议会发送 `reasoning_effort`（OpenAI/Gemini/AWS/自定义）
-  - `Gemini Native` 模式下当前不发送思考强度参数（防止与不同网关实现冲突）
-  - 若模型不支持推理参数，改回 `无(不设置)`
-  - 插件会自动识别并折叠常见思考字段到 Bob 可折叠思考区：`<reasoning>/<think>`、`reasoning_content`、`thinking`、Gemini thought parts、OpenAI 兼容 `reasoning_*`
+完整端点包含 `/chat/completions`、`/responses`、`/messages`、`/models/<model>:generateContent` 或 `/model/<model>/converse`。插件使用相应请求格式，不会修改你保存的选择。根地址按“接口协议”补齐；代理路径、`/v2`、Google `/v1beta/openai` 和 query 会保留。URL 不允许内嵌用户名/密码、空主机或 fragment。
 
-## 3) 常见问题
+### 高级设置与异常恢复
 
-- 报错 `Invalid API key`：key 错误或已失效
-- 报错 `Upstream request failed`：上游服务不可用/容量不足
-- AWS Bedrock 报 403/401：确认 Amazon Bedrock API Key 或 Access Key / Secret Key / Session Token、Region、模型权限和账号是否已开通 Bedrock
-- AWS Bedrock 报 `model_not_found`：Key 和 endpoint 多半已通，换成该 endpoint 支持的模型 ID，例如 `openai.gpt-oss-20b-1:0`
-- Claude Opus 4.8/4.7 报 `not available for this account`：账号未开放该模型；可先用已验证的 `global.anthropic.claude-sonnet-4-6`
-- Bedrock Mantle / Bearer 网关报 403/401：确认 Bearer API Key 和网关地址
-- 报错 `HTTP 404`：通常是把“完整端点”又被拼接了一次。请确保 `Base URL` 只填网关根地址，或直接填完整端点并保持 `Chat Completions` 协议
-- Gemini Native 报错 404：优先检查是否选了 `Gemini Native` 协议，以及模型名是否与网关路径一致（如 `gemini-3-flash-preview`）
-- 报错 `流式响应里没有可用翻译结果`：`v0.1.11` 起会自动回退一次非流式请求；若仍失败，先将“流式输出”切到关闭再重试
+- **流式输出**：OpenAI、Gemini 原生与 Claude 原生可用；AWS Converse 使用非流式。成功空流最多重试一次，可能产生第二次 API 调用。
+- **思考强度**：默认“无”表示不传参数；仅 Chat Completions / Responses 映射相应字段。原生 Gemini / Claude 和 AWS Converse 不传。
+- **最大输出 Token**：新服务默认 4096，范围 64–65536；现有值保持不变，实际需服务商与模型支持。
+- **截断**：明确显示失败，避免把半篇译文当成功。提高 Token 上限、降低思考强度或缩短原文。
+- **超时**：范围 10–300 秒；流式和回退共享预算。为 Bob 回调预留 5 秒，单次实际请求最多 295 秒；验证请求最多 30 秒。
+- **取消**：取消后的迟到结果不会更新卡片，也不会自动重发。
+- **401/403**：检查当前接口的凭据及模型访问权限。
+- **404**：检查代理前缀、模型名和路径；完整端点会自动识别协议，避免请求体与端点不匹配。
+- **429/5xx**：服务配额或上游异常，插件不会盲目重复收费请求。
+- **只有思考、没有正文**：模型可能耗尽输出预算；调整 Token 或思考强度后重试。
+- **Markdown**：Bob 1.21+ 且开启 Markdown 渲染时显示标题、列表和代码；旧版本保留原文格式的纯文本。
+
+AWS IAM 需成对填写 Access Key ID 与 Secret Access Key；临时凭据另填 Session Token，Region 需与目标端点一致。其他接口忽略 AWS 字段。Google 官方原生使用 `x-goog-api-key`，Gemini 网关保留 Bearer 兼容；Claude 原生使用 `x-api-key` 和 `anthropic-version: 2023-06-01`。
+
+## English
+
+Install the standard `.bobplugin`, or the legacy package if your existing plugin uses the legacy identifier. Add the plugin in Bob's translation services, enter your endpoint, API key, model and protocol, then click **Validate**. Validation performs a small real translation and may incur API charges. Existing service settings are preserved during upgrades.
+
+Complete endpoints select the matching request format automatically. Root endpoints follow the selected protocol. OpenAI Chat/Responses, native Gemini, native Claude Messages and AWS Converse are supported. Native Gemini and Claude stream; Converse is buffered. Existing token limits stay unchanged; new services default to 4096. Explicit truncation, cancellation and API failures are reported instead of being treated as success. Empty successful streams may retry once within the original deadline.
+
+Use the table above for endpoint examples. Model access and charges depend on your provider. The plugin is free and does not provide API credits or accounts. See [architecture and verification](architecture.md) for development commands and release boundaries.
