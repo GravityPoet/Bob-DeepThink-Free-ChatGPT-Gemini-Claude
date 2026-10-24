@@ -39,6 +39,7 @@
 - **404**：检查代理前缀、模型名和路径；完整端点会自动识别协议，避免请求体与端点不匹配。
 - **429/5xx**：服务配额或上游异常，插件不会盲目重复收费请求。
 - **只有思考、没有正文**：模型可能耗尽输出预算；调整 Token 或思考强度后重试。
+- **字面思考标签**：原文中的 `<think>` / `<reasoning>` 会被保护并还原，不会当成模型的推理内容删除。上游未完整返回这些标记时会明确报错。
 - **Markdown**：Bob 1.21+ 且开启 Markdown 渲染时显示标题、列表和代码；旧版本保留原文格式的纯文本。
 
 AWS IAM 专用服务需成对填写 Access Key ID 与 Secret Access Key；临时凭据另填 Session Token，Region 需与目标端点一致。专用服务留空端点时按区域生成；模型填写 Bedrock 实际模型或推理配置 ID。通用服务的 AWS API Key 路线直接填写完整区域端点。Google 官方原生使用 `x-goog-api-key`，Gemini 网关保留 Bearer 兼容；Claude 原生使用 `x-api-key` 和 `anthropic-version: 2023-06-01`。

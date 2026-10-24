@@ -4,6 +4,13 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 插件免费；API 账号、模型权限、配额及费用由所选服务商提供。名称中的 Free 不代表所有模型或接口免费。
 
+## 0.2.2 流式与排版修复
+
+- 只把响应开头的思考包装作为推理内容，保留代码、正文和原文中的字面标签。
+- 对原文中的 `<think>` / `<reasoning>` 标签进行保护并在本地还原；上游未完整返回时明确报错。
+- 半截思考标签和保护标记不闪进正文，流式不提交空内容帧。
+- 新增标题、列表、表格、代码与标签边界回归；保留原名称和服务设置。
+
 ## 0.2.1 设置精简
 
 - 保留原插件名称与标识符；通用设置从 14 项减为 10 项，供应商、地址、密钥和模型优先。
@@ -38,7 +45,7 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 [完整配置与排错](docs/quickstart.md) · [架构、验证与发布说明](docs/architecture.md) · [已发布版本](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases)
 
-**更新状态**：仓库源码与直装包为 0.2.1；自动更新源仍指向已发布的 v0.1.24。正式 Release 完成前不会把不存在的下载地址写入更新源。
+**更新状态**：仓库源码与直装包为 0.2.2；自动更新源仍指向已发布的 v0.1.24。正式 Release 完成前不会把不存在的下载地址写入更新源。
 
 ## 开发
 
@@ -55,6 +62,8 @@ npm run verify
 
 ## English
 
+Version 0.2.2 restricts legacy thinking-wrapper handling to response prefixes, preserves literal tags inside source documents and code, protects source `<think>` / `<reasoning>` markup across upstream APIs, and restores it locally. Partial wrappers and protection markers do not appear in streaming output, and empty frames are suppressed. Missing protected markup is reported as an API error. The original plugin name and service settings are preserved.
+
 Version 0.2.1 keeps the original plugin name and identity, reduces regular settings from 14 to 10, and moves IAM/STS credentials into an optional AWS IAM plugin. AWS API keys still work in the regular plugin. Install the IAM package only when needed, then add its service in Bob. Existing IAM users should retain their old setup until the dedicated service is configured; credentials are not automatically migrated. Bob's public settings schema has no conditional visibility or collapsible sections. AWS signing code loads only for SigV4 requests.
 
 A free, multi-protocol AI translation plugin for Bob. Connect OpenAI-compatible gateways, native Gemini, native Claude Messages and AWS Bedrock. API accounts, access, quotas and charges are supplied by your provider; the plugin does not include free API credits.
@@ -63,7 +72,7 @@ Version 0.2.0 fixes missing/repeated streaming characters, incomplete frames, Un
 
 Download the standard archive above, or the legacy archive matching your installed identifier. Upgrade without removing your existing services. Configure your endpoint, key, protocol and model, then use **Validate** to perform a small real translation. Validation may incur API charges. See the [quick start](docs/quickstart.md) and [architecture](docs/architecture.md).
 
-Source and direct-install archives are 0.2.1. Automatic update feeds remain on the published v0.1.24 release until a new release is completed. Build and CI do not publish releases.
+Source and direct-install archives are 0.2.2. Automatic update feeds remain on the published v0.1.24 release until a new release is completed. Build and CI do not publish releases.
 
 ## 许可 / License
 

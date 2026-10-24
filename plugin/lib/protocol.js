@@ -245,7 +245,7 @@ function parseTranslateResponse(resp, context) {
         };
     }
 
-    var parsed = splitThoughtAndAnswer(text);
+    var parsed = splitThoughtAndAnswer(text, context && context.sourceText);
     var structuredThinkText = extractStructuredThinkText(resp.data);
     var mergedThinkText = mergeThinkText(structuredThinkText, parsed.thinkText);
     if (!parsed.answerText) {

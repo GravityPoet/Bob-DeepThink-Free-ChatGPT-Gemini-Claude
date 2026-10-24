@@ -1,64 +1,46 @@
+var literalTags = require('./literal-tags.js');
 
-
-var THINK_BLOCK_REGEXP = /<\s*(reasoning|think)\b[^>]*>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
-var THINK_OPEN_REGEXP = /<\s*(reasoning|think)\b[^>]*>/gi;
-var THINK_CLOSE_REGEXP = /<\s*\/\s*(reasoning|think)\s*>/gi;
-
-function splitThoughtAndAnswer(rawText) {
-    if (typeof rawText !== 'string' || !rawText.trim()) {
-        return {
-            answerText: '',
-            thinkText: '',
-        };
+// Legacy thinking wrappers are metadata only at the beginning of a response.
+// Tags in source documents, inline text or fenced code remain literal content.
+function splitThoughtAndAnswer(rawText, sourceText) {
+    var remaining = cleanInlineText(rawText);
+    if (!remaining) return { answerText: '', thinkText: '' };
+    if (typeof sourceText === 'string' && /^\s*<\s*(think|reasoning)(?=[\s/>])/i.test(sourceText)) {
+        return { answerText: remaining, thinkText: '' };
     }
-
-    THINK_BLOCK_REGEXP.lastIndex = 0;
-    THINK_OPEN_REGEXP.lastIndex = 0;
-    THINK_CLOSE_REGEXP.lastIndex = 0;
-
-    var thinkChunks = [];
-    var answerText = rawText.replace(THINK_BLOCK_REGEXP, function (_full, _tag, content) {
-        var cleanContent = cleanInlineText(content);
-        if (cleanContent) {
-            thinkChunks.push(cleanContent);
+    var thoughts = [];
+    while (remaining) {
+        var opening = /^<\s*(think|reasoning)(?=[\s/>])[^>]*>/i.exec(remaining);
+        if (!opening) {
+            if (remaining.charAt(0) === '<') {
+                var compact = remaining.toLowerCase().replace(/\s/g, '');
+                if ('<think'.indexOf(compact) === 0 || '<reasoning'.indexOf(compact) === 0 || /^<\s*(think|reasoning)(?=[\s/>])[^>]*$/i.test(remaining)) {
+                    return { answerText: '', thinkText: cleanInlineText(thoughts.join('\n\n')) };
+                }
+            }
+            break;
         }
-        return '';
-    });
-
-    var lastOpen = null;
-    var openMatch = THINK_OPEN_REGEXP.exec(answerText);
-    while (openMatch) {
-        lastOpen = {
-            index: openMatch.index,
-            end: THINK_OPEN_REGEXP.lastIndex,
-        };
-        openMatch = THINK_OPEN_REGEXP.exec(answerText);
-    }
-    if (lastOpen) {
-        var tailThink = cleanInlineText(answerText.slice(lastOpen.end));
-        if (tailThink) {
-            thinkChunks.push(tailThink);
+        var tail = remaining.slice(opening[0].length);
+        var closing = new RegExp('<\\s*\\/\\s*' + opening[1] + '\\s*>', 'i').exec(tail);
+        if (!closing) {
+            if (cleanInlineText(tail)) thoughts.push(cleanInlineText(tail));
+            return { answerText: '', thinkText: cleanInlineText(thoughts.join('\n\n')) };
         }
-        answerText = answerText.slice(0, lastOpen.index);
+        var thought = cleanInlineText(tail.slice(0, closing.index));
+        if (thought) thoughts.push(thought);
+        remaining = cleanInlineText(tail.slice(closing.index + closing[0].length));
     }
-
-    THINK_CLOSE_REGEXP.lastIndex = 0;
-    answerText = answerText.replace(THINK_CLOSE_REGEXP, '');
-
-    return {
-        answerText: cleanInlineText(answerText),
-        thinkText: cleanInlineText(thinkChunks.join('\n\n')),
-    };
+    return { answerText: remaining, thinkText: cleanInlineText(thoughts.join('\n\n')) };
 }
 
-function buildTranslateResult(sourceLang, targetLang, answerText, thinkText, allowEmptyParagraphs) {
+function buildTranslateResult(sourceLang, targetLang, answerText, thinkText, allowEmptyParagraphs, literalMeta) {
     var result = {
         from: sourceLang,
         to: targetLang,
         toParagraphs: [],
     };
 
-    var cleanAnswer = cleanInlineText(answerText);
+    var cleanAnswer = literalTags.restore(cleanInlineText(answerText), literalMeta, allowEmptyParagraphs);
     if (cleanAnswer) {
         result.toParagraphs = [cleanAnswer];
     } else if (!allowEmptyParagraphs) {

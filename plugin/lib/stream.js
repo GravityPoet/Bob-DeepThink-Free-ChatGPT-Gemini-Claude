@@ -1,6 +1,7 @@
 var util = require('./util.js');
 var protocol = require('./protocol.js');
 var result = require('./result.js');
+var literalTags = require('./literal-tags.js');
 
 function requestWithStream(params) {
     var state = { text: '', thinkText: '', buffer: '', dataLines: [], eventName: '', raw: '', events: 0, error: null, pendingBytes: [], ended: false, terminalRequired: false, terminal: false };
@@ -36,7 +37,7 @@ function requestWithStream(params) {
                 feed(decodeChunk(null, state, true), state, params, true);
                 var status = util.getStatusCode(resp);
                 var data = !state.events ? util.safeJsonParse(state.raw) : null;
-                var context = { apiEndpoint: endpoint, modelName: params.modelName, baseUrl: params.config.baseUrl };
+                var context = { apiEndpoint: endpoint, modelName: params.modelName, baseUrl: params.config.baseUrl, sourceText: params.parserSourceText };
                 if (state.error) { params.done({ error: state.error }); return; }
                 if (status && (status < 200 || status >= 300)) {
                     params.done({ error: protocol.parseApiError(data || (resp && resp.data) || state.raw, status, context) }); return;
@@ -52,7 +53,7 @@ function requestWithStream(params) {
                     if (!parsed.ok) { params.done({ error: parsed.error }); return; }
                     state.text = parsed.text; state.thinkText = parsed.thinkText;
                 }
-                var parsedFinal = result.splitThoughtAndAnswer(state.text);
+                var parsedFinal = result.splitThoughtAndAnswer(state.text, params.parserSourceText);
                 if (!parsedFinal.answerText) {
                     // Empty streams get at most one retry, within the original deadline.
                     var fallbackBody = Object.assign({}, params.requestBody);
@@ -61,8 +62,11 @@ function requestWithStream(params) {
                     params.fallback(params);
                     return;
                 }
+                if (!literalTags.complete(parsedFinal.answerText, params.literalTags)) {
+                    params.done({ error: util.makeServiceError('api', '上游没有完整保留原文标记，请重试或更换服务。') }); return;
+                }
                 params.done({ result: result.buildTranslateResult(params.sourceLang, params.targetLang, parsedFinal.answerText,
-                    result.mergeThinkText(state.thinkText, parsedFinal.thinkText), false) });
+                    result.mergeThinkText(state.thinkText, parsedFinal.thinkText), false, params.literalTags) });
             } catch (error) {
                 params.done({ error: util.makeServiceError('api', '无法处理流式翻译结果。', error.message) });
             }
@@ -133,9 +137,12 @@ function dispatch(state, params) {
 
 function emitStreamResult(params, state) {
     if (params.done.completed || typeof params.normalizedQuery.onStream !== 'function') return;
-    var parsed = result.splitThoughtAndAnswer(state.text);
+    var parsed = result.splitThoughtAndAnswer(state.text, params.parserSourceText);
     var think = result.mergeThinkText(state.thinkText, parsed.thinkText);
-    if (parsed.answerText || think) params.normalizedQuery.onStream(result.buildTranslateResult(params.sourceLang, params.targetLang, parsed.answerText, think, true));
+    if (parsed.answerText || think) {
+        var frame = result.buildTranslateResult(params.sourceLang, params.targetLang, parsed.answerText, think, true, params.literalTags);
+        if (frame.content.text || frame.thinkInfo && frame.thinkInfo.content) params.normalizedQuery.onStream(frame);
+    }
 }
 
 function extractStreamDeltaText(event) {
