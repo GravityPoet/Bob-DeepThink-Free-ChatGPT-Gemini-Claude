@@ -57,6 +57,8 @@ git push origin main
 
 发布资产的 SHA-256 必须记录并与 appcast、GitHub digest 和三个包的公开下载校验一致。草稿使用已认证的 Release 列表/ID 读取，不用公开下载地址判断是否上传成功。发布后核对精确 tag、`releases/latest`、`draft=false`、`prerelease=false`、四个资产及 tag 指向的候选 SHA；最后回读公开的两个 appcast 并核对顶部版本、identifier、URL 和 SHA-256。下载放在独立工作目录，不使用删除型 trap。
 
+更新源校验的输入直接来自标准版、legacy 版安装包内 `info.json` 的 `appcast` 字段，允许正常 HTTP 重定向，按最终 JSON 内容验证；不要手工猜测 raw 域名或把 URL 字面相等当成有效性依据。公开资产可使用系统 curl：`--location --fail --connect-timeout 10 --max-time 30 --retry 1 --retry-delay 1 --retry-all-errors --retry-max-time 35`，指定隔离输出文件，下载后必须校验大小、SHA-256、ZIP、版本与 identifier。不要输出 CDN 重定向中的临时签名 URL。
+
 ## 回滚与熔断
 
 - tag 推送前：恢复 appcast/README/SOP 的提交，删除未发布的本地 tag。
@@ -70,6 +72,8 @@ git push origin main
 
 | 日期 | 版本 | 命令/信号 | 原因 | 修复 |
 | --- | --- | --- | --- | --- |
+| 2026-10-25 | 0.2.4 | 预发布检查 `assert info['appcast'] == expected_raw_url` 返回 `AssertionError` | 检查器假定使用 `raw.githubusercontent.com`，安装包实际使用可正常重定向的 `github.com/.../raw/main/...`；属于检查假设错误 | 改从包内 `info.json` 直接获取 URL，验证最终 HTTP 200、identifier 与内容；两个真实更新源均通过，不修改已验收的插件包 |
+| 2026-10-25 | 0.2.4 | urllib 公开资产下载返回 `RemoteDisconnected: Remote end closed connection without response` | 重定向后的连接被关闭，具体网络根因未定，资产上传状态和 GitHub digest 正常 | 保持旧更新源，改用系统 curl 有界重试；四个公开资产均返回 200 并通过大小和 SHA-256 检查，三个插件另通过 ZIP、版本和 identifier 校验 |
 | 2026-10-25 | 0.2.3 | 发布后下载校验命令被本机执行器拒绝：`rm -rf style commands are not permitted` | 临时校验脚本使用了 `rm -rf` trap；发布资产本身没有失败或改变 | 改用隔离 `/tmp` 目录，不在命令中使用递归删除；逐个下载并运行 `shasum -a 256 -c`，再回读公开 appcast |
 | 2026-10-25 | 0.2.3 | `gh release view v0.2.3` / tag collision check 返回 not found | 目标 tag 与 Release 尚未创建；这是发布前的预期空状态，不是发布失败 | 确认远端没有同名 tag/Release 后继续创建唯一的 v0.2.3 |
 | 2026-10-25 | 0.2.3 | 预检发现 appcast 顶部仍为 0.1.24 | 源码已升级但更新源尚未随 Release 更新 | 发布前生成包 SHA，更新两个 appcast 顶部条目并在发布后下载校验 |
