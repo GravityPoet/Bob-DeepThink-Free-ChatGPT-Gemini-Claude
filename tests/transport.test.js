@@ -28,6 +28,19 @@ test('Bob receives visible stream results before HTTP completion', () => {
     assert.equal(text(q.completions[0].result), '# 标题\n\n第一段');
 });
 
+test('CPA gateway uses a compact translation prompt without changing stream semantics', () => {
+    let request;
+    const q = query();
+    loadPlugin({ baseUrl: 'https://api.chordvox.com/cliproxy', customModel: 'gpt-6-luna', model: 'custom' }, {
+        streamRequest(r) { request = r; },
+    }).translate(q.value);
+    assert.equal(request.body.stream, true);
+    assert.match(request.body.messages[0].content, /Translate from English to 简体中文/);
+    assert.equal(request.body.messages[1].content, 'Hello');
+    assert.ok(request.body.messages[0].content.length < 300);
+    assert.equal(request.body.messages[0].content.includes('You are a professional translation engine'), false);
+});
+
 test('all possible two-chunk splits preserve an SSE translation', () => {
     const source=sse({choices:[{delta:{content:'你好 🌎 100'}}]})+'data: [DONE]\r\n\r\n';
     for(let i=0;i<=source.length;i++) {
@@ -142,6 +155,14 @@ test('URL normalization preserves proxy paths, versions and query strings',()=>{
         ['http://[::1]:8080','chat_completions','http://[::1]:8080/v1/chat/completions'],
     ]) assert.equal(urls.buildApiEndpoint(urls.normalizeBaseUrl(base,mode),mode,'m'),expected);
     for(const bad of ['https:///','ftp://example.com','https://fixture-user@example.com','https://example.com/#fragment','https://example.com:99999','https://example.com/%zz','https://example.com/with space']) assert.equal(urls.normalizeBaseUrl(bad,'responses'),'');
+});
+
+test('CPA detection is limited to the ChordVox cliproxy path', () => {
+    const urls = loadPlugin().require('./lib/urls.js');
+    assert.equal(urls.isCpaGateway('https://api.chordvox.com/cliproxy'), true);
+    assert.equal(urls.isCpaGateway('https://api.chordvox.com/cliproxy/v1'), true);
+    assert.equal(urls.isCpaGateway('https://api.chordvox.com/sub2api/v1'), false);
+    assert.equal(urls.isCpaGateway('https://example.com/cliproxy'), false);
 });
 test('menu and runtime protocol defaults agree',()=>{
     const fs=require('node:fs');const info=JSON.parse(fs.readFileSync(require('node:path').resolve(__dirname,'../plugin/info.json')));

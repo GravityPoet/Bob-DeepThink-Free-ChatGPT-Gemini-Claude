@@ -1,6 +1,6 @@
 {
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "category": "translate",
   "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude",
   "summary": "多供应商 AI 翻译，支持流式与 Markdown。",

@@ -26,6 +26,10 @@ function endpointMode(url) {
 
 function isCompleteEndpoint(url) { return !!endpointMode(url); }
 function isCerebrasBaseUrl(url) { var p = parseHttpUrl(url); return p.ok && /^api\.cerebras\.ai(?::\d+)?$/.test(p.host); }
+function isCpaGateway(url) {
+    var p = parseHttpUrl(url);
+    return p.ok && /^api\.chordvox\.com(?::\d+)?$/i.test(p.host) && /^\/cliproxy(?:\/|$)/i.test(p.path);
+}
 
 function normalizeBaseUrl(raw, apiMode) {
     if (typeof raw !== 'string') return '';
@@ -70,6 +74,7 @@ function isDefaultSub2ApiUrl(raw) { return !String(raw || '').trim() || /^http:\
 module.exports = {
     parseHttpUrl: parseHttpUrl, normalizeBaseUrl: normalizeBaseUrl, buildApiEndpoint: buildApiEndpoint,
     endpointMode: endpointMode, isCompleteEndpoint: isCompleteEndpoint, isCerebrasBaseUrl: isCerebrasBaseUrl,
+    isCpaGateway: isCpaGateway,
     normalizeGeminiNativeModelName: normalizeGeminiNativeModelName, normalizeRegion: normalizeRegion,
     buildBedrockMantleBaseUrl: buildBedrockMantleBaseUrl, buildBedrockRuntimeOpenAiBaseUrl: buildBedrockRuntimeOpenAiBaseUrl,
     buildBedrockMantleAnthropicBaseUrl: buildBedrockMantleAnthropicBaseUrl,

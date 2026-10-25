@@ -31,7 +31,7 @@ python3 -m json.tool appcast-legacy.json >/dev/null
 
 `npm run verify` 必须通过语法检查、全量 Node 测试和 `scripts/build.py --check`。构建后应保持包字节不变，否则重新执行受影响验收。Bob 实机验收应覆盖普通翻译、`/models`、流式中途回调和 Markdown/代码格式；构建与测试不替代实机验收。相同运行时代码、设置与包 SHA 的已通过证据可以复用。发布候选的 GitHub Actions `verify`、`jscore` 均须 completed/success。
 
-0.2.4 的温度验收还需覆盖 `0`、小数、留空、越界、思考冲突、新 Claude API 与新 Gemini 限制、AWS 签名、空流回退及三个包的设置入口。Bob 中验证温度保存与实际请求，测试后恢复原模型和温度设置。当前本地验收为 142 项测试、17 条 JavaScriptCore 路径；实际服务验证范围为 SiliconFlow DeepSeek，不宣称逐家验证全部付费接口。
+0.2.5 的 CPA 优化验收需覆盖精简提示、同一模型/端点的首字节对比、流式中途回调、格式保护和非 CPA 提示不变。当前本地验收为 144 项 Node 测试；同一有效 CPA 凭据的三轮首字节约 2.48–3.72 秒，实测不包含 Bob UI 绘制。
 
 ## 发布步骤
 
@@ -78,3 +78,4 @@ git push origin main
 | 2026-10-25 | 0.2.3 | 发布后下载校验命令被本机执行器拒绝：`rm -rf style commands are not permitted` | 临时校验脚本使用了 `rm -rf` trap；发布资产本身没有失败或改变 | 改用隔离 `/tmp` 目录，不在命令中使用递归删除；逐个下载并运行 `shasum -a 256 -c`，再回读公开 appcast |
 | 2026-10-25 | 0.2.3 | `gh release view v0.2.3` / tag collision check 返回 not found | 目标 tag 与 Release 尚未创建；这是发布前的预期空状态，不是发布失败 | 确认远端没有同名 tag/Release 后继续创建唯一的 v0.2.3 |
 | 2026-10-25 | 0.2.3 | 预检发现 appcast 顶部仍为 0.1.24 | 源码已升级但更新源尚未随 Release 更新 | 发布前生成包 SHA，更新两个 appcast 顶部条目并在发布后下载校验 |
+| 2026-10-25 | 0.2.5 | CPA 速度对比初次误判为 Key 不同 | Bob plist 对不同服务的安全字段采用不同存储编码，原始长度/哈希不能比较；截图确认明文相同 | 不再比较存储编码；用同一有效凭据、端点、模型和短文本做 A/B，按请求体、首字节和完成时间归因 |

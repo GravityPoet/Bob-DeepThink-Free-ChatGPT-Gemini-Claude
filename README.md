@@ -4,6 +4,12 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 插件免费；API 账号、模型权限、配额及费用由所选服务商提供。名称中的 Free 不代表所有模型或接口免费。
 
+## 0.2.5 CPA 流式速度优化
+
+- 针对 `https://api.chordvox.com/cliproxy` 使用精简但等价的翻译提示：语言方向和格式要求集中在 system prompt，用户消息只保留原文，减少 CPA 网关首字节等待。
+- 保留 `stream=true`、Markdown/代码保护、取消、错误处理和一次空流回退；其他供应商继续使用原有提示路径。
+- 同一 CPA Endpoint、模型和有效凭据实测三轮首字节约 **2.48–3.72 秒**；旧提示路径约 **7 秒上下**，具体速度仍受上游排队和模型负载影响。
+
 ## 0.2.4 可调翻译温度
 
 - 在服务设置中新增“翻译温度”：留空跟随模型，支持时可填写小数或 `0`；标准版、legacy 版与 AWS IAM 版均提供。
@@ -91,7 +97,7 @@ npm run verify
 
 ## English
 
-Version 0.2.4 adds an optional translation temperature field to all three packages. Leave it blank to use the upstream default, or enter a number (including zero) when supported. Native fields are mapped across all six protocols, including streaming, fallback and validation. Known unsupported, deprecated or conflicting combinations return an actionable error before inference; the plugin does not silently ignore the selection, clamp it or disable reasoning. See [compatibility rules](docs/protocols.md#翻译温度).
+Version 0.2.5 adds a compact CPA prompt path for faster first visible output. Version 0.2.4 added an optional translation temperature field to all three packages. Leave it blank to use the upstream default, or enter a number (including zero) when supported. Native fields are mapped across all six protocols, including streaming, fallback and validation. Known unsupported, deprecated or conflicting combinations return an actionable error before inference; the plugin does not silently ignore the selection, clamp it or disable reasoning. See [compatibility rules](docs/protocols.md#翻译温度).
 
 Version 0.2.3 ships as a single `.bobplugin`, with no companion app. Choose a preset in Bob's native model menu, or enter `/models` in the input translation window to fetch the current provider's catalog. Add a keyword, such as `/models gpt`, to filter it. Copy an ID into the existing custom-model setting. The directory uses only the current service's credentials and performs model-list GET requests. Bob's public plugin settings API cannot populate a live dropdown or write back options; one-click live selection is not claimed. Catalog visibility does not guarantee inference access.
 
@@ -109,7 +115,7 @@ Version 0.2.0 fixes missing/repeated streaming characters, incomplete frames, Un
 
 Download the standard archive above, or the legacy archive matching your installed identifier. Upgrade without removing your existing services. Configure your endpoint, key, protocol and model, then use **Validate** to perform a small real translation. Validation may incur API charges. See the [quick start](docs/quickstart.md) and [architecture](docs/architecture.md).
 
-Source and direct-install archives are 0.2.4. Automatic update feeds point to the v0.2.4 release. Build and CI do not publish releases.
+Source and direct-install archives are 0.2.5. Automatic update feeds point to the v0.2.5 release. Build and CI do not publish releases.
 
 ## 许可 / License
 

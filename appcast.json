@@ -2,12 +2,12 @@
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
   "versions": [
     {
-      "version": "0.2.4",
-      "desc": "0.2.4：新增可调翻译温度；按模型、接口与思考状态验证兼容性，保留默认行为，流式、验证与回退使用一致参数。",
-      "sha256": "228edf9ba47bd23dbbf69aa2c906e5c51736d6a543303194b09a71250c1b799c",
-      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.2.4/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
+      "version": "0.2.5",
+      "desc": "0.2.5：针对 CPA/CLIProxyAPI 优化翻译提示，降低首字节延迟；保留流式、Markdown、代码保护与其他供应商原有行为。",
+      "sha256": "f42e11632200718aa2368fa0c2f383eb73a3492a1ea9a9bed89c5c979bece92b",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.2.5/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
       "minBobVersion": "1.8.0",
-      "timestamp": 1792884649185
+      "timestamp": 1792930224029
     },
     {
       "version": "0.2.3",
