@@ -5,7 +5,7 @@ const vm = require('node:vm');
 function loadPlugin(options = {}, http = {}, globals = {}) {
     const root = path.resolve(__dirname, '../plugin');
     const context = vm.createContext({
-        $option: { apiKey: 'test-key', baseUrl: 'https://example.com/v1', apiMode: 'chat_completions', ...options },
+        $option: { apiKey: 'test-key', baseUrl: 'https://example.com/v1', apiMode: 'chat_completions', maxOutputTokens: '4096', ...options },
         $http: http,
         $env: { appVersion: '1.21.2' },
         $data: { fromUTF8: text => ({ toUTF8: () => text }) },

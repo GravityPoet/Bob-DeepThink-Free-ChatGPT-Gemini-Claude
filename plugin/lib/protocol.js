@@ -31,13 +31,17 @@ function buildTranslateRequestBody(params) {
 
 function buildBaseTranslateRequestBody(params) {
     if (params.apiMode === 'gemini_interactions') {
-        return applyReasoningParam({ model: urls.normalizeGeminiNativeModelName(params.modelName),
+        var interactionsBody = { model: urls.normalizeGeminiNativeModelName(params.modelName),
             input: params.userPrompt, system_instruction: params.systemPrompt, store: false,
-            generation_config: { max_output_tokens: params.maxOutputTokens } }, params);
+            generation_config: {} };
+        if (!params.omitMaxOutputTokens) interactionsBody.generation_config.max_output_tokens = params.maxOutputTokens;
+        return applyReasoningParam(interactionsBody, params);
     }
     if (params.apiMode === 'anthropic_messages') {
-        return applyReasoningParam({ model: params.modelName, system: params.systemPrompt,
-            messages: [{ role: 'user', content: params.userPrompt }], max_tokens: params.maxOutputTokens }, params);
+        var anthropicBody = { model: params.modelName, system: params.systemPrompt,
+            messages: [{ role: 'user', content: params.userPrompt }] };
+        if (!params.omitMaxOutputTokens) anthropicBody.max_tokens = params.maxOutputTokens;
+        return applyReasoningParam(anthropicBody, params);
     }
     if (params.apiMode === 'aws_converse') {
         var converseBody = {
@@ -56,10 +60,9 @@ function buildBaseTranslateRequestBody(params) {
                     text: params.systemPrompt,
                 },
             ],
-            inferenceConfig: {
-                maxTokens: params.maxOutputTokens,
-            },
+            inferenceConfig: {},
         };
+        if (!params.omitMaxOutputTokens) converseBody.inferenceConfig.maxTokens = params.maxOutputTokens;
 
         return applyReasoningParam(converseBody, params);
     }
@@ -83,10 +86,9 @@ function buildBaseTranslateRequestBody(params) {
                     },
                 ],
             },
-            generationConfig: {
-                maxOutputTokens: params.maxOutputTokens,
-            },
+            generationConfig: {},
         };
+        if (!params.omitMaxOutputTokens) geminiBody.generationConfig.maxOutputTokens = params.maxOutputTokens;
 
         return applyReasoningParam(geminiBody, params);
     }
@@ -104,12 +106,11 @@ function buildBaseTranslateRequestBody(params) {
                     content: params.userPrompt,
                 },
             ],
-            max_tokens: params.maxOutputTokens,
         };
 
-        if (/^(?:gpt-[5-9](?:[.\-]|$)|o[1-9](?:-|$))/.test(params.modelName)) {
-            chatBody.max_completion_tokens = chatBody.max_tokens;
-            delete chatBody.max_tokens;
+        if (!params.omitMaxOutputTokens) {
+            if (/^(?:gpt-[5-9](?:[.\-]|$)|o[1-9](?:-|$))/.test(params.modelName)) chatBody.max_completion_tokens = params.maxOutputTokens;
+            else chatBody.max_tokens = params.maxOutputTokens;
         }
         applyReasoningParam(chatBody, params);
         return chatBody;
@@ -137,9 +138,9 @@ function buildBaseTranslateRequestBody(params) {
                 ],
             },
         ],
-        max_output_tokens: params.maxOutputTokens,
         store: false,
     };
+    if (!params.omitMaxOutputTokens) body.max_output_tokens = params.maxOutputTokens;
 
     applyReasoningParam(body, params);
 

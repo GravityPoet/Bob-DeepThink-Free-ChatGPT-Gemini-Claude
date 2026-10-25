@@ -41,6 +41,19 @@ test('CPA gateway uses a compact translation prompt without changing stream sema
     assert.equal(request.body.messages[0].content.includes('You are a professional translation engine'), false);
 });
 
+test('simple text uses compact prompts globally while complex Markdown keeps the full prompt', () => {
+    let simple, complex;
+    const simpleQuery = query();
+    loadPlugin({}, { request(r) { simple = r; r.handler(ok(chat('译文'))); } }).translate(simpleQuery.value);
+    assert.match(simple.body.messages[0].content, /Translate from English to 简体中文/);
+    assert.equal(simple.body.messages[0].content.includes('professional translation engine'), false);
+    const complexQuery = query();
+    complexQuery.value.text = '## 标题\\n\\n**加粗**\\n\\n```js\\nconst value = 1;\\n```';
+    complexQuery.value.originalText = complexQuery.value.text;
+    loadPlugin({}, { request(r) { complex = r; r.handler(ok(chat('译文'))); } }).translate(complexQuery.value);
+    assert.match(complex.body.messages[0].content, /professional translation engine/);
+});
+
 test('all possible two-chunk splits preserve an SSE translation', () => {
     const source=sse({choices:[{delta:{content:'你好 🌎 100'}}]})+'data: [DONE]\r\n\r\n';
     for(let i=0;i<=source.length;i++) {
@@ -163,6 +176,19 @@ test('CPA detection is limited to the ChordVox cliproxy path', () => {
     assert.equal(urls.isCpaGateway('https://api.chordvox.com/cliproxy/v1'), true);
     assert.equal(urls.isCpaGateway('https://api.chordvox.com/sub2api/v1'), false);
     assert.equal(urls.isCpaGateway('https://example.com/cliproxy'), false);
+});
+
+test('default output limit is omitted while an explicit limit is sent', () => {
+    const defaultQuery = query();
+    let defaultRequest;
+    loadPlugin({ maxOutputTokens: 'default' }, { request(r) { defaultRequest = r; r.handler(ok(chat('译文'))); } }).translate(defaultQuery.value);
+    assert.equal(defaultRequest.body.max_tokens, undefined);
+    assert.equal(defaultRequest.body.max_completion_tokens, undefined);
+
+    const explicitQuery = query();
+    let explicitRequest;
+    loadPlugin({ maxOutputTokens: '4096' }, { request(r) { explicitRequest = r; r.handler(ok(chat('译文'))); } }).translate(explicitQuery.value);
+    assert.equal(explicitRequest.body.max_completion_tokens || explicitRequest.body.max_tokens, 4096);
 });
 test('menu and runtime protocol defaults agree',()=>{
     const fs=require('node:fs');const info=JSON.parse(fs.readFileSync(require('node:path').resolve(__dirname,'../plugin/info.json')));

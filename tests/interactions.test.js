@@ -23,6 +23,12 @@ test('Gemini Interactions uses the stable endpoint and stateless request shape',
     assert.doesNotMatch(JSON.stringify(q.completions), /opaque-signature/);
 });
 
+test('Gemini Interactions default output limit is omitted', () => {
+    const q = query(); let request;
+    loadPlugin({ ...options, maxOutputTokens: 'default', streamOutput: 'false' }, { request(r) { request = r; r.handler(ok(response)); } }).translate(q.value);
+    assert.equal(request.body.generation_config.max_output_tokens, undefined);
+});
+
 const events = [
     { event_type: 'interaction.created', interaction: { status: 'in_progress' } },
     { event_type: 'step.start', index: 0, step: { type: 'thought', signature: 'opaque-signature' } },

@@ -108,12 +108,13 @@ function buildRuntimeConfig() {
         300
     );
 
-    var maxOutputTokens = parseIntegerInRange(
-        getOptionString('maxOutputTokens', String(DEFAULT_MAX_OUTPUT_TOKENS)),
-        DEFAULT_MAX_OUTPUT_TOKENS,
-        64,
-        65536
-    );
+    var maxOutputChoice = getOptionString('maxOutputTokens', 'default');
+    var omitMaxOutputTokens = !maxOutputChoice || /^default$/i.test(maxOutputChoice);
+    var maxOutputRaw = maxOutputChoice;
+    if (maxOutputChoice === 'custom') maxOutputRaw = getOptionString('maxOutputTokensCustom', '');
+    var maxOutputTokens = omitMaxOutputTokens
+        ? DEFAULT_MAX_OUTPUT_TOKENS
+        : parseIntegerInRange(maxOutputRaw, DEFAULT_MAX_OUTPUT_TOKENS, 64, 65536);
 
     var reasoningEffort = reasoning.normalizeEffort(getOptionString('reasoningEffort', DEFAULT_REASONING_EFFORT));
     if (!reasoningEffort) return { ok: false, error: makeServiceError('param', '思考强度无效，请重新选择。') };
@@ -132,6 +133,7 @@ function buildRuntimeConfig() {
         bedrockRegion: bedrockRegion,
         timeoutSec: timeoutSec,
         maxOutputTokens: maxOutputTokens,
+        omitMaxOutputTokens: omitMaxOutputTokens,
         reasoningEffort: reasoningEffort,
         translationTemperature: getOptionString('translationTemperature', ''),
         streamOutput: streamOutput,

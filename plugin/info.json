@@ -1,6 +1,6 @@
 {
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "category": "translate",
   "name": "Bob-DeepThink-Free-ChatGPT-Gemini-Claude",
   "summary": "多供应商 AI 翻译，支持流式与 Markdown。",
@@ -282,10 +282,43 @@
     },
     {
       "identifier": "maxOutputTokens",
-      "type": "text",
+      "type": "menu",
       "title": "输出上限",
+      "defaultValue": "default",
+      "desc": "默认不发送上限；选择自定义时填写具体 Token 数。",
+      "menuValues": [
+        {
+          "title": "默认（不发送）",
+          "value": "default"
+        },
+        {
+          "title": "1024",
+          "value": "1024"
+        },
+        {
+          "title": "4096",
+          "value": "4096"
+        },
+        {
+          "title": "8192",
+          "value": "8192"
+        },
+        {
+          "title": "16384",
+          "value": "16384"
+        },
+        {
+          "title": "自定义",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "identifier": "maxOutputTokensCustom",
+      "type": "text",
+      "title": "自定义输出上限",
       "defaultValue": "4096",
-      "desc": "64–65536 Token，需模型支持。",
+      "desc": "仅选择“自定义”时使用，范围 64–65536 Token。",
       "textConfig": {
         "placeholderText": "4096",
         "type": "visible"

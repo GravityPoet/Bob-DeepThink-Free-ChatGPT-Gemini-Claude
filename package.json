@@ -1,6 +1,6 @@
 {
   "name": "bob-deepthink",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "private": true,
   "description": "Bob 多协议 AI 翻译插件的无依赖开发工具",
   "scripts": {

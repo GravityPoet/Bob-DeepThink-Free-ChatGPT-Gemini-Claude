@@ -9,6 +9,11 @@ test('Claude native builds Messages with the documented version and API-key head
  assert.equal(r.body.model,'claude-sonnet-4-6');assert.ok(r.body.system);assert.equal(r.body.messages[0].role,'user');assert.ok(r.body.max_tokens);assert.equal(r.body.reasoning_effort,undefined);
  assert.equal(text(q.completions[0].result),'译文');
 });
+test('Claude default output limit is omitted',()=>{
+ const q=query();let r;
+ loadPlugin({...options,maxOutputTokens:'default',streamOutput:'false'},{request(request){r=request;request.handler(ok({content:[{type:'text',text:'译文'}],stop_reason:'end_turn'}));}}).translate(q.value);
+ assert.equal(r.body.max_tokens,undefined);
+});
 test('Claude native separates thinking, ignores signatures and keeps repeated deltas',()=>{
  const q=query();loadPlugin(options,{streamRequest(r){
   for(const e of [

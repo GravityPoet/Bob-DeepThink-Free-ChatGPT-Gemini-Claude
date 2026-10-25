@@ -47,7 +47,7 @@ $option.model='custom';$option.customModel='gpt-4.1';$option.translationTemperat
 $http.request=function(r){if(r.body.temperature!==0)throw new Error('zero temperature');r.handler({response:{statusCode:200},data:{output_text:'零温度'}});};
 run('Hello',function(p){if(!p.result)throw new Error('temperature chat');});
 $option.customModel='gemini-2.5-flash';$option.apiMode='gemini_generate_content';$option.reasoningEffort='low';$option.translationTemperature='.3';
-$http.request=function(r){var c=r.body.generationConfig;if(c.temperature!==.3||c.maxOutputTokens!==4096||c.thinkingConfig.thinkingBudget!==1024)throw new Error('temperature Gemini config');r.handler({response:{statusCode:200},data:{output_text:'原生温度'}});};
+$http.request=function(r){var c=r.body.generationConfig;if(c.temperature!==.3||c.maxOutputTokens!==undefined||c.thinkingConfig.thinkingBudget!==1024)throw new Error('temperature Gemini config');r.handler({response:{statusCode:200},data:{output_text:'原生温度'}});};
 run('Hello',function(p){if(!p.result)throw new Error('temperature Gemini');});
 $option.apiMode='gemini_interactions';
 $http.request=function(r){var c=r.body.generation_config;if(c.temperature!==.3||c.thinking_level!=='low')throw new Error('temperature interactions config');r.handler({response:{statusCode:200},data:{output_text:'原生温度'}});};

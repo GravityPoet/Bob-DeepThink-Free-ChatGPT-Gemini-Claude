@@ -2,12 +2,12 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
-      "version": "0.2.5",
-      "desc": "兼容更新 0.2.5：针对 CPA/CLIProxyAPI 优化翻译提示，降低首字节延迟；保留旧 identifier 和已有服务配置。",
-      "sha256": "1a0c7e4d5f8748a70c2b56753b2e1f0ee24571166bba0ea8ac2eb530fbb4804c",
-      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.2.5/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
+      "version": "0.2.6",
+      "desc": "兼容更新 0.2.6：全局自适应精简提示与默认输出上限省略；保留旧 identifier 和已有服务配置。",
+      "sha256": "b174b59053e15d48258c7c90f1dc70c2ae28786fb0131856b2df2a14b5aa79fa",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.2.6/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
       "minBobVersion": "1.8.0",
-      "timestamp": 1792930224029
+      "timestamp": 1792933922246
     },
     {
       "version": "0.2.3",
