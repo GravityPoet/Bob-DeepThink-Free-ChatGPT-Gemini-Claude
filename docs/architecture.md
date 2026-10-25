@@ -60,7 +60,7 @@ Node.js 20+、Python 3.9+，无需 `npm install`。测试使用 Node 内置 test
 
 ## 发布边界
 
-源码与本地安装包版本为 0.2.6。标准版与 legacy 版 `appcast*.json` 指向 v0.2.6 Release；AWS IAM 专用包没有自动更新源。构建命令不创建 tag、Release 或改更新源。发布时先上传对应安装包，验证下载及 SHA-256，再确认各自 appcast；legacy identifier 不应改变。
+源码与本地安装包版本为 0.2.7。标准版与 legacy 版 `appcast*.json` 指向 v0.2.7 Release；AWS IAM 专用包没有自动更新源。构建命令不创建 tag、Release 或改更新源。发布时先上传对应安装包，验证下载及 SHA-256，再确认各自 appcast；legacy identifier 不应改变。
 
 ## English
 
@@ -92,7 +92,7 @@ Bob 当前公开的 `info.json` schema 只列出 `text` 与 `menu`，未提供�
 
 本轮设计参考 Apple 模板的信息层级与简短说明，实际控件、间距、字体和配色均由 Bob 原生设置控制。官网与最新插件 schema 为实现约束；参考了当前同类插件的供应商/协议配置结构，未复制其实现。品牌社媒变化与插件原生设置无关，未据此改变名称或品牌。
 
-## CPA 流式速度（0.2.6）
+## CPA 流式速度（0.2.7）
 
 - 仅对 `api.chordvox.com/cliproxy` 启用精简翻译提示，避免把长段格式说明重复放进每次 CPA 请求。
 - 请求仍保留流式标志、输出上限、原文字面保护和完整回调；非 CPA 兼容网关不改变提示行为。

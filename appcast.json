@@ -2,12 +2,12 @@
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
   "versions": [
     {
-      "version": "0.2.6",
-      "desc": "0.2.6：全局自适应精简提示；普通短文本降低首字节延迟，复杂 Markdown/代码自动保留完整格式提示；默认输出上限不再发送。",
-      "sha256": "06e35520e8912c2d39c72b417ed52b3c738c1f1cbbc9a5e71c34503149a92d41",
-      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.2.6/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
+      "version": "0.2.7",
+      "desc": "0.2.7：普通文本按纯文本显示，避免 Bob Markdown 渲染造成译文被放大加粗；复杂 Markdown 才使用 Markdown 格式。",
+      "sha256": "6375e8bb89ab2da52a01ee1ad0ac9f9ab83be224266dbdab63b33a932aaa1887",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.2.7/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
       "minBobVersion": "1.8.0",
-      "timestamp": 1792933922246
+      "timestamp": 1792950995742
     },
     {
       "version": "0.2.3",

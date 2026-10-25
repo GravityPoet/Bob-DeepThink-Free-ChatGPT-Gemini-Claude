@@ -33,7 +33,7 @@ function splitThoughtAndAnswer(rawText, sourceText) {
     return { answerText: remaining, thinkText: cleanInlineText(thoughts.join('\n\n')) };
 }
 
-function buildTranslateResult(sourceLang, targetLang, answerText, thinkText, allowEmptyParagraphs, literalMeta) {
+function buildTranslateResult(sourceLang, targetLang, answerText, thinkText, allowEmptyParagraphs, literalMeta, format) {
     var result = {
         from: sourceLang,
         to: targetLang,
@@ -47,7 +47,7 @@ function buildTranslateResult(sourceLang, targetLang, answerText, thinkText, all
         result.toParagraphs = [''];
     }
 
-    result.content = { format: 'markdown', text: cleanAnswer };
+    result.content = { format: format === 'markdown' ? 'markdown' : 'plain', text: cleanAnswer };
     var cleanThink = cleanInlineText(thinkText);
     if (cleanThink) {
         result.thinkInfo = {

@@ -63,7 +63,8 @@ function runTranslation(query, completion, validation) {
         }
         var sourceLang = languages.normalizeLanguageCode(q.detectFrom || q.from || 'auto');
         var targetLang = languages.normalizeLanguageCode(q.detectTo || q.to);
-        var protectedInput = literalTags.protect(selectTranslationText(q));
+        var selectedText = selectTranslationText(q);
+        var protectedInput = literalTags.protect(selectedText);
         var prompts = buildTranslationPrompts(config, sourceLang, targetLang, protectedInput.text, !!protectedInput.meta,
             isComplexTranslationText(selectTranslationText(q), !!protectedInput.meta));
         var body = protocol.buildTranslateRequestBody({
@@ -84,6 +85,7 @@ function runTranslation(query, completion, validation) {
             fallback: requestWithoutStream,
             literalTags: protectedInput.meta,
             parserSourceText: protectedInput.text,
+            renderFormat: isComplexTranslationText(selectedText, !!protectedInput.meta) ? 'markdown' : 'plain',
         };
         var useStream = !validation && config.streamOutput &&
             typeof q.onStream === 'function' && typeof $http.streamRequest === 'function';
@@ -119,7 +121,7 @@ function requestWithoutStream(params) {
                     if (!literalTags.complete(parsed.text, params.literalTags)) {
                         params.done({ error: util.makeServiceError('api', '上游没有完整保留原文格式，请重试或更换服务。') }); return;
                     }
-                    params.done({ result: result.buildTranslateResult(params.sourceLang, params.targetLang, parsed.text, parsed.thinkText, false, params.literalTags) });
+                    params.done({ result: result.buildTranslateResult(params.sourceLang, params.targetLang, parsed.text, parsed.thinkText, false, params.literalTags, params.renderFormat) });
                 } catch (error) {
                     params.done({ error: util.makeServiceError('api', '无法解析上游翻译结果。', error.message) });
                 }

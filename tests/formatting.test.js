@@ -32,13 +32,20 @@ test('plain text still uses Bob preprocessing and older Bob queries remain suppo
             r.handler(ok(chat('译文')));
         } }).translate(q.value);
         assert.ok(q.completions[0].result);
+        assert.equal(q.completions[0].result.content.format, 'plain');
     }
 });
 
-test('Markdown headings, lists, tables, paragraphs and fenced code preserve their source formatting', () => {
+test('plain translations use Bob plain rendering instead of Markdown sizing', () => {
+    const p = buffered('于 5 月 25 日开放', 'opened on May 25');
+    assert.equal(p.result.content.format, 'plain');
+});
+
+test('plain source stays plain even if an upstream model adds Markdown-looking text', () => {
     const answer = '# 标题\n\n正文 **加粗** 和 `inline code`。\n\n- 第一项\n  - 子项\n\n| 参数 | 数值 |\n| --- | ---: |\n| XY-Z100 | 1000 |\n\n```js\n  const total = 1000;\n```';
     const p = buffered(answer);
     assert.equal(text(p.result), answer);
+    assert.equal(p.result.content.format, 'plain');
     assert.equal(p.result.toParagraphs[0], answer);
 });
 

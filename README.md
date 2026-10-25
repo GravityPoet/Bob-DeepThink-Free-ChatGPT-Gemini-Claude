@@ -4,7 +4,7 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 插件免费；API 账号、模型权限、配额及费用由所选服务商提供。名称中的 Free 不代表所有模型或接口免费。
 
-## 0.2.6 CPA 流式速度优化
+## 0.2.7 CPA 流式速度优化
 
 - 针对 `https://api.chordvox.com/cliproxy` 使用精简但等价的翻译提示：语言方向和格式要求集中在 system prompt，用户消息只保留原文，减少 CPA 网关首字节等待。
 - 普通短文本对其他供应商也使用精简提示；检测到 Markdown、表格、代码、HTML、链接、特殊标签或长文本时自动恢复完整提示，优先保留排版和代码效果。
@@ -99,7 +99,7 @@ npm run verify
 
 ## English
 
-Version 0.2.6 adds a compact CPA prompt path for faster first visible output. Version 0.2.4 added an optional translation temperature field to all three packages. Leave it blank to use the upstream default, or enter a number (including zero) when supported. Native fields are mapped across all six protocols, including streaming, fallback and validation. Known unsupported, deprecated or conflicting combinations return an actionable error before inference; the plugin does not silently ignore the selection, clamp it or disable reasoning. See [compatibility rules](docs/protocols.md#翻译温度).
+Version 0.2.7 adds a compact CPA prompt path for faster first visible output. Version 0.2.4 added an optional translation temperature field to all three packages. Leave it blank to use the upstream default, or enter a number (including zero) when supported. Native fields are mapped across all six protocols, including streaming, fallback and validation. Known unsupported, deprecated or conflicting combinations return an actionable error before inference; the plugin does not silently ignore the selection, clamp it or disable reasoning. See [compatibility rules](docs/protocols.md#翻译温度).
 
 Version 0.2.3 ships as a single `.bobplugin`, with no companion app. Choose a preset in Bob's native model menu, or enter `/models` in the input translation window to fetch the current provider's catalog. Add a keyword, such as `/models gpt`, to filter it. Copy an ID into the existing custom-model setting. The directory uses only the current service's credentials and performs model-list GET requests. Bob's public plugin settings API cannot populate a live dropdown or write back options; one-click live selection is not claimed. Catalog visibility does not guarantee inference access.
 
@@ -117,7 +117,7 @@ Version 0.2.0 fixes missing/repeated streaming characters, incomplete frames, Un
 
 Download the standard archive above, or the legacy archive matching your installed identifier. Upgrade without removing your existing services. Configure your endpoint, key, protocol and model, then use **Validate** to perform a small real translation. Validation may incur API charges. See the [quick start](docs/quickstart.md) and [architecture](docs/architecture.md).
 
-Source and direct-install archives are 0.2.6. Automatic update feeds point to the v0.2.6 release. Build and CI do not publish releases.
+Source and direct-install archives are 0.2.7. Automatic update feeds point to the v0.2.7 release. Build and CI do not publish releases.
 
 ## 许可 / License
 
