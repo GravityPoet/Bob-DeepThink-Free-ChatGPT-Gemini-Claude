@@ -79,3 +79,9 @@ git push origin main
 | 2026-10-25 | 0.2.3 | `gh release view v0.2.3` / tag collision check 返回 not found | 目标 tag 与 Release 尚未创建；这是发布前的预期空状态，不是发布失败 | 确认远端没有同名 tag/Release 后继续创建唯一的 v0.2.3 |
 | 2026-10-25 | 0.2.3 | 预检发现 appcast 顶部仍为 0.1.24 | 源码已升级但更新源尚未随 Release 更新 | 发布前生成包 SHA，更新两个 appcast 顶部条目并在发布后下载校验 |
 | 2026-10-25 | 0.2.5 | CPA 速度对比初次误判为 Key 不同 | Bob plist 对不同服务的安全字段采用不同存储编码，原始长度/哈希不能比较；截图确认明文相同 | 不再比较存储编码；用同一有效凭据、端点、模型和短文本做 A/B，按请求体、首字节和完成时间归因 |
+
+## 0.2.8 发布记录
+
+- 候选提交：`6c09685f92cf688cb36bbafa348dc8376e08a011`；tag：`v0.2.8`。
+- 草稿创建时 GitHub 先返回临时 `untagged-*` 地址；发布后正式地址为 `https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/tag/v0.2.8`，已回读 `draft=false`、`prerelease=false`、目标提交和四个资产。
+- 标准包、legacy 包、AWS IAM 包及 SHA256 清单的发布 digest 已与本地候选核对；标准与 legacy appcast 顶部已指向 v0.2.8。
