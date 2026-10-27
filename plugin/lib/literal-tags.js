@@ -10,12 +10,23 @@ function protect(text) {
         values.push(value);
         return prefix + (values.length - 1) + '__';
     }
-    var protectedText = protectCodeBlocks(text, save);
+    // Bob can deliver a single-line text fence such as
+    // ```text natural language ``` (the visual line may wrap in the UI).
+    // Preserve only its wrapper; the body is prose and must be translated.
+    var protectedText = protectInlineTextFences(text, save);
+    protectedText = protectCodeBlocks(protectedText, save);
     protectedText = protectCodeSpans(protectedText, save);
     TAGS.lastIndex = 0;
     protectedText = protectedText.replace(TAGS, save);
     if (!values.length) return { text: text, meta: null };
     return { text: protectedText, meta: { prefix: prefix, values: values, pattern: new RegExp(prefix + '(\\d+)__', 'g') } };
+}
+
+function protectInlineTextFences(text, save) {
+    var pattern = /(`{3,}|~{3,})(text|txt|plain|plaintext|prose|quote)([ \t]+)([^\r\n]*?)([ \t]*)\1/gi;
+    return text.replace(pattern, function (_all, fence, language, spacing, body, trailing) {
+        return save(fence + language + spacing) + body + save(trailing + fence);
+    });
 }
 
 function protectCodeSpans(text, save) {
@@ -42,12 +53,31 @@ function protectCodeSpans(text, save) {
 
 function protectCodeBlocks(text, save) {
     var lines = text.split('\n'), output = [], pending = [], fence = '';
+    var translatableFence = false;
     lines.forEach(function (line) {
         if (!fence) {
             var opening = /^[ \t]*(`{3,}|~{3,})([^\r\n]*)\r?$/.exec(line);
             if (opening && (opening[1].charAt(0) !== '`' || opening[2].indexOf('`') < 0)) {
                 fence = opening[1]; pending = [line];
+                translatableFence = isTranslatableFence(opening[2]);
+                if (translatableFence) {
+                    // A text/markdown fence is a presentation wrapper, not
+                    // executable code. Keep only its delimiters verbatim so
+                    // the natural-language body can still be translated.
+                    output.push(save(line));
+                    pending = [];
+                }
             } else output.push(line);
+            return;
+        }
+        if (translatableFence) {
+            var translatableClosing = /^[ \t]*(`+|~+)[ \t]*\r?$/.exec(line);
+            if (translatableClosing && translatableClosing[1].charAt(0) === fence.charAt(0) && translatableClosing[1].length >= fence.length) {
+                output.push(save(line));
+                fence = ''; pending = []; translatableFence = false;
+            } else {
+                output.push(line);
+            }
             return;
         }
         pending.push(line);
@@ -56,8 +86,14 @@ function protectCodeBlocks(text, save) {
             output.push(save(pending.join('\n'))); fence = ''; pending = [];
         }
     });
-    if (fence) output.push(save(pending.join('\n')));
+    if (fence && !translatableFence) output.push(save(pending.join('\n')));
     return output.join('\n');
+}
+
+function isTranslatableFence(info) {
+    // `markdown`/`md` fences may contain nested code fences. Treat them as
+    // literal unless the caller explicitly marks the block as plain text.
+    return /^(?:text|txt|plain|plaintext|prose|quote)(?:[ \t]|$)/i.test(String(info || '').trim());
 }
 
 function restore(text, meta, partial) {

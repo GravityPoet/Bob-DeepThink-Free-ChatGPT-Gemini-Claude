@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
+      "version": "0.2.8",
+      "desc": "兼容更新 0.2.8：修复 text/plain 文本围栏整段回显，保留旧 identifier。",
+      "sha256": "d48ac8b92f016531acfa10731af2ba4110c77c1509ac24b8b4411ae528396c85",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.2.8/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1793120478000
+    },
+    {
       "version": "0.2.7",
       "desc": "0.2.7：普通文本按纯文本显示，避免 Bob Markdown 渲染造成译文被放大加粗；复杂 Markdown 才使用 Markdown 格式。",
       "sha256": "b07f1362d1c6886852669a55b1ac11f79dfc4e8a19eeafc69d5ba60f5eff13cc",

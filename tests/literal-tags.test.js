@@ -47,6 +47,30 @@ test('fenced code is restored verbatim instead of being translated by the upstre
     }
 });
 
+test('text fenced blocks translate their prose while preserving the fence lines', () => {
+    const q = query();
+    q.value.text = '```text\ntext Block command line pushes that expose my email\n```';
+    loadPlugin({ streamOutput: 'false' }, { request(r) {
+        const ids = tokens(r);
+        assert.equal(ids.length, 2);
+        assert.ok(r.body.messages[1].content.includes('text Block command line pushes that expose my email'));
+        r.handler(ok(chat(ids[0] + '\n命令行推送会暴露我的电子邮件' + '\n' + ids[1])));
+    } }).translate(q.value);
+    assert.equal(text(q.completions[0].result), '```text\n命令行推送会暴露我的电子邮件\n```');
+});
+
+test('single-line text fences do not turn the whole translation into a literal code span', () => {
+    const q = query();
+    q.value.text = '```text Block command line pushes that expose my email ```';
+    loadPlugin({ streamOutput: 'false' }, { request(r) {
+        const ids = tokens(r);
+        assert.equal(ids.length, 2);
+        assert.ok(r.body.messages[1].content.includes('Block command line pushes that expose my email'));
+        r.handler(ok(chat(ids[0] + '命令行推送会暴露我的电子邮件' + ids[1])));
+    } }).translate(q.value);
+    assert.equal(text(q.completions[0].result), '```text 命令行推送会暴露我的电子邮件 ```');
+});
+
 test('literal source tags bypass upstream tag filtering and are restored locally', () => {
     const q=query();q.value.text='```html\n<think>Keep literal markup.</think>\n```';
     loadPlugin({streamOutput:'false'}, {request(r){

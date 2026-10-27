@@ -4,6 +4,11 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 插件免费；API 账号、模型权限、配额及费用由所选服务商提供。名称中的 Free 不代表所有模型或接口免费。
 
+## 0.2.8 翻译代码块修复
+
+- ` ```text ... ``` `、` ```plain ... ``` ` 等文本围栏现在翻译其中的自然语言，同时保留围栏；JavaScript、Python、Shell 等真正代码块继续原样保护。
+- 修复 Bob 把单行文本围栏视觉换行后整段原样回显、看起来“完全不翻译”的问题。
+
 ## 0.2.7 CPA 流式速度优化
 
 - 针对 `https://api.chordvox.com/cliproxy` 使用精简但等价的翻译提示：语言方向和格式要求集中在 system prompt，用户消息只保留原文，减少 CPA 网关首字节等待。
@@ -82,7 +87,7 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 [完整配置与排错](docs/quickstart.md) · [架构、验证与发布说明](docs/architecture.md) · [已发布版本](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases)
 
-**更新状态**：仓库源码与直装包为 0.2.4；标准版与 legacy 版自动更新源指向 GitHub Release `v0.2.4`。AWS IAM 专用包需要手动安装更新。
+**更新状态**：仓库源码与直装包为 0.2.8；标准版与 legacy 版自动更新源指向 GitHub Release `v0.2.8`。AWS IAM 专用包需要手动安装更新。
 
 ## 开发
 
@@ -117,7 +122,7 @@ Version 0.2.0 fixes missing/repeated streaming characters, incomplete frames, Un
 
 Download the standard archive above, or the legacy archive matching your installed identifier. Upgrade without removing your existing services. Configure your endpoint, key, protocol and model, then use **Validate** to perform a small real translation. Validation may incur API charges. See the [quick start](docs/quickstart.md) and [architecture](docs/architecture.md).
 
-Source and direct-install archives are 0.2.7. Automatic update feeds point to the v0.2.7 release. Build and CI do not publish releases.
+Source and direct-install archives are 0.2.8. Text fenced blocks such as ```text ... ``` now translate their prose while preserving the fences; programming code blocks remain verbatim. Automatic update feeds point to the v0.2.8 release. Build and CI do not publish releases.
 
 ## 许可 / License
 

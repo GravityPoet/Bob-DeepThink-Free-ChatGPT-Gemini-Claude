@@ -31,7 +31,7 @@ python3 -m json.tool appcast-legacy.json >/dev/null
 
 `npm run verify` 必须通过语法检查、全量 Node 测试和 `scripts/build.py --check`。构建后应保持包字节不变，否则重新执行受影响验收。Bob 实机验收应覆盖普通翻译、`/models`、流式中途回调和 Markdown/代码格式；构建与测试不替代实机验收。相同运行时代码、设置与包 SHA 的已通过证据可以复用。发布候选的 GitHub Actions `verify`、`jscore` 均须 completed/success。
 
-0.2.5 的 CPA 优化验收需覆盖精简提示、同一模型/端点的首字节对比、流式中途回调、格式保护和非 CPA 提示不变。当前本地验收为 144 项 Node 测试；同一有效 CPA 凭据的三轮首字节约 2.48–3.72 秒，实测不包含 Bob UI 绘制。
+0.2.8 的文本围栏回显修复验收需覆盖 `text/plain` 单行和多行围栏、真正代码块原样保护；0.2.5 的 CPA 优化验收需覆盖精简提示、同一模型/端点的首字节对比、流式中途回调、格式保护和非 CPA 提示不变。当前本地验收为 144 项 Node 测试；同一有效 CPA 凭据的三轮首字节约 2.48–3.72 秒，实测不包含 Bob UI 绘制。
 
 ## 发布步骤
 

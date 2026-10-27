@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
   "versions": [
     {
+      "version": "0.2.8",
+      "desc": "0.2.8：修复 text/plain 文本围栏被整段原样回显的问题；翻译围栏正文并保留围栏，真正代码块继续原样保护。",
+      "sha256": "c193dc2d664acca7c4fd5f6793290375e3379c998f13cd7d608634ae02d32baa",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.2.8/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1793120478000
+    },
+    {
       "version": "0.2.7",
       "desc": "0.2.7：普通文本按纯文本显示，避免 Bob Markdown 渲染造成译文被放大加粗；复杂 Markdown 才使用 Markdown 格式。",
       "sha256": "6375e8bb89ab2da52a01ee1ad0ac9f9ab83be224266dbdab63b33a932aaa1887",
