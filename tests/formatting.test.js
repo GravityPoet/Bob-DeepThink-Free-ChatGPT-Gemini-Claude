@@ -44,9 +44,9 @@ test('plain translations use Bob plain rendering instead of Markdown sizing', ()
 test('plain source stays plain even if an upstream model adds Markdown-looking text', () => {
     const answer = '# 标题\n\n正文 **加粗** 和 `inline code`。\n\n- 第一项\n  - 子项\n\n| 参数 | 数值 |\n| --- | ---: |\n| XY-Z100 | 1000 |\n\n```js\n  const total = 1000;\n```';
     const p = buffered(answer);
-    assert.equal(text(p.result), answer);
+    assert.equal(text(p.result), answer.replace('**加粗**', '加粗'));
     assert.equal(p.result.content.format, 'plain');
-    assert.equal(p.result.toParagraphs[0], answer);
+    assert.equal(p.result.toParagraphs[0], answer.replace('**加粗**', '加粗'));
 });
 
 test('literal think tags inside fenced code are not removed as model reasoning', () => {

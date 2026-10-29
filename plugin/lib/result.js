@@ -58,6 +58,17 @@ function buildTranslateResult(sourceLang, targetLang, answerText, thinkText, all
     return result;
 }
 
+function stripUnrequestedBold(text, sourceHasBold) {
+    if (sourceHasBold || typeof text !== 'string') return text;
+    // The source had no bold marker. Remove a model-added paired `**...**`
+    // wrapper before Bob sees the result, so it cannot become unexpected bold
+    // in Markdown mode or visible asterisks in plain mode. Code is protected
+    // by literal-tags before this function runs.
+    return text
+        .replace(/(^|[^\w])\*\*(?=\S)([^\n]*?\S)\*\*/g, '$1$2')
+        .replace(/(^|[^\w])__(?=\S)(?=[^_\n]*(?:\s|[^\x00-\x7F]))([^\n]*?\S)__(?=$|[^\w])/g, '$1$2');
+}
+
 function mergeThinkText(baseText, incomingText) {
     var base = cleanInlineText(baseText);
     var incoming = cleanInlineText(incomingText);
@@ -94,6 +105,7 @@ function cleanInlineText(text) {
 module.exports = {
     splitThoughtAndAnswer: splitThoughtAndAnswer,
     buildTranslateResult: buildTranslateResult,
+    stripUnrequestedBold: stripUnrequestedBold,
     mergeThinkText: mergeThinkText,
     cleanInlineText: cleanInlineText,
 };

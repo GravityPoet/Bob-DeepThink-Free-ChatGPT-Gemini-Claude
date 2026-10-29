@@ -31,7 +31,7 @@ python3 -m json.tool appcast-legacy.json >/dev/null
 
 `npm run verify` 必须通过语法检查、全量 Node 测试和 `scripts/build.py --check`。构建后应保持包字节不变，否则重新执行受影响验收。Bob 实机验收应覆盖普通翻译、`/models`、流式中途回调和 Markdown/代码格式；构建与测试不替代实机验收。相同运行时代码、设置与包 SHA 的已通过证据可以复用。发布候选的 GitHub Actions `verify`、`jscore` 均须 completed/success。
 
-0.2.8 的文本围栏回显修复验收需覆盖 `text/plain` 单行和多行围栏、真正代码块原样保护；0.2.5 的 CPA 优化验收需覆盖精简提示、同一模型/端点的首字节对比、流式中途回调、格式保护和非 CPA 提示不变。当前本地验收为 144 项 Node 测试；同一有效 CPA 凭据的三轮首字节约 2.48–3.72 秒，实测不包含 Bob UI 绘制。
+0.2.8 的文本围栏回显修复验收需覆盖 `text/plain` 单行和多行围栏、真正代码块原样保护；0.2.5 的 CPA 优化验收需覆盖精简提示、同一模型/端点的首字节对比、流式中途回调、格式保护和非 CPA 提示不变。当前本地验收为 158 项 Node 测试；同一有效 CPA 凭据的三轮首字节约 2.48–3.72 秒，实测不包含 Bob UI 绘制。
 
 ## 发布步骤
 
@@ -85,3 +85,10 @@ git push origin main
 - 候选提交：`6c09685f92cf688cb36bbafa348dc8376e08a011`；tag：`v0.2.8`。
 - 草稿创建时 GitHub 先返回临时 `untagged-*` 地址；发布后正式地址为 `https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/tag/v0.2.8`，已回读 `draft=false`、`prerelease=false`、目标提交和四个资产。
 - 标准包、legacy 包、AWS IAM 包及 SHA256 清单的发布 digest 已与本地候选核对；标准与 legacy appcast 顶部已指向 v0.2.8。
+
+## 0.2.9 候选记录
+
+- 本轮修复范围：普通长文本/多段文本的 Markdown 渲染误判、模型新增粗体标记、符号与 Unicode 保真回归。提示词复杂度与结果渲染格式拆开；源文无粗体时结果层清理 `**...**` / `__...__` 包裹。
+- 验证：158 个 Node 测试、17 条 JavaScriptCore 路径；重建三种候选包。新增测试覆盖普通长文本、四段文本、下划线标识符、算术星号、CJK/emoji/短横线、源 Markdown、流式中途帧和上游错误透传。
+- 本机真实 CPA 流式合成样例：HTTP 200，首个可见译文约 5.82 秒、30 帧、完整约 9.30 秒；微软 Kimi-K2.6 返回 404 `DeploymentNotFound`，归类为 Azure 部署配置问题。
+- 当前只提交并推送候选源码与包，未创建公开 tag / Release，也未改 appcast；公开发布需在候选包安装和客户验收后单独执行。回滚可重新安装已发布的 v0.2.8 包。

@@ -4,10 +4,17 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 插件免费；API 账号、模型权限、配额及费用由所选服务商提供。名称中的 Free 不代表所有模型或接口免费。
 
+## 0.2.9 排版与符号审计修复
+
+- 修复普通长文本和多段纯文本被误标为 Markdown，模型偶发返回 `**...**` 时导致 Bob 错误显示加粗的问题。
+- 原文没有粗体时，提示词明确禁止新增强调标记，结果层会清理模型新增的成对 `**...**` / `__...__` 包裹；代码、字面标签和原文已有强调不改写。
+- 新增中文、emoji、短横线/长横线/破折号、文件名下划线、算术星号、表格、代码和流式中途帧回归。
+
 ## 0.2.8 翻译代码块修复
 
 - ` ```text ... ``` `、` ```plain ... ``` ` 等文本围栏现在翻译其中的自然语言，同时保留围栏；JavaScript、Python、Shell 等真正代码块继续原样保护。
 - 修复 Bob 把单行文本围栏视觉换行后整段原样回显、看起来“完全不翻译”的问题。
+- 普通长文本和多段纯文本继续使用完整提示词，但结果按纯文本显示；原文没有粗体时，模型偶发返回的 `**...**` 不会把译文错误显示为加粗。原文已有 Markdown 强调、标题、列表、表格或代码时仍保留对应排版。
 
 ## 0.2.7 CPA 流式速度优化
 
@@ -87,7 +94,7 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 [完整配置与排错](docs/quickstart.md) · [架构、验证与发布说明](docs/architecture.md) · [已发布版本](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases)
 
-**更新状态**：仓库源码与直装包为 0.2.8；标准版与 legacy 版自动更新源指向 GitHub Release `v0.2.8`。AWS IAM 专用包需要手动安装更新。
+**更新状态**：当前工作树为 0.2.9 候选；公开标准版与 legacy 版更新源仍指向已发布的 GitHub Release `v0.2.8`，待候选安装验收后再发布 0.2.9。AWS IAM 专用包需要手动安装更新。
 
 ## 开发
 
@@ -104,7 +111,9 @@ npm run verify
 
 ## English
 
-Version 0.2.7 adds a compact CPA prompt path for faster first visible output. Version 0.2.4 added an optional translation temperature field to all three packages. Leave it blank to use the upstream default, or enter a number (including zero) when supported. Native fields are mapped across all six protocols, including streaming, fallback and validation. Known unsupported, deprecated or conflicting combinations return an actionable error before inference; the plugin does not silently ignore the selection, clamp it or disable reasoning. See [compatibility rules](docs/protocols.md#翻译温度).
+Version 0.2.9 fixes accidental Markdown bold on ordinary long or multi-paragraph prose. The plugin keeps full prompts for complex text but returns Markdown only when the source actually contains Markdown structure; model-added paired emphasis is removed when the source has none. Code, literal tags, source emphasis, Unicode symbols and streaming frames remain protected. Version 0.2.4 added an optional translation temperature field to all three packages. Leave it blank to use the upstream default, or enter a number (including zero) when supported. See [compatibility rules](docs/protocols.md#翻译温度).
+
+Version 0.2.7 adds a compact CPA prompt path for faster first visible output.
 
 Version 0.2.3 ships as a single `.bobplugin`, with no companion app. Choose a preset in Bob's native model menu, or enter `/models` in the input translation window to fetch the current provider's catalog. Add a keyword, such as `/models gpt`, to filter it. Copy an ID into the existing custom-model setting. The directory uses only the current service's credentials and performs model-list GET requests. Bob's public plugin settings API cannot populate a live dropdown or write back options; one-click live selection is not claimed. Catalog visibility does not guarantee inference access.
 
@@ -122,7 +131,7 @@ Version 0.2.0 fixes missing/repeated streaming characters, incomplete frames, Un
 
 Download the standard archive above, or the legacy archive matching your installed identifier. Upgrade without removing your existing services. Configure your endpoint, key, protocol and model, then use **Validate** to perform a small real translation. Validation may incur API charges. See the [quick start](docs/quickstart.md) and [architecture](docs/architecture.md).
 
-Source and direct-install archives are 0.2.8. Text fenced blocks such as ```text ... ``` now translate their prose while preserving the fences; programming code blocks remain verbatim. Automatic update feeds point to the v0.2.8 release. Build and CI do not publish releases.
+The current source and direct-install archives are a 0.2.9 candidate. Public automatic update feeds still point to the verified v0.2.8 release until the candidate is installed and accepted. Text fenced blocks such as ```text ... ``` now translate their prose while preserving the fences; programming code blocks remain verbatim. Build and CI do not publish releases.
 
 ## 许可 / License
 
