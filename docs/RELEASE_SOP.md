@@ -97,6 +97,14 @@ git push origin main
 - 真实 Bob 日志确认 OCR 输出本身含 `<button>Previous</button> <button>Next</button>`；本版本同时修复 Open-LLM-OCR 的 UI 标签清理和翻译插件的普通文本 HTML 兜底。
 - 追加回归覆盖 OCR 普通行 UI 标签、代码围栏字面 HTML、图片描述、布局坐标和翻译插件 CPA HTML 兜底；`npm run verify` 通过 161 个 Node 测试，JavaScriptCore 17 项通过。
 
+## 0.3.0 发布记录
+
+- 候选提交：`3e6e6d7708d3272b35e337c889a50ddf3633a5dd`；tag：`v0.3.0`。
+- 发布 Release：`https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/tag/v0.3.0`；`draft=false`、`prerelease=false`、latest 已回读。
+- 标准包 SHA256：`85d7b5db0231cb7492f20869ca90115fcba7fdb0bd084d501c3f3286ea98ac2a`；legacy 包：`77a66d9ab7b470aa2e06f41dfffa82204e96a57d3a2c327000da4afa0c4bb01d`；AWS IAM 包：`c7a904e4bd3e068e521050bea91436cfe90d657352af7d5674a3fb812feb4295`。
+- 本机 Bob 翻译插件已从 0.2.9 更新到 0.3.0；Open-LLM-OCR 已为 0.6.7。最终 161 个 Node、17 项 JavaScriptCore 和 OCR 侧 120 Node/10 Python/43 JavaScriptCore 检查通过。
+- GitHub Release 资产逐个下载校验通过；有一次错误使用了不存在的自定义清单文件名，后续应使用实际上传资产名 `SHA256SUMS`。
+
 ## 0.2.9 候选记录
 
 - 本轮修复范围：普通长文本/多段文本的 Markdown 渲染误判、模型新增粗体标记、符号与 Unicode 保真回归。提示词复杂度与结果渲染格式拆开；源文无粗体时结果层清理 `**...**` / `__...__` 包裹。

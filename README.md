@@ -137,7 +137,7 @@ Version 0.2.0 fixes missing/repeated streaming characters, incomplete frames, Un
 
 Download the standard archive above, or the legacy archive matching your installed identifier. Upgrade without removing your existing services. Configure your endpoint, key, protocol and model, then use **Validate** to perform a small real translation. Validation may incur API charges. See the [quick start](docs/quickstart.md) and [architecture](docs/architecture.md).
 
-The current source and direct-install archives are a 0.2.9 candidate. Public automatic update feeds still point to the verified v0.2.8 release until the candidate is installed and accepted. Text fenced blocks such as ```text ... ``` now translate their prose while preserving the fences; programming code blocks remain verbatim. Build and CI do not publish releases.
+The current source and direct-install archives are v0.3.0. The standard and legacy automatic update feeds point to the verified v0.3.0 release. Text fenced blocks such as ```text ... ``` translate their prose while preserving the fences; programming code blocks remain verbatim. Build and CI do not publish releases.
 
 ## 许可 / License
 
