@@ -67,7 +67,9 @@ function requestWithStream(params) {
                 if (!literalTags.complete(parsedFinal.answerText, params.literalTags)) {
                     params.done({ error: util.makeServiceError('api', '上游没有完整保留原文格式，请重试或更换服务。') }); return;
                 }
-                params.done({ result: result.buildTranslateResult(params.sourceLang, params.targetLang, result.stripUnrequestedBold(parsedFinal.answerText, params.sourceHasBold),
+                var finalAnswer = result.stripUnrequestedMarkup(parsedFinal.answerText, params.sourceHasMarkup);
+                finalAnswer = result.stripUnrequestedBold(finalAnswer, params.sourceHasBold);
+                params.done({ result: result.buildTranslateResult(params.sourceLang, params.targetLang, finalAnswer,
                     result.mergeThinkText(state.thinkText, parsedFinal.thinkText), false, params.literalTags, params.renderFormat) });
             } catch (error) {
                 params.done({ error: util.makeServiceError('api', '无法处理流式翻译结果。', error.message) });
@@ -137,7 +139,9 @@ function requestConverseStream(params) {
             if (!parsed.answerText || !literalTags.complete(parsed.answerText, params.literalTags)) {
                 params.done({ error: util.makeServiceError('api', 'AWS 没有返回完整翻译，请重试或更换模型。') }); return;
             }
-            params.done({ result: result.buildTranslateResult(params.sourceLang, params.targetLang, result.stripUnrequestedBold(parsed.answerText, params.sourceHasBold),
+            var converseAnswer = result.stripUnrequestedMarkup(parsed.answerText, params.sourceHasMarkup);
+            converseAnswer = result.stripUnrequestedBold(converseAnswer, params.sourceHasBold);
+            params.done({ result: result.buildTranslateResult(params.sourceLang, params.targetLang, converseAnswer,
                 result.mergeThinkText(state.thinkText, parsed.thinkText), false, params.literalTags, params.renderFormat) });
         },
     });
@@ -215,7 +219,9 @@ function emitStreamResult(params, state) {
     var parsed = result.splitThoughtAndAnswer(state.text, params.parserSourceText);
     var think = result.mergeThinkText(state.thinkText, parsed.thinkText);
     if (parsed.answerText || think) {
-        var frame = result.buildTranslateResult(params.sourceLang, params.targetLang, result.stripUnrequestedBold(parsed.answerText, params.sourceHasBold), think, true, params.literalTags, params.renderFormat);
+        var streamAnswer = result.stripUnrequestedMarkup(parsed.answerText, params.sourceHasMarkup);
+        streamAnswer = result.stripUnrequestedBold(streamAnswer, params.sourceHasBold);
+        var frame = result.buildTranslateResult(params.sourceLang, params.targetLang, streamAnswer, think, true, params.literalTags, params.renderFormat);
         if (frame.content.text || frame.thinkInfo && frame.thinkInfo.content) params.normalizedQuery.onStream({ result: frame });
     }
 }

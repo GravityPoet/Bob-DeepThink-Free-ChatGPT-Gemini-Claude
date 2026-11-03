@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { loadPlugin, query, chat, ok, text } = require('./helpers');
+const { loadPlugin, query, chat, ok, sse, text } = require('./helpers');
 
 function translate(source, answer, options = {}) {
     const q = query();
@@ -58,6 +58,32 @@ test('plain source also removes an unsolicited underscore-bold wrapper', () => {
     const result = translate('普通文本', '__模型自行加粗__');
     assert.equal(result.content.format, 'plain');
     assert.equal(text(result), '模型自行加粗');
+});
+
+test('plain source removes generated HTML controls but keeps their text', () => {
+    const result = translate('普通文本', '<button>上一页</button> <button>下一页</button>');
+    assert.equal(text(result), '上一页 下一页');
+    assert.equal(result.content.format, 'plain');
+});
+
+test('streaming plain source removes generated HTML controls before display', () => {
+    const q = query();
+    loadPlugin({}, { streamRequest(r) {
+        r.streamHandler({ text: sse({ choices: [{ delta: { content: '<button>上一页</button>' } }] }) });
+        r.handler(ok());
+    } }).translate(q.value);
+    assert.equal(text(q.streams[0].result), '上一页');
+    assert.equal(text(q.completions[0].result), '上一页');
+});
+
+test('literal HTML examples remain unchanged when source contains markup', () => {
+    const q = query();
+    q.value.text = '保留 `<button>上一页</button>` 原样';
+    loadPlugin({ streamOutput: 'false' }, { request(r) {
+        const marker = JSON.stringify(r.body).match(/XLT_LITERAL_[A-Z0-9]+_\d+__/g)[0];
+        r.handler(ok(chat('保留 ' + marker + ' 原样')));
+    } }).translate(q.value);
+    assert.equal(text(q.completions[0].result), '保留 `<button>上一页</button>` 原样');
 });
 
 test('identifier __init__ is not stripped as an emphasis wrapper', () => {

@@ -69,6 +69,49 @@ function stripUnrequestedBold(text, sourceHasBold) {
         .replace(/(^|[^\w])__(?=\S)(?=[^_\n]*(?:\s|[^\x00-\x7F]))([^\n]*?\S)__(?=$|[^\w])/g, '$1$2');
 }
 
+function stripUnrequestedMarkup(text, sourceHasMarkup) {
+    if (sourceHasMarkup || typeof text !== 'string') return text;
+    // Models sometimes wrap ordinary OCR-like text in HTML controls (for
+    // example <button>上一页</button>). When the source had no markup, these
+    // tags are generated presentation noise. Keep literal source HTML
+    // protected by literal-tags.js and preserve the text between the tags.
+    var lines = text.split('\n');
+    var fence = '';
+    var output = [];
+    lines.forEach(function (line) {
+        if (!fence) {
+            var opening = /^[ \t]*(`{3,}|~{3,})[^\r\n]*$/.exec(line);
+            if (opening) {
+                fence = opening[1];
+                output.push(line);
+                return;
+            }
+            output.push(stripMarkupLine(line));
+            return;
+        }
+        output.push(line);
+        var closing = /^[ \t]*(`+|~+)[ \t]*$/.exec(line);
+        if (closing && closing[1].charAt(0) === fence.charAt(0) && closing[1].length >= fence.length) fence = '';
+    });
+    return output.join('\n').replace(/\n{3,}/g, '\n\n');
+}
+
+function stripMarkupLine(line) {
+    var literals = [];
+    var safe = String(line || '').replace(/(`+)([^`\r\n]*?)\1/g, function (whole) {
+        literals.push(whole);
+        return 'XLT_INLINE_LITERAL_' + (literals.length - 1) + '_';
+    });
+    safe = safe
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .replace(/<\s*\/?\s*(?:br|hr)\s*\/?>/gi, '\n')
+        .replace(/<\s*\/?\s*(?:p|div|section|article|header|footer|main|aside|nav|ul|ol|li|table|thead|tbody|tfoot|tr|h[1-6])\b[^>]*>/gi, '\n')
+        .replace(/<\s*\/?\s*(?!think(?:[\s/>])|reasoning(?:[\s/>])|XLT_LITERAL_)[a-z][^>]*>/gi, '');
+    return safe.replace(/XLT_INLINE_LITERAL_(\d+)_/g, function (whole, index) {
+        return literals[Number(index)] === undefined ? whole : literals[Number(index)];
+    });
+}
+
 function mergeThinkText(baseText, incomingText) {
     var base = cleanInlineText(baseText);
     var incoming = cleanInlineText(incomingText);
@@ -106,6 +149,7 @@ module.exports = {
     splitThoughtAndAnswer: splitThoughtAndAnswer,
     buildTranslateResult: buildTranslateResult,
     stripUnrequestedBold: stripUnrequestedBold,
+    stripUnrequestedMarkup: stripUnrequestedMarkup,
     mergeThinkText: mergeThinkText,
     cleanInlineText: cleanInlineText,
 };

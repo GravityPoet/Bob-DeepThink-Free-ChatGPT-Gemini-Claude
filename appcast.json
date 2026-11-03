@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
   "versions": [
     {
+      "version": "0.3.0",
+      "desc": "0.3.0：清理 OpenDocRouter OCR 与翻译结果中的 UI HTML 标签，保留按钮文字、代码和流式排版。",
+      "sha256": "85d7b5db0231cb7492f20869ca90115fcba7fdb0bd084d501c3f3286ea98ac2a",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.3.0/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1793820000000
+    },
+    {
       "version": "0.2.8",
       "desc": "0.2.8：修复 text/plain 文本围栏被整段原样回显的问题；翻译围栏正文并保留围栏，真正代码块继续原样保护。",
       "sha256": "c193dc2d664acca7c4fd5f6793290375e3379c998f13cd7d608634ae02d32baa",

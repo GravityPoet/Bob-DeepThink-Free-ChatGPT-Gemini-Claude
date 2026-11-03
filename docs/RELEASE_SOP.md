@@ -86,6 +86,17 @@ git push origin main
 - 草稿创建时 GitHub 先返回临时 `untagged-*` 地址；发布后正式地址为 `https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/tag/v0.2.8`，已回读 `draft=false`、`prerelease=false`、目标提交和四个资产。
 - 标准包、legacy 包、AWS IAM 包及 SHA256 清单的发布 digest 已与本地候选核对；标准与 legacy appcast 顶部已指向 v0.2.8。
 
+## 0.3.0 发布范围与门禁
+
+- 修复 CPA 截图翻译中 OpenDocRouter OCR 的 `<button>Previous</button>` / `<button>Next</button>` 污染；必须同时验证 OCR 层和翻译层，不能只测翻译插件。
+- 测试覆盖普通/流式生成 HTML 清理、源文/代码 HTML 保留、OCR UI 包装、OpenDocRouter 表格/坐标和现有 Markdown/think 标签。
+- 本轮 0.3.0 发布使用三包确定性构建，标准/legacy appcast 在公开下载校验后激活。
+
+## 0.3.0 发布范围与门禁
+
+- 真实 Bob 日志确认 OCR 输出本身含 `<button>Previous</button> <button>Next</button>`；本版本同时修复 Open-LLM-OCR 的 UI 标签清理和翻译插件的普通文本 HTML 兜底。
+- 追加回归覆盖 OCR 普通行 UI 标签、代码围栏字面 HTML、图片描述、布局坐标和翻译插件 CPA HTML 兜底；`npm run verify` 通过 161 个 Node 测试，JavaScriptCore 17 项通过。
+
 ## 0.2.9 候选记录
 
 - 本轮修复范围：普通长文本/多段文本的 Markdown 渲染误判、模型新增粗体标记、符号与 Unicode 保真回归。提示词复杂度与结果渲染格式拆开；源文无粗体时结果层清理 `**...**` / `__...__` 包裹。

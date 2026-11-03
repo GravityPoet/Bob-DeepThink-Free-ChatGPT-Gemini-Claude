@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
+      "version": "0.3.0",
+      "desc": "兼容更新 0.3.0：清理 OpenDocRouter OCR 与翻译结果中的 UI HTML 标签，保留旧 identifier。",
+      "sha256": "77a66d9ab7b470aa2e06f41dfffa82204e96a57d3a2c327000da4afa0c4bb01d",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.3.0/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1793820000000
+    },
+    {
       "version": "0.2.8",
       "desc": "兼容更新 0.2.8：修复 text/plain 文本围栏整段回显，保留旧 identifier。",
       "sha256": "d48ac8b92f016531acfa10731af2ba4110c77c1509ac24b8b4411ae528396c85",

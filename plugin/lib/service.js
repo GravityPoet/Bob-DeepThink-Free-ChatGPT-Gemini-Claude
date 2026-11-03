@@ -67,6 +67,11 @@ function runTranslation(query, completion, validation) {
         var protectedInput = literalTags.protect(selectedText);
         var complexText = isComplexTranslationText(selectedText, !!protectedInput.meta);
         var markdownText = hasMarkdownSyntax(selectedText);
+        // Code spans/fences and reserved tags are protected before checking
+        // whether markup belongs to the source. This lets us strip a model
+        // generated <button> wrapper from plain OCR text without touching
+        // literal HTML examples that the source actually contains.
+        var sourceHasMarkup = hasHtmlMarkup(protectedInput.text);
         var sourceHasBold = hasMarkdownBold(protectedInput.text);
         var prompts = buildTranslationPrompts(config, sourceLang, targetLang, protectedInput.text, !!protectedInput.meta, complexText);
         var body = protocol.buildTranslateRequestBody({
@@ -88,6 +93,7 @@ function runTranslation(query, completion, validation) {
             literalTags: protectedInput.meta,
             parserSourceText: protectedInput.text,
             sourceHasBold: sourceHasBold,
+            sourceHasMarkup: sourceHasMarkup,
             // Long or multi-paragraph prose may need the full prompt, but it
             // stays plain unless the source actually contains Markdown.
             // Otherwise model-added **markers become visible bold in Bob.
@@ -127,7 +133,8 @@ function requestWithoutStream(params) {
                     if (!literalTags.complete(parsed.text, params.literalTags)) {
                         params.done({ error: util.makeServiceError('api', '上游没有完整保留原文格式，请重试或更换服务。') }); return;
                     }
-                    var answerText = result.stripUnrequestedBold(parsed.text, params.sourceHasBold);
+                    var answerText = result.stripUnrequestedMarkup(parsed.text, params.sourceHasMarkup);
+                    answerText = result.stripUnrequestedBold(answerText, params.sourceHasBold);
                     params.done({ result: result.buildTranslateResult(params.sourceLang, params.targetLang, answerText, parsed.thinkText, false, params.literalTags, params.renderFormat) });
                 } catch (error) {
                     params.done({ error: util.makeServiceError('api', '无法解析上游翻译结果。', error.message) });
@@ -216,6 +223,11 @@ function hasMarkdownSyntax(text) {
     if (new RegExp('(?:^|' + before + ')\\*(?=\\S)([^*\\n]*?\\S)\\*' + after).test(text)) return true;
     if (new RegExp('(?:^|' + before + ')_(?=\\S)([^_\\n]*?\\S)_' + after).test(text)) return true;
     return false;
+}
+
+function hasHtmlMarkup(text) {
+    if (typeof text !== 'string' || !text) return false;
+    return /<\s*\/?\s*[A-Za-z][^>]*>/i.test(text);
 }
 
 function hasMarkdownBold(protectedText) {

@@ -4,6 +4,12 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 插件免费；API 账号、模型权限、配额及费用由所选服务商提供。名称中的 Free 不代表所有模型或接口免费。
 
+## 0.3.0 CPA/OCR HTML 标签清理
+
+- 修复 OpenDocRouter OCR 把截图按钮识别成 `<button>Previous</button>`、`<button>Next</button>` 后传给翻译插件的问题；OCR 层现在只保留按钮文字。
+- 翻译结果层增加兜底：普通源文本中的模型生成 UI HTML 包装会被清理，流式中途结果与最终结果一致；源文、代码块和行内 HTML 示例保持原样。
+- CPA、Fireworks、OpenRouter 和其他供应商共用同一格式边界，避免同类结果出现乱码标签。
+
 ## 0.2.9 排版与符号审计修复
 
 - 修复普通长文本和多段纯文本被误标为 Markdown，模型偶发返回 `**...**` 时导致 Bob 错误显示加粗的问题。
@@ -94,7 +100,7 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 [完整配置与排错](docs/quickstart.md) · [架构、验证与发布说明](docs/architecture.md) · [已发布版本](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases)
 
-**更新状态**：当前工作树为 0.2.9 候选；公开标准版与 legacy 版更新源仍指向已发布的 GitHub Release `v0.2.8`，待候选安装验收后再发布 0.2.9。AWS IAM 专用包需要手动安装更新。
+**更新状态**：当前工作树为 0.3.0；标准版与 legacy 版更新源指向公开 Release `v0.3.0`。AWS IAM 专用包需要手动安装更新。
 
 ## 开发
 
@@ -111,7 +117,7 @@ npm run verify
 
 ## English
 
-Version 0.2.9 fixes accidental Markdown bold on ordinary long or multi-paragraph prose. The plugin keeps full prompts for complex text but returns Markdown only when the source actually contains Markdown structure; model-added paired emphasis is removed when the source has none. Code, literal tags, source emphasis, Unicode symbols and streaming frames remain protected. Version 0.2.4 added an optional translation temperature field to all three packages. Leave it blank to use the upstream default, or enter a number (including zero) when supported. See [compatibility rules](docs/protocols.md#翻译温度).
+Version 0.3.0 removes generated UI HTML wrappers from OCR/translation boundaries, including `<button>` labels returned by OpenDocRouter. Source HTML, code, Markdown, Unicode symbols and streaming frames remain protected. Version 0.2.4 added an optional translation temperature field to all three packages. Leave it blank to use the upstream default, or enter a number (including zero) when supported. See [compatibility rules](docs/protocols.md#翻译温度).
 
 Version 0.2.7 adds a compact CPA prompt path for faster first visible output.
 
