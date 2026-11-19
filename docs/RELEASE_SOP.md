@@ -80,6 +80,7 @@ git push origin main
 | 2026-10-25 | 0.2.3 | 预检发现 appcast 顶部仍为 0.1.24 | 源码已升级但更新源尚未随 Release 更新 | 发布前生成包 SHA，更新两个 appcast 顶部条目并在发布后下载校验 |
 | 2026-10-25 | 0.2.5 | CPA 速度对比初次误判为 Key 不同 | Bob plist 对不同服务的安全字段采用不同存储编码，原始长度/哈希不能比较；截图确认明文相同 | 不再比较存储编码；用同一有效凭据、端点、模型和短文本做 A/B，按请求体、首字节和完成时间归因 |
 | 2026-11-19 | 0.3.1 | 新增 Fireworks 回归测试首次断言失败：`/~~~Hello~~~/` 未匹配 | 官方兼容模板在原文前后保留换行，测试断言漏掉了换行，不是运行时代码失败 | 改为匹配 `~~~\\nHello\\n~~~`，再运行完整 Node、JavaScriptCore 和确定性打包检查 |
+| 2026-11-19 | 0.3.1 | 首次公开包验收脚本把 AWS identifier 判为失败：`io.github.bobdeepthink.awsiam` 未在白名单 | 验证脚本沿用了标准/legacy 两个 identifier，遗漏了 AWS 专用包的真实 identifier；三包下载、SHA 和 ZIP 均正常 | 从包内 `info.json` 读取并分别核对三种真实 identifier，所有断言使用 `set -e`，避免局部失败后输出假成功 |
 
 ## 0.2.8 发布记录
 
