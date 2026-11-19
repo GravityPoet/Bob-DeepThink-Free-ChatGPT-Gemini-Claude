@@ -54,6 +54,34 @@ test('simple text uses compact prompts globally while complex Markdown keeps the
     assert.match(complex.body.messages[0].content, /professional translation engine/);
 });
 
+test('Fireworks DeepSeek uses the native short prompt and deterministic default without adding an output cap', () => {
+    let request;
+    const q = query();
+    loadPlugin({
+        baseUrl: 'https://api.fireworks.ai/inference/v1',
+        customModel: 'accounts/fireworks/models/deepseek-v4p1-flash-1017',
+        model: 'custom',
+        maxOutputTokens: 'default',
+        translationTemperature: '',
+    }, { request(r) { request = r; r.handler(ok(chat('译文'))); } }).translate(q.value);
+    assert.match(request.body.messages[0].content, /You are a translation engine/);
+    assert.match(request.body.messages[1].content, /~~~\nHello\n~~~/);
+    assert.equal(request.body.temperature, 0);
+    assert.equal(request.body.max_tokens, undefined);
+});
+
+test('Fireworks DeepSeek keeps an explicit translation temperature', () => {
+    let request;
+    const q = query();
+    loadPlugin({
+        baseUrl: 'https://api.fireworks.ai/inference/v1',
+        customModel: 'accounts/fireworks/models/deepseek-v4p1-flash-1017',
+        model: 'custom',
+        translationTemperature: '0.2',
+    }, { request(r) { request = r; r.handler(ok(chat('译文'))); } }).translate(q.value);
+    assert.equal(request.body.temperature, 0.2);
+});
+
 test('all possible two-chunk splits preserve an SSE translation', () => {
     const source=sse({choices:[{delta:{content:'你好 🌎 100'}}]})+'data: [DONE]\r\n\r\n';
     for(let i=0;i<=source.length;i++) {

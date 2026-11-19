@@ -26,6 +26,11 @@ function endpointMode(url) {
 
 function isCompleteEndpoint(url) { return !!endpointMode(url); }
 function isCerebrasBaseUrl(url) { var p = parseHttpUrl(url); return p.ok && /^api\.cerebras\.ai(?::\d+)?$/.test(p.host); }
+function isFireworksBaseUrl(url) { var p = parseHttpUrl(url); return p.ok && /^api\.fireworks\.ai(?::\d+)?$/.test(p.host); }
+function isFireworksDeepSeekFlash(modelName, baseUrl) {
+    if (!isFireworksBaseUrl(baseUrl)) return false;
+    return /(?:^|\/)deepseek-v4(?:p1|\.1)-flash(?:-1017)?(?:$|[-_])/i.test(String(modelName || ''));
+}
 function isCpaGateway(url) {
     var p = parseHttpUrl(url);
     return p.ok && /^api\.chordvox\.com(?::\d+)?$/i.test(p.host) && /^\/cliproxy(?:\/|$)/i.test(p.path);
@@ -74,6 +79,7 @@ function isDefaultSub2ApiUrl(raw) { return !String(raw || '').trim() || /^http:\
 module.exports = {
     parseHttpUrl: parseHttpUrl, normalizeBaseUrl: normalizeBaseUrl, buildApiEndpoint: buildApiEndpoint,
     endpointMode: endpointMode, isCompleteEndpoint: isCompleteEndpoint, isCerebrasBaseUrl: isCerebrasBaseUrl,
+    isFireworksBaseUrl: isFireworksBaseUrl, isFireworksDeepSeekFlash: isFireworksDeepSeekFlash,
     isCpaGateway: isCpaGateway,
     normalizeGeminiNativeModelName: normalizeGeminiNativeModelName, normalizeRegion: normalizeRegion,
     buildBedrockMantleBaseUrl: buildBedrockMantleBaseUrl, buildBedrockRuntimeOpenAiBaseUrl: buildBedrockRuntimeOpenAiBaseUrl,

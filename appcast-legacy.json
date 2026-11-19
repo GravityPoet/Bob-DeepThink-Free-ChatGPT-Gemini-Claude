@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.ai-vip-0-token-plan",
   "versions": [
     {
+      "version": "0.3.1",
+      "desc": "兼容更新 0.3.1：对 Fireworks DeepSeek V4.1 Flash 1017 对齐 Bob 官方短提示并优化首字延迟，保留旧 identifier。",
+      "sha256": "c2fee386a01f4eecbeb064e387dce709f3ab5fe9cae34f08ab914c4327bd35cd",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.3.1/Bob-DeepThink-Free-ChatGPT-Gemini-Claude-legacy-id.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1795064417000
+    },
+    {
       "version": "0.3.0",
       "desc": "兼容更新 0.3.0：清理 OpenDocRouter OCR 与翻译结果中的 UI HTML 标签，保留旧 identifier。",
       "sha256": "77a66d9ab7b470aa2e06f41dfffa82204e96a57d3a2c327000da4afa0c4bb01d",

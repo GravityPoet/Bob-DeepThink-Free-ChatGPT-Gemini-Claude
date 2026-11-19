@@ -2,6 +2,14 @@
   "identifier": "io.github.gravitypoet.bob-deepthink-free-chatgpt-gemini-claude",
   "versions": [
     {
+      "version": "0.3.1",
+      "desc": "0.3.1：对 Fireworks DeepSeek V4.1 Flash 1017 对齐 Bob 官方短提示并优化首字延迟；默认温度 0，输出上限默认不发送。",
+      "sha256": "dbeb5f7537a83ee1f745127f4ecf991d80190d0450dc008997a22a0f8441f022",
+      "url": "https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases/download/v0.3.1/Bob-DeepThink-Free-ChatGPT-Gemini-Claude.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1795064417000
+    },
+    {
       "version": "0.3.0",
       "desc": "0.3.0：清理 OpenDocRouter OCR 与翻译结果中的 UI HTML 标签，保留按钮文字、代码和流式排版。",
       "sha256": "85d7b5db0231cb7492f20869ca90115fcba7fdb0bd084d501c3f3286ea98ac2a",

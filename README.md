@@ -10,6 +10,13 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 - 翻译结果层增加兜底：普通源文本中的模型生成 UI HTML 包装会被清理，流式中途结果与最终结果一致；源文、代码块和行内 HTML 示例保持原样。
 - CPA、Fireworks、OpenRouter 和其他供应商共用同一格式边界，避免同类结果出现乱码标签。
 
+## 0.3.1 Fireworks DeepSeek 首字延迟优化
+
+- Fireworks 的 DeepSeek V4.1 Flash 1017 普通翻译现在采用与 Bob 官方 Fireworks 服务一致的短提示模板，减少无关提示带来的额外推理。
+- 未填写翻译温度时，这个 Fireworks 模型默认使用 `temperature: 0`；其他模型和用户显式填写的温度保持原有行为。
+- 输出上限仍按“默认（不发送）”处理，不额外发送 `max_tokens` 或 `max_completion_tokens`。
+- 同一 Fireworks Key、模型和短文本的本机 A/B 实测，首个可见译文中位时间从约 1.91 秒降到约 1.47 秒。实际速度仍受上游排队和模型负载影响。
+
 ## 0.2.9 排版与符号审计修复
 
 - 修复普通长文本和多段纯文本被误标为 Markdown，模型偶发返回 `**...**` 时导致 Bob 错误显示加粗的问题。
@@ -100,7 +107,7 @@ Bob 多协议 AI 翻译插件。使用同一套配置接入 OpenAI 兼容网关�
 
 [完整配置与排错](docs/quickstart.md) · [架构、验证与发布说明](docs/architecture.md) · [已发布版本](https://github.com/GravityPoet/Bob-DeepThink-Free-ChatGPT-Gemini-Claude/releases)
 
-**更新状态**：当前工作树为 0.3.0；标准版与 legacy 版更新源指向公开 Release `v0.3.0`。AWS IAM 专用包需要手动安装更新。
+**更新状态**：当前工作树为 0.3.1；标准版与 legacy 版更新源指向公开 Release `v0.3.1`。AWS IAM 专用包需要手动安装更新。
 
 ## 开发
 
@@ -116,6 +123,8 @@ npm run verify
 `plugin/main.js` 只保留 Bob 入口；`plugin/lib/` 按配置、协议、流式、签名与结果分工。构建时递归打包全部模块，`--check` 确保安装包对应当前源码。运行环境仍是 Bob JavaScriptCore，不依赖 Node 或浏览器 API。
 
 ## English
+
+Version 0.3.1 aligns ordinary Fireworks DeepSeek V4.1 Flash 1017 translations with Bob's short native prompt and defaults that path to `temperature: 0` when the field is blank. The default output limit remains omitted, and explicit user temperatures are preserved. A local same-key A/B measured median first visible output at about 1.47 seconds after the change versus 1.91 seconds before it.
 
 Version 0.3.0 removes generated UI HTML wrappers from OCR/translation boundaries, including `<button>` labels returned by OpenDocRouter. Source HTML, code, Markdown, Unicode symbols and streaming frames remain protected. Version 0.2.4 added an optional translation temperature field to all three packages. Leave it blank to use the upstream default, or enter a number (including zero) when supported. See [compatibility rules](docs/protocols.md#翻译温度).
 
@@ -137,7 +146,7 @@ Version 0.2.0 fixes missing/repeated streaming characters, incomplete frames, Un
 
 Download the standard archive above, or the legacy archive matching your installed identifier. Upgrade without removing your existing services. Configure your endpoint, key, protocol and model, then use **Validate** to perform a small real translation. Validation may incur API charges. See the [quick start](docs/quickstart.md) and [architecture](docs/architecture.md).
 
-The current source and direct-install archives are v0.3.0. The standard and legacy automatic update feeds point to the verified v0.3.0 release. Text fenced blocks such as ```text ... ``` translate their prose while preserving the fences; programming code blocks remain verbatim. Build and CI do not publish releases.
+The current source and direct-install archives are v0.3.1. The standard and legacy automatic update feeds point to the verified v0.3.1 release. Text fenced blocks such as ```text ... ``` translate their prose while preserving the fences; programming code blocks remain verbatim. Build and CI do not publish releases.
 
 ## 许可 / License
 

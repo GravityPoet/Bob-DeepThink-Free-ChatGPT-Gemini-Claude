@@ -79,6 +79,7 @@ git push origin main
 | 2026-10-25 | 0.2.3 | `gh release view v0.2.3` / tag collision check 返回 not found | 目标 tag 与 Release 尚未创建；这是发布前的预期空状态，不是发布失败 | 确认远端没有同名 tag/Release 后继续创建唯一的 v0.2.3 |
 | 2026-10-25 | 0.2.3 | 预检发现 appcast 顶部仍为 0.1.24 | 源码已升级但更新源尚未随 Release 更新 | 发布前生成包 SHA，更新两个 appcast 顶部条目并在发布后下载校验 |
 | 2026-10-25 | 0.2.5 | CPA 速度对比初次误判为 Key 不同 | Bob plist 对不同服务的安全字段采用不同存储编码，原始长度/哈希不能比较；截图确认明文相同 | 不再比较存储编码；用同一有效凭据、端点、模型和短文本做 A/B，按请求体、首字节和完成时间归因 |
+| 2026-11-19 | 0.3.1 | 新增 Fireworks 回归测试首次断言失败：`/~~~Hello~~~/` 未匹配 | 官方兼容模板在原文前后保留换行，测试断言漏掉了换行，不是运行时代码失败 | 改为匹配 `~~~\\nHello\\n~~~`，再运行完整 Node、JavaScriptCore 和确定性打包检查 |
 
 ## 0.2.8 发布记录
 
@@ -104,6 +105,12 @@ git push origin main
 - 标准包 SHA256：`85d7b5db0231cb7492f20869ca90115fcba7fdb0bd084d501c3f3286ea98ac2a`；legacy 包：`77a66d9ab7b470aa2e06f41dfffa82204e96a57d3a2c327000da4afa0c4bb01d`；AWS IAM 包：`c7a904e4bd3e068e521050bea91436cfe90d657352af7d5674a3fb812feb4295`。
 - 本机 Bob 翻译插件已从 0.2.9 更新到 0.3.0；Open-LLM-OCR 已为 0.6.7。最终 161 个 Node、17 项 JavaScriptCore 和 OCR 侧 120 Node/10 Python/43 JavaScriptCore 检查通过。
 - GitHub Release 资产逐个下载校验通过；有一次错误使用了不存在的自定义清单文件名，后续应使用实际上传资产名 `SHA256SUMS`。
+
+## 0.3.1 发布范围与门禁
+
+- Fireworks DeepSeek V4.1 Flash 1017 普通文本采用 Bob 官方 Fireworks 服务的短提示模板；空温度时使用 `temperature: 0`，默认输出上限仍不发送。
+- 必须覆盖 Fireworks 请求体回归、显式温度保留、默认无输出上限、全量 Node、JavaScriptCore、三包确定性构建和 Bob 本机安装版本。
+- 本机同一 Fireworks Key、模型与短文本 A/B 首个可见译文中位约 1.91 秒降至约 1.47 秒；该实测不包含 Bob UI 绘制，需在最终版本安装后复用同一配置做业务验收。
 
 ## 0.2.9 候选记录
 
